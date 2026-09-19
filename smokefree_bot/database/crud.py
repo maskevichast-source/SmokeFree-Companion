@@ -406,3 +406,21 @@ async def recent_cravings(session: AsyncSession, user_id: int, days: int = 14) -
         }
         for r in records
     ]
+
+
+async def radar_targets(session: AsyncSession) -> list[tuple[UserTrigger, User]]:
+    stmt = (
+        select(UserTrigger, User)
+        .join(User, UserTrigger.user_id == User.id)
+        .where(UserTrigger.enabled.is_(True), User.onboarding_complete.is_(True))
+    )
+    res = await session.execute(stmt)
+    return list(res.all())
+
+
+async def mark_radar_sent(session: AsyncSession, trigger_id: int) -> None:
+    trigger = await session.get(UserTrigger, trigger_id)
+    if trigger:
+        trigger.last_radar_sent = datetime.now(timezone.utc)
+        session.add(trigger)
+        await session.commit()

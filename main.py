@@ -21,10 +21,14 @@ try:
     from smokefree_bot.webapp.api import create_app
     from smokefree_bot.database.connection import init_db, close_db
     from smokefree_bot.bot.config import get_settings
+    from smokefree_bot.bot.handlers import start, stats, sos, radar, relapse, quotes, chat
+    from smokefree_bot.bot.scheduler.jobs import build_scheduler
 except ImportError:
     from webapp.api import create_app
     from database.connection import init_db, close_db
     from bot.config import get_settings
+    from bot.handlers import start, stats, sos, radar, relapse, quotes, chat
+    from bot.scheduler.jobs import build_scheduler
 
 app = create_app()
 
@@ -48,16 +52,20 @@ async def on_startup():
             bot = Bot(token=bot_token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
             dp = Dispatcher()
 
+            for r in (start.router, stats.router, sos.router, radar.router, relapse.router, quotes.router, chat.router):
+                dp.include_router(r)
+
             try:
-                from smokefree_bot.bot.handlers.stats import router as stats_router
-                dp.include_router(stats_router)
-            except Exception as router_err:
-                logger.warning(f"Stats router skip: {router_err}")
+                scheduler = build_scheduler(bot)
+                scheduler.start()
+                logger.info("Background scheduler started.")
+            except Exception as sched_err:
+                logger.warning(f"Scheduler start skipped: {sched_err}")
 
             logger.info("Starting Telegram Bot polling in background...")
             asyncio.create_task(dp.start_polling(bot))
         except Exception as bot_err:
-            logger.warning(f"Telegram Bot start deferred: {bot_err}")
+            logger.error(f"Telegram Bot start error: {bot_err}")
 
 @app.on_event("shutdown")
 async def on_shutdown():

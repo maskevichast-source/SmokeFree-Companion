@@ -188,3 +188,8 @@ class AICoach:
             return await self.reply("Мне сложно сейчас проговорить, но я чувствую сильную тягу к никотину.", days_free, user_id)
 
 coach = AICoach()
+
+async def ask_ai_coach(user: Any, stats: dict | None, message: str) -> str:
+    days = stats.get("days_free", 0) if stats else 0
+    user_id = getattr(user, "id", None)
+    return await coach.reply(message, days_free=days, user_id=user_id)
