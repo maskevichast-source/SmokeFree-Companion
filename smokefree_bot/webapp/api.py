@@ -217,7 +217,7 @@ def create_app() -> FastAPI:
     @app.get("/api/stats/{user_id}")
     async def stats(user_id: int, request: Request, _: int = Depends(authorized_user_id)) -> JSONResponse:
         settings = get_settings()
-        bot_token = settings.bot_token.get_secret_value()
+        bot_token = settings.bot_token.get_secret_value() if settings.bot_token else ""
         user_token = make_user_token(user_id, bot_token) if bot_token else ""
         async with SessionFactory() as session:
             try:
