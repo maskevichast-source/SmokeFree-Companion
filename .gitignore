@@ -1,0 +1,49 @@
+# compiled output
+dist/
+build/
+tmp/
+out-tsc/
+*.tsbuildinfo
+.expo
+.expo-shared
+
+# dependencies
+node_modules/
+.pnpm-store/
+
+# environment
+.env*
+!.env.example
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc & logs
+*.log
+npm-debug.log
+yarn-error.log
+testem.log
+/coverage
+.DS_Store
+Thumbs.db
+.cache/
+.local/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.sqlite
+*.sqlite3
+*.db

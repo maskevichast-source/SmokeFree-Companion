@@ -1,0 +1,6 @@
+{
+  "name": "SmokeFree Companion",
+  "description": "Интерактивный компаньон для мониторинга привычек отказа от курения, аналитика репозитория maskevichast-source/SmokeFree-Companion и оптимизация для Railway и Telegram.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

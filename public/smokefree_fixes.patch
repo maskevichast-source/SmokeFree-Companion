@@ -1,0 +1,160 @@
+diff --git a/railway.json b/railway.json
+new file mode 100644
+index 0000000..84790e1
+--- /dev/null
++++ b/railway.json
+@@ -0,0 +1,15 @@
++{
++  "$schema": "https://railway.app/railway.schema.json",
++  "build": {
++    "builder": "NIXPACKS",
++    "watchPatterns": ["smokefree_bot/**"],
++    "buildCommand": "cd smokefree_bot && pip install --no-cache-dir -r requirements.txt"
++  },
++  "deploy": {
++    "startCommand": "cd smokefree_bot && python main.py",
++    "healthcheckPath": "/health",
++    "healthcheckTimeout": 30,
++    "restartPolicyType": "ON_FAILURE",
++    "restartPolicyMaxRetries": 5
++  }
++}
+diff --git a/smokefree_bot/bot/scheduler/jobs.py b/smokefree_bot/bot/scheduler/jobs.py
+index ab1248c..8e34935 100644
+--- a/smokefree_bot/bot/scheduler/jobs.py
++++ b/smokefree_bot/bot/scheduler/jobs.py
+@@ -1,6 +1,6 @@
+ import logging
+ import random
+-from datetime import date, datetime
++from datetime import date, datetime, timezone
+ from zoneinfo import ZoneInfo
+ from aiogram import Bot
+ from apscheduler.schedulers.asyncio import AsyncIOScheduler
+@@ -33,11 +33,15 @@ async def send_daily_message(bot: Bot, kind: str) -> None:
+         users = (
+             await session.scalars(select(User).where(User.onboarding_complete.is_(True)))
+         ).all()
+-        today = datetime.now(ZoneInfo(get_settings().timezone)).date()
+         templates = MORNING_TEMPLATES if kind == "morning" else EVENING_TEMPLATES
+-
++        default_tz = ZoneInfo(get_settings().timezone)
+         for user in users:
+             try:
++                try:
++                    user_tz = ZoneInfo(user.timezone or get_settings().timezone)
++                except Exception:
++                    user_tz = default_tz
++                today = datetime.now(user_tz).date()
+                 msg = random.choice(templates).format(
+                     name=user.first_name or "друг",
+                     days=days_free(user, today)
+@@ -45,36 +49,46 @@ async def send_daily_message(bot: Bot, kind: str) -> None:
+                 await bot.send_message(
+                     user.id,
+                     msg,
+-                    reply_markup=tracker_keyboard()
++                    reply_markup=tracker_keyboard(user.id)
+                 )
+             except Exception:
+                 logger.exception("Daily message failed for user %s", user.id)
+ 
+ async def radar_job(bot: Bot) -> None:
+-    tz = ZoneInfo(get_settings().timezone)
+-    now = datetime.now(tz)
+-    current_minutes = now.hour * 60 + now.minute
+-    target_minutes = current_minutes + 15
+-    if target_minutes >= 24 * 60:
+-        target_minutes -= 24 * 60
+-    today = now.date()
+-
++    default_tz = ZoneInfo(get_settings().timezone)
+     async with SessionFactory() as session:
+         for trigger, user in await radar_targets(session):
+-            if trigger.time_minutes != target_minutes or trigger.last_sent_date == today:
+-                continue
+-            claimed = await mark_radar_sent(session, trigger.id, today)
+-            if claimed is None:
++            try:
++                user_tz = ZoneInfo(user.timezone or get_settings().timezone)
++            except Exception:
++                user_tz = default_tz
++            now = datetime.now(user_tz)
++            today = now.date()
++            current_minutes = now.hour * 60 + now.minute
++            target_minutes = (current_minutes + 15) % 1440
++
++            if trigger.time_minutes != target_minutes:
+                 continue
++
++            # Проверяем last_radar_sent
++            if trigger.last_radar_sent:
++                sent_dt = trigger.last_radar_sent
++                sent_date = sent_dt.astimezone(user_tz).date() if sent_dt.tzinfo else sent_dt.date()
++                if sent_date == today:
++                    continue
++
++            # Отмечаем отправку в базе (принимает session и trigger.id)
++            await mark_radar_sent(session, trigger.id)
++
+             try:
+                 await bot.send_message(
+                     user.id,
+-                    f"⚡️ Триггер-радар (за 15 минут)\n\n"
++                    "⚡️ Триггер-радар (за 15 минут)\n\n"
+                     f"Приближается твой триггер: «{trigger.label}».\n"
+                     "Пик желания длится ровно 3 минуты. Сделай глоток воды, смени позу "
+                     "или включи дыхание SOS в приложении.\n\n"
+-                    f"Ты чист уже {days_free(user, today)} дней. Ты сильнее этой привычки!",
+-                    reply_markup=tracker_keyboard(),
++                    f"Ты чист уже {days_free(user, today)} дн. Ты сильнее этой привычки!",
++                    reply_markup=tracker_keyboard(user.id),
+                 )
+             except Exception:
+                 logger.exception("Radar message failed for user %s", user.id)
+@@ -82,7 +96,6 @@ async def radar_job(bot: Bot) -> None:
+ def build_scheduler(bot: Bot) -> AsyncIOScheduler:
+     scheduler = AsyncIOScheduler(timezone=ZoneInfo(get_settings().timezone))
+     scheduler.add_job(radar_job, "interval", minutes=1, args=[bot], id="trigger-radar", max_instances=1)
+-    # Утреннее сообщение в 09:00 по времени пользователя
+     scheduler.add_job(
+         send_daily_message,
+         "cron",
+@@ -92,7 +105,6 @@ def build_scheduler(bot: Bot) -> AsyncIOScheduler:
+         id="morning-checkin",
+         max_instances=1,
+     )
+-    # Вечернее сообщение в 21:00
+     scheduler.add_job(
+         send_daily_message,
+         "cron",
+diff --git a/smokefree_bot/database/connection.py b/smokefree_bot/database/connection.py
+index e923260..a19de0d 100644
+--- a/smokefree_bot/database/connection.py
++++ b/smokefree_bot/database/connection.py
+@@ -8,6 +8,10 @@ engine = create_async_engine(
+     settings.database_dsn,
+     echo=settings.debug,
+     future=True,
++    pool_pre_ping=True,      # Защита от обрыва TCP-сессий на Railway
++    pool_recycle=1800,       # Пересоздание соединений каждые 30 мин
++    pool_size=10,
++    max_overflow=20,
+ )
+ 
+ SessionFactory = async_sessionmaker(
+@@ -16,7 +20,6 @@ SessionFactory = async_sessionmaker(
+     expire_on_commit=False,
+ )
+ 
+-
+ async def init_db() -> None:
+     async with engine.begin() as connection:
+         await connection.run_sync(Base.metadata.create_all)
+@@ -26,6 +29,5 @@ async def init_db() -> None:
+         except Exception:
+             pass
+ 
+-
+ async def close_db() -> None:
+     await engine.dispose()
