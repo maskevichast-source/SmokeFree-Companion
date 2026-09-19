@@ -32,8 +32,11 @@
           <button class="currency-btn" data-currency="RUB">₽</button>
           <button class="currency-btn" data-currency="USD">$</button>
         </div>
+        <button class="btn-ios-guide" id="refreshButton" title="Обновить данные">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 0 1 14.5-6"/><path d="M20.5 12a8.5 8.5 0 0 1-14.5 6"/><path d="M18 3v3.5h-3.5"/><path d="M6 21v-3.5h3.5"/></svg>
+        </button>
         <button class="btn-ios-guide" id="btnIosGuide" title="Как открыть в Safari / добавить на экран">
-          <i data-lucide="share"></i>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.3"/><circle cx="18" cy="6" r="2.3"/><circle cx="18" cy="18" r="2.3"/><path d="M8.1 10.7l7.8-3.4"/><path d="M8.1 13.3l7.8 3.4"/></svg>
         </button>
       </div>
     </header>
@@ -49,14 +52,14 @@
       </div>
       <div class="auth-notice-actions">
         <button class="btn-auth-sync" id="btnManualSync">
-          <i data-lucide="link"></i> Синхронизировать
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 12a3.8 3.8 0 0 1 3.8-3.8h1.7a3.8 3.8 0 1 1 0 7.6h-.9"/><path d="M14.5 12a3.8 3.8 0 0 1-3.8 3.8H9a3.8 3.8 0 1 1 0-7.6h.9"/></svg> Синхронизировать
         </button>
       </div>
     </div>
 
     <!-- NEAREST TRIGGER -->
     <div class="nearest-trigger-card" id="nearestTriggerBox" style="display:none;">
-      <div class="nearest-icon"><i data-lucide="radar"></i></div>
+      <div class="nearest-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><path d="M12 12L18.5 7"/></svg></div>
       <div>
         <strong id="nearestTriggerTitle">Ближайший триггер</strong>
         <p id="nearestTriggerTime">—</p>
@@ -66,23 +69,23 @@
     <!-- TABBAR -->
     <nav class="tabbar">
       <button class="tab active" data-tab="overview">
-        <i data-lucide="home"></i>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
         Обзор
       </button>
       <button class="tab" data-tab="health">
-        <i data-lucide="heart-pulse"></i>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.6-9.5-9.2C1 8 2 4.8 5 4c2-.5 4 .5 5 2.2C11 4.5 13-.5 15 4c3 .8 4 4 2.5 6.8C15 15.4 12 20 12 20z"/><path d="M6 12h2l1.5 3 2-6 1.5 3h3"/></svg>
         Здоровье
       </button>
       <button class="tab" data-tab="radar">
-        <i data-lucide="radar"></i>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><path d="M12 12L18.5 7"/></svg>
         Радар
       </button>
       <button class="tab" data-tab="analytics">
-        <i data-lucide="bar-chart-3"></i>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16"/><rect x="7.5" y="12" width="2.8" height="5.5" rx="0.5"/><rect x="12.6" y="8" width="2.8" height="9.5" rx="0.5"/><rect x="17.7" y="5" width="2.8" height="12.5" rx="0.5"/></svg>
         Графики
       </button>
       <button class="tab" data-tab="coach">
-        <i data-lucide="bot"></i>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="10" rx="3"/><circle cx="9" cy="13" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1.3" fill="currentColor" stroke="none"/><path d="M12 8V4.5"/><circle cx="12" cy="3.2" r="1.1" fill="currentColor" stroke="none"/></svg>
         Коуч
       </button>
     </nav>
@@ -115,7 +118,7 @@
       <div class="hero-controls">
         <span>Живой таймер свободы</span>
         <button class="btn-edit-time" id="btnEditTime">
-          <i data-lucide="pencil"></i> Изменить время
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l.6-3.6L15.4 5.6a2 2 0 0 1 2.9 0l1.1 1.1a2 2 0 0 1 0 2.9L8.6 20.4 4 20z"/><path d="M14 7l3 3"/></svg> Изменить время
         </button>
       </div>
 
@@ -131,7 +134,7 @@
       <div class="metrics-grid">
         <div class="metric-card">
           <div class="metric-top">
-            <div class="metric-icon metric-gold"><i data-lucide="banknote"></i></div>
+            <div class="metric-icon metric-gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 9h.01M18 15h.01"/></svg></div>
             <span class="metric-tag">Деньги</span>
           </div>
           <p>Сэкономлено</p>
@@ -143,7 +146,7 @@
         </div>
         <div class="metric-card">
           <div class="metric-top">
-            <div class="metric-icon metric-blue"><i data-lucide="clock"></i></div>
+            <div class="metric-icon metric-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3.2 2"/></svg></div>
             <span class="metric-tag">Время</span>
           </div>
           <p>Возвращено жизни</p>
@@ -155,7 +158,7 @@
         </div>
         <div class="metric-card">
           <div class="metric-top">
-            <div class="metric-icon metric-lilac"><i data-lucide="shield-check"></i></div>
+            <div class="metric-icon metric-lilac"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.6-3 7.6-7 9-4-1.4-7-4.4-7-9V6z"/><path d="M9 12.2l2 2 4-4.2"/></svg></div>
             <span class="metric-tag">Победы</span>
           </div>
           <p>Тяг преодолено</p>
@@ -170,7 +173,7 @@
       <div class="goal-card">
         <div class="goal-header">
           <div class="goal-title-wrap">
-            <i data-lucide="target"></i>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.2"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg>
             <div>
               <strong>Финансовая цель</strong>
               <p>Копим на важное</p>
@@ -187,7 +190,7 @@
 
       <!-- QUOTE CARD -->
       <div class="quote-card" id="quoteCard">
-        <i data-lucide="quote" class="quote-icon"></i>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="quote-icon"><path d="M4.5 10.2c0-2.4 1.9-4.2 4.2-4.2v2.1c-1.2 0-2.1.9-2.1 2.1h2.1v4.2H4.5v-4.2z"/><path d="M13.6 10.2c0-2.4 1.9-4.2 4.2-4.2v2.1c-1.2 0-2.1.9-2.1 2.1h2.1v4.2h-4.2v-4.2z"/></svg>
         <p id="quoteText">Между стимулом и реакцией есть зазор — в нем твоя свобода выбора.</p>
         <span id="quoteAuthor">— Виктор Франкл</span>
       </div>
@@ -195,7 +198,7 @@
       <!-- QUICK ACTIONS -->
       <div class="quick-actions-section">
         <button class="action-btn-sos" id="sosButton">
-          <div class="sos-icon-pulse"><i data-lucide="siren"></i></div>
+          <div class="sos-icon-pulse"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5a5.7 5.7 0 0 1 5.7 5.7V14H6.3V8.2A5.7 5.7 0 0 1 12 2.5z"/><path d="M4.3 14h15.4v2.6a1 1 0 0 1-1 1H5.3a1 1 0 0 1-1-1V14z"/><path d="M12 2.5V.8"/><path d="M10.5 20.5h3"/></svg></div>
           <div class="sos-text">
             <strong>SOS: сильная тяга</strong>
             <small>3-минутная дыхательная практика</small>
@@ -204,14 +207,14 @@
 
         <div class="action-grid-two">
           <button class="action-card action-green" id="resistedButton">
-            <div class="action-icon"><i data-lucide="check-circle-2"></i></div>
+            <div class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.3l2.7 2.7L16.5 9"/></svg></div>
             <div>
               <strong>Я справился</strong>
               <small>Зафиксировать победу</small>
             </div>
           </button>
           <button class="action-card action-warm" id="relapseButton">
-            <div class="action-icon"><i data-lucide="alert-triangle"></i></div>
+            <div class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2L22 20H2z"/><path d="M12 9.3v4.4"/><circle cx="12" cy="16.8" r="1" fill="currentColor" stroke="none"/></svg></div>
             <div>
               <strong>Был срыв</strong>
               <small>Без вины и стыда</small>
@@ -220,8 +223,9 @@
         </div>
       </div>
 
-      <button class="footer-note" id="storyButton" style="width:100%; background:none;">
-        <span><i data-lucide="image-down"></i> Сохранить карточку прогресса</span>
+      <button class="btn-story-card" id="storyButton">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="13" rx="2"/><circle cx="8.3" cy="8.3" r="1.4"/><path d="M3 14.5l4.5-4.5 4 4 3-3 5.5 5.5"/><path d="M12 21v-5"/><path d="M9.8 18.6L12 21l2.2-2.4"/></svg>
+        Сохранить карточку прогресса
       </button>
 
     </section>
@@ -307,7 +311,7 @@
     <section class="tab-panel" id="coach">
       <div class="section-heading">
         <h2>AI-коуч</h2>
-        <span class="ai-badge"><i data-lucide="sparkles"></i> Gemini</span>
+        <span class="ai-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 2.5l1.6 4.7 4.7 1.6-4.7 1.6-1.6 4.7-1.6-4.7-4.7-1.6 4.7-1.6z"/><path d="M18.7 14l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg> Gemini</span>
       </div>
       <p class="panel-lead">Персональный наставник по методам Карра, Брюера и стоиков — на связи 24/7.</p>
 
@@ -320,20 +324,16 @@
 
       <div class="coach-chat-container" id="coachChatBox">
         <div class="coach-msg coach-msg-assistant">
-          <div class="coach-avatar"><i data-lucide="bot"></i></div>
+          <div class="coach-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="10" rx="3"/><circle cx="9" cy="13" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1.3" fill="currentColor" stroke="none"/><path d="M12 8V4.5"/><circle cx="12" cy="3.2" r="1.1" fill="currentColor" stroke="none"/></svg></div>
           <div class="coach-bubble">Привет! Я рядом. Расскажи, что происходит прямо сейчас?</div>
         </div>
       </div>
 
       <form class="coach-input-form" id="coachForm">
         <input type="text" id="coachInput" placeholder="Напиши, что чувствуешь…" autocomplete="off" />
-        <button type="submit" class="coach-send-btn"><i data-lucide="send"></i></button>
+        <button type="submit" class="coach-send-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2.5L10.8 13.2"/><path d="M21.5 2.5l-6.8 19-4-9-9-4z"/></svg></button>
       </form>
     </section>
-
-    <button class="footer-note" id="refreshButton" style="width:100%; background:none; margin-top:16px;">
-      Обновить данные
-    </button>
 
   </div>
 
@@ -383,7 +383,7 @@
       </div>
 
       <button class="btn-success-large" id="btnSosResisted">
-        <i data-lucide="trophy"></i> Я справился, тяга отступила
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 3.5h9v4a4.5 4.5 0 0 1-9 0v-4z"/><path d="M5.5 4.5h-2a3 3 0 0 0 3 3"/><path d="M18.5 4.5h2a3 3 0 0 1-3 3"/><path d="M10 14.5h4v2.8h-4z"/><path d="M8 20.5h8"/><path d="M12 17.3v3.2"/></svg> Я справился, тяга отступила
       </button>
     </div>
   </div>
@@ -528,7 +528,7 @@
       </div>
 
       <a href="#" id="btnOpenInSafari" class="btn-safari-direct" style="display:none;" target="_blank" rel="noopener">
-        <i data-lucide="external-link"></i> Открыть в Safari
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 3.5h6.7v6.7"/><path d="M20.2 3.5L9.8 13.9"/><path d="M17.5 12.3v5.9a1.8 1.8 0 0 1-1.8 1.8H5.8A1.8 1.8 0 0 1 4 18.2V7.8A1.8 1.8 0 0 1 5.8 6h5.9"/></svg> Открыть в Safari
       </a>
 
       <div class="modal-actions">
@@ -540,10 +540,6 @@
   <div class="toast" id="toast"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide-static/0.454.0/umd/lucide.min.js"></script>
-  <script>
-    if (window.lucide) lucide.createIcons();
-  </script>
   <script src="/app.js"></script>
 </body>
 </html>

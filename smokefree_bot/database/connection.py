@@ -1,13 +1,16 @@
 from pathlib import Path
+from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from bot.config import get_settings
 from database.models import Base
 
 settings = get_settings()
 
+_dsn = settings.database_dsn
+
 # Auto-create data directory if SQLite file path is used
-if "sqlite" in settings.database_dsn:
-    clean_path = settings.database_dsn.split(":///")[-1]
+if "sqlite" in _dsn:
+    clean_path = _dsn.split(":///")[-1]
     if clean_path and not clean_path.startswith(":memory:"):
         db_dir = Path(clean_path).parent
         db_dir.mkdir(parents=True, exist_ok=True)
@@ -16,15 +19,38 @@ engine_kwargs: dict = {
     "echo": settings.debug,
     "future": True,
 }
-if not settings.database_dsn.startswith("sqlite"):
+
+if not _dsn.startswith("sqlite"):
+    # Managed Postgres providers (Neon, Supabase, Railway's own Postgres, etc.)
+    # commonly hand out URLs with libpq-style query params such as
+    # `sslmode=require` or `channel_binding=require`. asyncpg's driver does not
+    # understand those kwargs directly, so they're stripped here and translated
+    # into the connect_args asyncpg actually expects. TLS is requested whenever
+    # the original URL asked for it (or said nothing, which we treat as "yes"
+    # since virtually every managed Postgres free tier requires TLS).
+    parts = urlsplit(_dsn)
+    query = dict(parse_qsl(parts.query))
+    sslmode = query.pop("sslmode", None)
+    query.pop("channel_binding", None)
+    _dsn = urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment))
+
+    connect_args: dict = {}
+    if sslmode not in ("disable",):
+        connect_args["ssl"] = "require"
+
     engine_kwargs.update({
         "pool_pre_ping": True,
         "pool_recycle": 1800,
-        "pool_size": 10,
-        "max_overflow": 20,
+        # A single-user personal bot never needs a large pool, and free-tier
+        # managed Postgres (e.g. Neon's free plan) caps concurrent connections
+        # low — keep this modest so the app never gets rejected for exceeding
+        # the provider's connection limit.
+        "pool_size": 3,
+        "max_overflow": 2,
+        "connect_args": connect_args,
     })
 
-engine = create_async_engine(settings.database_dsn, **engine_kwargs)
+engine = create_async_engine(_dsn, **engine_kwargs)
 
 SessionFactory = async_sessionmaker(
     bind=engine,

@@ -355,7 +355,7 @@
                 <span></span>
               </button>
               <button class="btn-del-trigger" data-del-trigger="${item.id}" title="Удалить триггер">
-                <i data-lucide="trash-2"></i>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9.5 7V4.2h5V7"/><path d="M6.3 7l.9 12.4a1.5 1.5 0 0 0 1.5 1.4h6.6a1.5 1.5 0 0 0 1.5-1.4L17.7 7"/><path d="M10.2 11v6"/><path d="M13.8 11v6"/></svg>
               </button>
             </div>
           </div>
@@ -389,7 +389,6 @@
         })
       );
 
-      if (window.lucide) lucide.createIcons();
     } catch (err) {
       console.error(err);
     }
@@ -725,7 +724,7 @@
 
     if (sender === "assistant") {
       msgEl.innerHTML = `
-        <div class="coach-avatar"><i data-lucide="bot"></i></div>
+        <div class="coach-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="10" rx="3"/><circle cx="9" cy="13" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1.3" fill="currentColor" stroke="none"/><path d="M12 8V4.5"/><circle cx="12" cy="3.2" r="1.1" fill="currentColor" stroke="none"/></svg></div>
         <div class="coach-bubble">${formattedContent}</div>
       `;
     } else {
@@ -735,7 +734,6 @@
     }
     box.appendChild(msgEl);
     box.scrollTop = box.scrollHeight;
-    if (window.lucide) lucide.createIcons();
   }
 
   async function sendCoachMessage(messageText) {
@@ -747,7 +745,7 @@
     const typingBubble = document.createElement("div");
     typingBubble.className = "coach-msg coach-msg-assistant";
     typingBubble.innerHTML = `
-      <div class="coach-avatar"><i data-lucide="bot"></i></div>
+      <div class="coach-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="10" rx="3"/><circle cx="9" cy="13" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1.3" fill="currentColor" stroke="none"/><path d="M12 8V4.5"/><circle cx="12" cy="3.2" r="1.1" fill="currentColor" stroke="none"/></svg></div>
       <div class="coach-bubble" style="opacity: 0.7;">Изучаю контекст и формулирую ответ…</div>
     `;
     $("coachChatBox")?.appendChild(typingBubble);
@@ -955,7 +953,6 @@
           load();
         }
       }
-      if (window.lucide) window.lucide.createIcons();
     })
   );
 

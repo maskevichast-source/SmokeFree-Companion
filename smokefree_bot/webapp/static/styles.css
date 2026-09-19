@@ -1027,6 +1027,7 @@ h1 {
 }
 
 /* AI COACH */
+.ai-badge svg { width: 12px; height: 12px; }
 .ai-badge {
   display: inline-flex;
   align-items: center;
@@ -1227,6 +1228,28 @@ h1 {
 .clean-track-card small {
   font-size: 11px;
   color: var(--muted);
+}
+
+.btn-story-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--panel-soft);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  margin-top: 4px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn-story-card svg { width: 16px; height: 16px; color: var(--blue); }
+.btn-story-card:hover, .btn-story-card:active {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
 .footer-note {
