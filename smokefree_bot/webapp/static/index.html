@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>SmokeFree — твой трек свободы</title>
+  <meta name="description" content="Трекер отказа от никотина: статистика, радар триггеров, AI-коуч и путь к здоровью." />
+  <meta name="theme-color" content="#080d14" />
+  <link rel="manifest" id="manifestLink" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="/styles.css" rel="stylesheet" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <div class="app-shell">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">SMOKEFREE COMPANION</div>
+        <h1 id="greeting">Друг, твой стаж свободы:</h1>
+        <div class="muted" id="startPointLabel">Старт: —</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="currency-selector">
+          <button class="currency-btn" data-currency="KZT">₸</button>
+          <button class="currency-btn" data-currency="RUB">₽</button>
+          <button class="currency-btn" data-currency="USD">$</button>
+        </div>
+        <button class="btn-ios-guide" id="btnIosGuide" title="Как открыть в Safari / добавить на экран">
+          <i data-lucide="share"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- AUTH NOTICE -->
+    <div class="auth-notice" id="authNotice" style="display:none;">
+      <div class="auth-notice-body">
+        <div class="auth-notice-icon">⚠️</div>
+        <div class="auth-notice-text">
+          <strong>Нужна авторизация</strong>
+          <p>Открой приложение через кнопку в Telegram-боте, либо синхронизируй ссылку вручную.</p>
+        </div>
+      </div>
+      <div class="auth-notice-actions">
+        <button class="btn-auth-sync" id="btnManualSync">
+          <i data-lucide="link"></i> Синхронизировать
+        </button>
+      </div>
+    </div>
+
+    <!-- NEAREST TRIGGER -->
+    <div class="nearest-trigger-card" id="nearestTriggerBox" style="display:none;">
+      <div class="nearest-icon"><i data-lucide="radar"></i></div>
+      <div>
+        <strong id="nearestTriggerTitle">Ближайший триггер</strong>
+        <p id="nearestTriggerTime">—</p>
+      </div>
+    </div>
+
+    <!-- TABBAR -->
+    <nav class="tabbar">
+      <button class="tab active" data-tab="overview">
+        <i data-lucide="home"></i>
+        Обзор
+      </button>
+      <button class="tab" data-tab="health">
+        <i data-lucide="heart-pulse"></i>
+        Здоровье
+      </button>
+      <button class="tab" data-tab="radar">
+        <i data-lucide="radar"></i>
+        Радар
+      </button>
+      <button class="tab" data-tab="analytics">
+        <i data-lucide="bar-chart-3"></i>
+        Графики
+      </button>
+      <button class="tab" data-tab="coach">
+        <i data-lucide="bot"></i>
+        Коуч
+      </button>
+    </nav>
+
+    <!-- ============================================================ -->
+    <!-- TAB: OVERVIEW -->
+    <!-- ============================================================ -->
+    <section class="tab-panel active" id="overview">
+
+      <!-- HERO -->
+      <div class="hero-card">
+        <div>
+          <div class="status-pill"><span class="pulse-dot"></span> СВОБОДЕН ОТ НИКОТИНА</div>
+          <div class="hero-label">Дней без сигарет</div>
+          <div class="hero-number"><span id="daysFree">0</span><small>дней</small></div>
+          <div class="hero-caption">Каждая минута — вклад в твое здоровье</div>
+        </div>
+        <div class="ring-wrap">
+          <svg class="progress-ring" viewBox="0 0 120 120">
+            <circle class="ring-track" cx="60" cy="60" r="50"></circle>
+            <circle class="ring-progress" id="ringProgress" cx="60" cy="60" r="50"></circle>
+          </svg>
+          <div class="ring-text">
+            <strong id="cleanTrackLarge">100%</strong>
+            <span>чистоты</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-controls">
+        <span>Живой таймер свободы</span>
+        <button class="btn-edit-time" id="btnEditTime">
+          <i data-lucide="pencil"></i> Изменить время
+        </button>
+      </div>
+
+      <!-- LIVE HUD -->
+      <div class="live-hud-row">
+        <div class="hud-unit"><span class="hud-val" id="hudDays">0</span><span class="hud-lbl">дни</span></div>
+        <div class="hud-unit"><span class="hud-val" id="hudHours">00</span><span class="hud-lbl">часы</span></div>
+        <div class="hud-unit"><span class="hud-val" id="hudMinutes">00</span><span class="hud-lbl">мин</span></div>
+        <div class="hud-unit"><span class="hud-val" id="hudSeconds">00</span><span class="hud-lbl">сек</span></div>
+      </div>
+
+      <!-- METRICS -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-top">
+            <div class="metric-icon metric-gold"><i data-lucide="banknote"></i></div>
+            <span class="metric-tag">Деньги</span>
+          </div>
+          <p>Сэкономлено</p>
+          <div class="metric-value-row">
+            <strong id="savedKzt">0</strong>
+            <small id="currencySign">₸</small>
+          </div>
+          <div class="metric-sub">≈ <span id="dailyCost">0</span> <span class="curr-sub">₸</span>/день</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-top">
+            <div class="metric-icon metric-blue"><i data-lucide="clock"></i></div>
+            <span class="metric-tag">Время</span>
+          </div>
+          <p>Возвращено жизни</p>
+          <div class="metric-value-row">
+            <strong id="minutesReturned">0</strong>
+            <small>мин</small>
+          </div>
+          <div class="metric-sub"><span id="hoursReturned">0</span> ч.</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-top">
+            <div class="metric-icon metric-lilac"><i data-lucide="shield-check"></i></div>
+            <span class="metric-tag">Победы</span>
+          </div>
+          <p>Тяг преодолено</p>
+          <div class="metric-value-row">
+            <strong id="cravingsResisted">0</strong>
+          </div>
+          <div class="metric-sub">Чистота: <span id="cleanPercent">100%</span></div>
+        </div>
+      </div>
+
+      <!-- GOAL CARD -->
+      <div class="goal-card">
+        <div class="goal-header">
+          <div class="goal-title-wrap">
+            <i data-lucide="target"></i>
+            <div>
+              <strong>Финансовая цель</strong>
+              <p>Копим на важное</p>
+            </div>
+          </div>
+          <span class="goal-badge" id="goalPercentBadge">0%</span>
+        </div>
+        <div class="goal-bar-bg"><div class="goal-bar-fill" id="goalProgressBar"></div></div>
+        <div class="goal-footer">
+          <span id="goalSavedLabel">0 ₸ накоплено</span>
+          <span id="goalTargetLabel">Цель: 0 ₸</span>
+        </div>
+      </div>
+
+      <!-- QUOTE CARD -->
+      <div class="quote-card" id="quoteCard">
+        <i data-lucide="quote" class="quote-icon"></i>
+        <p id="quoteText">Между стимулом и реакцией есть зазор — в нем твоя свобода выбора.</p>
+        <span id="quoteAuthor">— Виктор Франкл</span>
+      </div>
+
+      <!-- QUICK ACTIONS -->
+      <div class="quick-actions-section">
+        <button class="action-btn-sos" id="sosButton">
+          <div class="sos-icon-pulse"><i data-lucide="siren"></i></div>
+          <div class="sos-text">
+            <strong>SOS: сильная тяга</strong>
+            <small>3-минутная дыхательная практика</small>
+          </div>
+        </button>
+
+        <div class="action-grid-two">
+          <button class="action-card action-green" id="resistedButton">
+            <div class="action-icon"><i data-lucide="check-circle-2"></i></div>
+            <div>
+              <strong>Я справился</strong>
+              <small>Зафиксировать победу</small>
+            </div>
+          </button>
+          <button class="action-card action-warm" id="relapseButton">
+            <div class="action-icon"><i data-lucide="alert-triangle"></i></div>
+            <div>
+              <strong>Был срыв</strong>
+              <small>Без вины и стыда</small>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <button class="footer-note" id="storyButton" style="width:100%; background:none;">
+        <span><i data-lucide="image-down"></i> Сохранить карточку прогресса</span>
+      </button>
+
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TAB: HEALTH -->
+    <!-- ============================================================ -->
+    <section class="tab-panel" id="health">
+      <div class="section-heading">
+        <h2>Путь восстановления</h2>
+      </div>
+      <p class="panel-lead">Фазы восстановления организма по данным ВОЗ — обновляются в реальном времени.</p>
+
+      <div class="health-timeline" id="healthTimeline">
+        <!-- rendered by JS -->
+      </div>
+
+      <div class="section-heading">
+        <h2>Достижения</h2>
+        <span class="count-badge" id="achievementCount">0</span>
+      </div>
+      <div class="achievement-list" id="achievements">
+        <!-- rendered by JS -->
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TAB: RADAR -->
+    <!-- ============================================================ -->
+    <section class="tab-panel" id="radar">
+      <div class="section-heading">
+        <h2>Радар триггеров</h2>
+        <span class="radar-live"><span class="pulse-dot"></span> LIVE</span>
+      </div>
+      <p class="panel-lead">Отметь опасные часы — за 15 минут до них придет предупреждение в Telegram.</p>
+
+      <div class="trigger-presets">
+        <span class="presets-lbl">Быстрые пресеты</span>
+        <div class="presets-row">
+          <button class="preset-pill" data-time="09:00" data-label="Кофе с утра">☕ Кофе (09:00)</button>
+          <button class="preset-pill" data-time="13:00" data-label="После обеда">🍽 После обеда (13:00)</button>
+          <button class="preset-pill" data-time="18:00" data-label="Дорога домой">🚗 Дорога домой (18:00)</button>
+          <button class="preset-pill" data-time="21:00" data-label="Вечерний стресс">🌙 Вечер (21:00)</button>
+        </div>
+      </div>
+
+      <div class="trigger-list" id="triggers">
+        <div class="info-note"><p>Добавь опасный час — радар предупредит в Telegram за 15 минут.</p></div>
+      </div>
+
+      <form class="inline-form" id="triggerForm">
+        <input type="time" name="time" required />
+        <input type="text" name="label" placeholder="Например: перекур с коллегами" required />
+        <button type="submit" class="primary-button">Добавить</button>
+      </form>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TAB: ANALYTICS -->
+    <!-- ============================================================ -->
+    <section class="tab-panel" id="analytics">
+      <div class="section-heading">
+        <h2>Аналитика</h2>
+      </div>
+
+      <div class="chart-card">
+        <canvas id="cravingChart" height="220"></canvas>
+      </div>
+
+      <div class="clean-track-card">
+        <div>
+          <span>Чистота трека</span>
+          <strong id="cleanPercentDuplicateSpacer"></strong>
+        </div>
+        <div class="bar"><span id="cleanBar" style="width:0%"></span></div>
+        <small>Доля дней без срывов с момента старта</small>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TAB: COACH -->
+    <!-- ============================================================ -->
+    <section class="tab-panel" id="coach">
+      <div class="section-heading">
+        <h2>AI-коуч</h2>
+        <span class="ai-badge"><i data-lucide="sparkles"></i> Gemini</span>
+      </div>
+      <p class="panel-lead">Персональный наставник по методам Карра, Брюера и стоиков — на связи 24/7.</p>
+
+      <div class="coach-quick-prompts">
+        <button class="quick-prompt-btn" data-prompt="Сейчас сильная тяга, помоги">Сильная тяга</button>
+        <button class="quick-prompt-btn" data-prompt="Хочу покурить одну за компанию">Одна «за компанию»</button>
+        <button class="quick-prompt-btn" data-prompt="Чувствую стресс и раздражение">Стресс</button>
+        <button class="quick-prompt-btn" data-prompt="Почему мир кажется пресным без сигарет?">Дофаминовая яма</button>
+      </div>
+
+      <div class="coach-chat-container" id="coachChatBox">
+        <div class="coach-msg coach-msg-assistant">
+          <div class="coach-avatar"><i data-lucide="bot"></i></div>
+          <div class="coach-bubble">Привет! Я рядом. Расскажи, что происходит прямо сейчас?</div>
+        </div>
+      </div>
+
+      <form class="coach-input-form" id="coachForm">
+        <input type="text" id="coachInput" placeholder="Напиши, что чувствуешь…" autocomplete="off" />
+        <button type="submit" class="coach-send-btn"><i data-lucide="send"></i></button>
+      </form>
+    </section>
+
+    <button class="footer-note" id="refreshButton" style="width:100%; background:none; margin-top:16px;">
+      Обновить данные
+    </button>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODAL: SOS -->
+  <!-- ============================================================ -->
+  <div class="modal-overlay" id="modalSos">
+    <div class="modal-card modal-sos-card">
+      <div class="modal-header">
+        <div>
+          <h3>SOS: острая тяга</h3>
+          <p>Волна схлынет за 3 минуты</p>
+        </div>
+        <button class="modal-close" id="btnCloseSos">&times;</button>
+      </div>
+
+      <div class="sos-timer-display">
+        <span id="sosCountdown">03:00</span>
+        <small>осталось до конца практики</small>
+      </div>
+
+      <div class="sos-mode-toggle">
+        <button class="sos-mode-btn active" data-mode="breathing">Дыхание</button>
+        <button class="sos-mode-btn" data-mode="grounding">Заземление</button>
+      </div>
+
+      <div class="sos-view active" id="sosBreathingView">
+        <div class="breathing-circle-wrap">
+          <div class="breath-orb inhale" id="breathOrb">
+            <div class="breath-inner">
+              <strong id="breathAction">Вдох</strong>
+              <span id="breathSeconds">4</span>
+            </div>
+          </div>
+        </div>
+        <p class="breath-hint" id="breathHint">Медленно вдыхай через нос, наполняя легкие и живот...</p>
+      </div>
+
+      <div class="sos-view" id="sosGroundingView">
+        <div class="grounding-list">
+          <div class="grounding-item"><span class="gr-num">5</span> Назови 5 вещей, которые видишь вокруг</div>
+          <div class="grounding-item"><span class="gr-num">4</span> Назови 4 вещи, которые можешь потрогать</div>
+          <div class="grounding-item"><span class="gr-num">3</span> Назови 3 звука, которые слышишь</div>
+          <div class="grounding-item"><span class="gr-num">2</span> Назови 2 запаха вокруг</div>
+          <div class="grounding-item"><span class="gr-num">1</span> Назови 1 вкус, который чувствуешь</div>
+        </div>
+      </div>
+
+      <button class="btn-success-large" id="btnSosResisted">
+        <i data-lucide="trophy"></i> Я справился, тяга отступила
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODAL: RELAPSE -->
+  <!-- ============================================================ -->
+  <div class="modal-overlay" id="modalRelapse">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3>Был срыв — это нормально</h3>
+          <p>Без вины и стыда. Разберем и пойдем дальше.</p>
+        </div>
+        <button class="modal-close" id="btnCloseRelapse">&times;</button>
+      </div>
+
+      <form id="formRelapse">
+        <div class="field-group">
+          <label>Сколько сигарет?</label>
+          <div class="chips-selector" id="relapseCountChips">
+            <button type="button" class="choice-chip active" data-val="1">1</button>
+            <button type="button" class="choice-chip" data-val="2">2</button>
+            <button type="button" class="choice-chip" data-val="3">3</button>
+            <button type="button" class="choice-chip" data-val="5">5+</button>
+          </div>
+          <input type="hidden" id="inputRelapseCigarettes" value="1" />
+        </div>
+
+        <div class="field-group">
+          <label>Что стало триггером?</label>
+          <div class="chips-selector" id="relapseTriggerChips">
+            <button type="button" class="choice-chip" data-val="Стресс">Стресс</button>
+            <button type="button" class="choice-chip" data-val="Алкоголь">Алкоголь</button>
+            <button type="button" class="choice-chip" data-val="Компания">Компания</button>
+            <button type="button" class="choice-chip" data-val="Скука">Скука</button>
+          </div>
+          <input type="hidden" id="inputRelapseTrigger" value="Стресс" />
+        </div>
+
+        <div class="field-group">
+          <label>План на ближайшие 24 часа</label>
+          <div class="chips-selector" id="relapsePlanChips">
+            <button type="button" class="choice-chip" data-val="Сделать паузу">Сделать паузу</button>
+            <button type="button" class="choice-chip" data-val="Убрать сигареты из дома">Убрать сигареты</button>
+            <button type="button" class="choice-chip" data-val="Написать коучу">Написать коучу</button>
+          </div>
+          <input type="hidden" id="inputRelapsePlan" value="Сделать паузу" />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="btnCancelRelapse">Отмена</button>
+          <button type="submit" class="btn-primary">Зафиксировать</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODAL: QUIT TIME -->
+  <!-- ============================================================ -->
+  <div class="modal-overlay" id="modalQuitTime">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3>Изменить время отказа</h3>
+          <p>Укажи точный момент старта</p>
+        </div>
+        <button class="modal-close" id="btnCloseQuitTime">&times;</button>
+      </div>
+
+      <form id="formQuitTime">
+        <div class="field-group">
+          <label>Быстрый выбор</label>
+          <div class="presets-row">
+            <button type="button" class="preset-pill" data-preset="now">Сейчас</button>
+            <button type="button" class="preset-pill" data-preset="1h">Час назад</button>
+            <button type="button" class="preset-pill" data-preset="today8">Сегодня в 8:00</button>
+            <button type="button" class="preset-pill" data-preset="yesterday20">Вчера в 20:00</button>
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Дата и время</label>
+          <input type="datetime-local" class="field-input" id="inputQuitDateTime" required />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="btnCancelQuitTime">Отмена</button>
+          <button type="submit" class="btn-primary">Сохранить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODAL: MANUAL SYNC -->
+  <!-- ============================================================ -->
+  <div class="modal-overlay" id="modalSync">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3>Синхронизация</h3>
+          <p>Вставь ссылку или ID, полученные от бота</p>
+        </div>
+        <button class="modal-close" id="btnCloseSync">&times;</button>
+      </div>
+      <form id="formManualSync">
+        <div class="field-group">
+          <label>Ссылка или ID пользователя</label>
+          <input type="text" class="field-input" id="inputSyncUrl" placeholder="https://... или числовой ID" />
+          <span class="field-hint">Ссылку можно получить у бота командой /webapp</span>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="btnCancelSync">Отмена</button>
+          <button type="submit" class="btn-primary">Синхронизировать</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODAL: IOS GUIDE -->
+  <!-- ============================================================ -->
+  <div class="modal-overlay" id="modalIosGuide">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3>Открыть на iPhone</h3>
+          <p>Добавь приложение на экран «Домой» через Safari</p>
+        </div>
+        <button class="modal-close" id="btnCloseIosGuide">&times;</button>
+      </div>
+
+      <div class="ios-steps">
+        <div class="ios-step"><span class="step-num">1</span> Скопируй ссылку ниже</div>
+        <div class="ios-step"><span class="step-num">2</span> Открой её в Safari (не в Telegram)</div>
+        <div class="ios-step"><span class="step-num">3</span> Нажми «Поделиться» → «На экран Домой»</div>
+      </div>
+
+      <div class="copy-box">
+        <input type="text" id="iosShareUrl" readonly />
+        <button type="button" id="btnCopyIosUrl">Копировать</button>
+      </div>
+
+      <a href="#" id="btnOpenInSafari" class="btn-safari-direct" style="display:none;" target="_blank" rel="noopener">
+        <i data-lucide="external-link"></i> Открыть в Safari
+      </a>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-primary" id="btnUnderstandIos" style="grid-column: 1 / -1;">Понятно</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide-static/0.454.0/umd/lucide.min.js"></script>
+  <script>
+    if (window.lucide) lucide.createIcons();
+  </script>
+  <script src="/app.js"></script>
+</body>
+</html>
