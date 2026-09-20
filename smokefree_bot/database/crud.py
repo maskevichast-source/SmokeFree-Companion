@@ -209,24 +209,6 @@ async def delete_trigger(session: AsyncSession, user_id: int, trigger_id: int) -
     return True
 
 
-async def mark_radar_sent(session: AsyncSession, trigger_id: int) -> None:
-    trigger = await session.get(UserTrigger, trigger_id)
-    if trigger:
-        trigger.last_radar_sent = datetime.utcnow()
-        session.add(trigger)
-        await session.commit()
-
-
-async def radar_targets(session: AsyncSession) -> Sequence[tuple[UserTrigger, User]]:
-    query = (
-        select(UserTrigger, User)
-        .join(User, User.id == UserTrigger.user_id)
-        .where(UserTrigger.enabled.is_(True), User.onboarding_complete.is_(True))
-    )
-    result = await session.execute(query)
-    return result.all()
-
-
 async def add_achievement(session: AsyncSession, user_id: int, code: str) -> Achievement:
     existing = await session.scalar(
         select(Achievement).where(Achievement.user_id == user_id, Achievement.code == code)
@@ -243,7 +225,7 @@ async def add_achievement(session: AsyncSession, user_id: int, code: str) -> Ach
 async def list_achievements(session: AsyncSession, user_id: int) -> Sequence[Achievement]:
     return (
         await session.scalars(
-            select(Achievement).where(Achievement.user_id == user_id).order_by(Achievement.earned_at.asc())
+            select(Achievement).where(Achievement.user_id == user_id).order_by(Achievement.unlocked_at.asc())
         )
     ).all()
 
@@ -337,7 +319,7 @@ async def build_stats(session: AsyncSession, user_id: int) -> dict:
         "clean_track_percent": clean_pct_val,
         "cravings_by_day": cravings_by_day_list,
         "achievements": [
-            {"code": item.code, "earned_at": item.earned_at.isoformat()} for item in achievements
+            {"code": item.code, "earned_at": item.unlocked_at.isoformat()} for item in achievements
         ],
     }
 
@@ -358,8 +340,8 @@ async def get_cravings_by_day(session: AsyncSession, user_id: int, days: int = 1
     relapses = (
         await session.scalars(
             select(RelapseIncident)
-            .where(RelapseIncident.user_id == user_id, RelapseIncident.happened_at >= threshold_dt)
-            .order_by(RelapseIncident.happened_at.asc())
+            .where(RelapseIncident.user_id == user_id, RelapseIncident.occurred_at >= threshold_dt)
+            .order_by(RelapseIncident.occurred_at.asc())
         )
     ).all()
 
@@ -377,7 +359,7 @@ async def get_cravings_by_day(session: AsyncSession, user_id: int, days: int = 1
                 days_map[d_str]["relapses"] += 1
 
     for r in relapses:
-        d_str = r.happened_at.date().isoformat()
+        d_str = r.occurred_at.date().isoformat()
         if d_str in days_map:
             days_map[d_str]["relapses"] += max(1, r.cigarettes or 1)
 

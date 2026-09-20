@@ -60,6 +60,9 @@ class RelapseIncident(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"), index=True)
     trigger: Mapped[str] = mapped_column(String(120), default="неизвестно")
+    cigarettes: Mapped[int] = mapped_column(Integer, default=1)
+    reflection: Mapped[str] = mapped_column(Text, default="")
+    plan: Mapped[str] = mapped_column(Text, default="")
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     occurred_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
 

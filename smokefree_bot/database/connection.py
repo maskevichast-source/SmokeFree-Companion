@@ -62,10 +62,19 @@ async def init_db() -> None:
     async with engine.begin() as connection:
         await connection.run_sync(Base.metadata.create_all)
         from sqlalchemy import text
-        try:
-            await connection.execute(text("ALTER TABLE users ADD COLUMN quit_at TIMESTAMP;"))
-        except Exception:
-            pass
+        # Best-effort additive migrations for databases created by older
+        # versions of the schema (each wrapped separately so one already
+        # having the column doesn't stop the rest from running).
+        for stmt in (
+            "ALTER TABLE users ADD COLUMN quit_at TIMESTAMP;",
+            "ALTER TABLE relapse_incidents ADD COLUMN cigarettes INTEGER DEFAULT 1;",
+            "ALTER TABLE relapse_incidents ADD COLUMN reflection TEXT DEFAULT '';",
+            "ALTER TABLE relapse_incidents ADD COLUMN plan TEXT DEFAULT '';",
+        ):
+            try:
+                await connection.execute(text(stmt))
+            except Exception:
+                pass
 
 async def close_db() -> None:
     await engine.dispose()

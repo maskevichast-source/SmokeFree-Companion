@@ -17,10 +17,12 @@ from bot.config import get_settings
 from database.connection import SessionFactory
 from database.models import User
 from database.crud import (
+    complete_onboarding,
     delete_trigger,
     add_craving,
     add_relapse,
     build_stats,
+    get_or_create_user,
     list_triggers,
     recent_cravings,
     toggle_trigger,

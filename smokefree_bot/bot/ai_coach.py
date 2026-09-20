@@ -84,7 +84,7 @@ class AICoach:
     async def _generate(self, user_id: int | None, prompt: str, system_override: str | None = None) -> str:
         try:
             self._load()
-            models_to_try = ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.1-flash-lite", "gemini-flash-latest"]
+            models_to_try = ["gemini-flash-latest", "gemini-3.1-flash-lite", "gemini-2.5-flash"]
             contents = self._format_history_contents(user_id, prompt)
             instruction = system_override or SYSTEM_PROMPT
 
@@ -160,7 +160,7 @@ class AICoach:
         try:
             self._load()
             audio_part = self._types.Part.from_bytes(data=audio_data, mime_type="audio/ogg")
-            models_to_try = ["gemini-2.5-flash", "gemini-2.0-flash"]
+            models_to_try = ["gemini-flash-latest", "gemini-2.5-flash"]
             prompt = (
                 f"Это аудиосообщение пользователя (стаж свободы: {days_free} дней). "
                 "Пойми его эмоции, интонацию и суть. Ответь как мудрый КПТ-коуч и наставник с цитатой или глубоким инсайтом."
