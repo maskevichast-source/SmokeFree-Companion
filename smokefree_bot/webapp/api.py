@@ -174,6 +174,12 @@ def create_app() -> FastAPI:
     async def app_js() -> FileResponse:
         return FileResponse(STATIC_DIR / "app.js", media_type="application/javascript")
 
+    @app.get("/chart.umd.js")
+    async def chart_lib() -> FileResponse:
+        # Self-hosted so the Mini App never depends on a third-party CDN
+        # being reachable/versioned-correctly from inside Telegram's WebView.
+        return FileResponse(STATIC_DIR / "chart.umd.js", media_type="application/javascript")
+
     @app.get("/styles.css")
     async def styles() -> FileResponse:
         return FileResponse(STATIC_DIR / "styles.css", media_type="text/css")

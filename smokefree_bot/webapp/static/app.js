@@ -293,6 +293,10 @@
   function renderChart(points) {
     const canvas = $("cravingChart");
     if (!canvas) return;
+    if (typeof Chart === "undefined") {
+      console.error("Chart.js not loaded — skipping chart render");
+      return;
+    }
     const ctx = canvas.getContext("2d");
     if (chart) chart.destroy();
 
@@ -1078,49 +1082,13 @@
       return;
     }
 
+    // Step 1 — the actual network call. Only a failure here means we're
+    // genuinely offline / unauthenticated; this is the only thing allowed
+    // to trigger the recovery-sync / offline-banner path below.
+    let data;
     try {
-      const data = await api(`/api/stats/${userId}`);
-
-      // Auto-heal: If server database was wiped on redeploy or has reset/missing quit_at
-      const cached = localStorage.getItem("smokefree_cached_stats");
-      if (cached && data) {
-        try {
-          const cachedObj = JSON.parse(cached);
-          const cachedQuitAt = cachedObj.quit_at || (cachedObj.user && cachedObj.user.quit_at);
-          const serverQuitAt = data.user?.quit_at;
-
-          // Check if cached quit_at exists and should be restored to server
-          const isServerQuitMissing = !serverQuitAt && !data.user?.quit_date;
-          const isServerQuitReset = cachedQuitAt && serverQuitAt && (new Date(cachedQuitAt).getTime() < new Date(serverQuitAt).getTime() - 600000);
-
-          if (cachedQuitAt && (isServerQuitMissing || isServerQuitReset)) {
-            await api("/api/user/sync", {
-              method: "POST",
-              body: JSON.stringify({
-                user_id: Number(userId),
-                name: cachedObj.first_name || cachedObj.user?.name || "Друг",
-                quit_at: cachedQuitAt,
-                nicotine_type: cachedObj.nicotine_type || cachedObj.user?.nicotine_type || "Сигареты",
-                pack_price_kzt: cachedObj.pack_price_kzt || cachedObj.user?.pack_price_kzt || 900,
-                units_per_day: cachedObj.units_per_day || cachedObj.user?.units_per_day || 20,
-                financial_goal_kzt: cachedObj.financial_goal_kzt || cachedObj.user?.financial_goal_kzt || 0,
-              })
-            });
-            const reloaded = await api(`/api/stats/${userId}`);
-            renderStats(reloaded, true);
-            await loadTriggers();
-            toast("Прогресс успешно восстановлен!");
-            return;
-          }
-        } catch (syncErr) {
-          console.warn("Auto-sync fallback error:", syncErr);
-        }
-      }
-
-      renderStats(data, true);
-      await loadTriggers();
+      data = await api(`/api/stats/${userId}`);
     } catch (err) {
-      // Attempt recovery sync before falling back to offline mode
       try {
         const cached = localStorage.getItem("smokefree_cached_stats");
         if (cached) {
@@ -1156,6 +1124,57 @@
         if ($("greeting")) $("greeting").textContent = "Ошибка авторизации";
         if ($("authNotice")) $("authNotice").style.display = "flex";
       }
+      return;
+    }
+
+    // Step 2 — auto-heal: server DB was wiped on redeploy or has a reset/
+    // missing quit_at, but we have a newer value cached locally. This does
+    // its own network calls and can fail on its own without that meaning
+    // we're offline — `data` from Step 1 is always a valid fallback.
+    try {
+      const cached = localStorage.getItem("smokefree_cached_stats");
+      if (cached && data) {
+        const cachedObj = JSON.parse(cached);
+        const cachedQuitAt = cachedObj.quit_at || (cachedObj.user && cachedObj.user.quit_at);
+        const serverQuitAt = data.user?.quit_at;
+
+        const isServerQuitMissing = !serverQuitAt && !data.user?.quit_date;
+        const isServerQuitReset = cachedQuitAt && serverQuitAt && (new Date(cachedQuitAt).getTime() < new Date(serverQuitAt).getTime() - 600000);
+
+        if (cachedQuitAt && (isServerQuitMissing || isServerQuitReset)) {
+          await api("/api/user/sync", {
+            method: "POST",
+            body: JSON.stringify({
+              user_id: Number(userId),
+              name: cachedObj.first_name || cachedObj.user?.name || "Друг",
+              quit_at: cachedQuitAt,
+              nicotine_type: cachedObj.nicotine_type || cachedObj.user?.nicotine_type || "Сигареты",
+              pack_price_kzt: cachedObj.pack_price_kzt || cachedObj.user?.pack_price_kzt || 900,
+              units_per_day: cachedObj.units_per_day || cachedObj.user?.units_per_day || 20,
+              financial_goal_kzt: cachedObj.financial_goal_kzt || cachedObj.user?.financial_goal_kzt || 0,
+            })
+          });
+          data = await api(`/api/stats/${userId}`);
+          toast("Прогресс успешно восстановлен!");
+        }
+      }
+    } catch (syncErr) {
+      console.warn("Auto-sync fallback error:", syncErr);
+    }
+
+    // Step 3 — rendering. A bug here (a bad chart config, a missing DOM
+    // node, etc.) must never be mistaken for a network/offline failure —
+    // that would wrongly show the offline banner and skip loadTriggers()
+    // even though the data we have is perfectly fresh.
+    try {
+      renderStats(data, true);
+    } catch (renderErr) {
+      console.error("renderStats failed:", renderErr);
+    }
+    try {
+      await loadTriggers();
+    } catch (triggersErr) {
+      console.error("loadTriggers failed:", triggersErr);
     }
   }
 
