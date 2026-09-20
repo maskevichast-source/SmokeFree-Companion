@@ -1,0 +1,11 @@
+__DOMAIN__ {
+	# Caddy gets and renews a real Let's Encrypt certificate for this
+	# hostname automatically — nothing else to configure.
+	reverse_proxy 127.0.0.1:__PORT__
+	encode gzip
+
+	log {
+		output file /var/log/caddy/smokefree.log
+		format json
+	}
+}

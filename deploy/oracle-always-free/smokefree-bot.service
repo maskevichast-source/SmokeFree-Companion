@@ -1,0 +1,24 @@
+[Unit]
+Description=SmokeFree Companion (Telegram bot + Mini App backend)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=smokefree
+Group=smokefree
+WorkingDirectory=/opt/smokefree/app
+EnvironmentFile=/opt/smokefree/app.env
+ExecStart=/opt/smokefree/venv/bin/python main.py
+Restart=always
+RestartSec=5
+# Give the process time to shut down cleanly (closes DB pool, stops polling)
+TimeoutStopSec=15
+
+# Light sandboxing — the service only needs its own directory and the network
+NoNewPrivileges=true
+ProtectSystem=full
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
