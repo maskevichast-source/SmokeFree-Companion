@@ -75,6 +75,36 @@ export interface HealthMilestone {
   practicalTip?: string;
   scientificReference: string;
   iconType?: string;
+  phaseId?: string;
+}
+
+export interface PhysiologicalIndicator {
+  id: string;
+  name: string;
+  category: 'oxygen' | 'co_clearing' | 'nerve_regeneration' | 'lung_capacity' | 'dopamine_reset' | 'cardiovascular';
+  currentValue: string;
+  targetValue: string;
+  progressPercent: number; // 0 - 100
+  timeToCompleteSec: number;
+  description: string;
+  medicalInsight: string;
+  icon: string;
+}
+
+export interface PhysiologicalPhase {
+  id: string;
+  phaseNumber: number;
+  name: string;
+  subtitle: string;
+  durationRange: string;
+  startSec: number;
+  endSec: number;
+  status: 'completed' | 'in-progress' | 'upcoming';
+  progressPercent: number; // 0 - 100
+  description: string;
+  keyChanges: string[];
+  indicators: PhysiologicalIndicator[];
+  milestones: HealthMilestone[];
 }
 
 export interface AuditBug {
