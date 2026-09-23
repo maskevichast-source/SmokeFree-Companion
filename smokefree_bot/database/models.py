@@ -1,6 +1,9 @@
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from sqlalchemy import BigInteger, Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+def now_utc() -> datetime:
+    return datetime.now(timezone.utc)
 
 class Base(DeclarativeBase):
     pass
@@ -22,7 +25,7 @@ class User(Base):
     units_per_day: Mapped[float] = mapped_column(Float, default=15.0)
     financial_goal_kzt: Mapped[float] = mapped_column(Float, default=0.0)
     onboarding_complete: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
 
     cravings: Mapped[list["CravingLog"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     relapses: Mapped[list["RelapseIncident"]] = relationship(back_populates="user", cascade="all, delete-orphan")
@@ -38,7 +41,7 @@ class CravingLog(Base):
     trigger: Mapped[str] = mapped_column(String(120), default="неизвестно")
     outcome: Mapped[str] = mapped_column(String(40), default="resisted")
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
-    logged_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    logged_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc, index=True)
 
     user: Mapped["User"] = relationship(back_populates="cravings")
 
@@ -64,7 +67,7 @@ class RelapseIncident(Base):
     reflection: Mapped[str] = mapped_column(Text, default="")
     plan: Mapped[str] = mapped_column(Text, default="")
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
-    occurred_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc, index=True)
 
     user: Mapped["User"] = relationship(back_populates="relapses")
 
@@ -74,6 +77,6 @@ class Achievement(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"), index=True)
     code: Mapped[str] = mapped_column(String(64), index=True)
-    unlocked_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    unlocked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
 
     user: Mapped["User"] = relationship(back_populates="achievements")

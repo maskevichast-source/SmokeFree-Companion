@@ -1,7 +1,10 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.types.web_app_info import WebAppInfo
 from bot.config import get_settings
-from webapp.api import make_user_token
+try:
+    from webapp.api import make_user_token
+except ImportError:
+    from smokefree_bot.webapp.api import make_user_token
 
 def tracker_keyboard(user_id: int) -> InlineKeyboardMarkup:
     settings = get_settings()

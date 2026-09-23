@@ -15,6 +15,29 @@ DEFAULT_TRIGGERS = (
     ("Домашний вечерний отдых", 21 * 60),
 )
 
+ACHIEVEMENT_METADATA: dict[str, dict[str, str]] = {
+    "first_day": {
+        "title": "Первый чистый день",
+        "description": "24 часа без табака — организм очищается от CO",
+        "icon": "🌱",
+    },
+    "week_free": {
+        "title": "Неделя свободы",
+        "description": "7 дней без сигарет — пик физической тяги позади",
+        "icon": "✦",
+    },
+    "month_free": {
+        "title": "Месяц нового ритма",
+        "description": "30 дней без дыма — дыхание восстановлено",
+        "icon": "◆",
+    },
+    "craving_master": {
+        "title": "Мастер тяги",
+        "description": "10 побед над приступами тяги",
+        "icon": "◉",
+    },
+}
+
 
 async def get_user(session: AsyncSession, user_id: int) -> User | None:
     return await session.get(User, user_id)
@@ -44,7 +67,13 @@ async def complete_onboarding(
     pack_price_kzt: float,
     units_per_day: float,
     financial_goal_kzt: float = 0,
+    name: str | None = None,
+    timezone_name: str | None = None,
 ) -> User:
+    if name:
+        user.first_name = name
+    if timezone_name:
+        user.timezone = timezone_name
     user_tz = ZoneInfo(user.timezone or "Asia/Almaty")
     if isinstance(quit_at, datetime):
         if quit_at.tzinfo is None:
@@ -319,7 +348,14 @@ async def build_stats(session: AsyncSession, user_id: int) -> dict:
         "clean_track_percent": clean_pct_val,
         "cravings_by_day": cravings_by_day_list,
         "achievements": [
-            {"code": item.code, "earned_at": item.unlocked_at.isoformat()} for item in achievements
+            {
+                "code": item.code,
+                "title": ACHIEVEMENT_METADATA.get(item.code, {}).get("title", item.code),
+                "description": ACHIEVEMENT_METADATA.get(item.code, {}).get("description", "Достижение открыто"),
+                "icon": ACHIEVEMENT_METADATA.get(item.code, {}).get("icon", "🏅"),
+                "earned_at": item.unlocked_at.isoformat() if item.unlocked_at else None,
+            }
+            for item in achievements
         ],
     }
 
@@ -370,7 +406,7 @@ async def get_cravings_by_day(session: AsyncSession, user_id: int, days: int = 1
 
 
 async def recent_cravings(session: AsyncSession, user_id: int, days: int = 14) -> list[dict]:
-    threshold = datetime.utcnow() - timedelta(days=days)
+    threshold = datetime.now(timezone.utc) - timedelta(days=days)
     records = (
         await session.scalars(
             select(CravingLog)

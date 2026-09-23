@@ -273,6 +273,8 @@ def create_app() -> FastAPI:
                 pack_price_kzt=payload.pack_price_kzt or user.pack_price_kzt or 900.0,
                 units_per_day=payload.units_per_day or user.units_per_day or 20.0,
                 financial_goal_kzt=payload.financial_goal_kzt or user.financial_goal_kzt or 0.0,
+                name=payload.name or user.first_name or "Друг",
+                timezone_name=payload.timezone or user.timezone or "Asia/Almaty",
             )
             fresh_stats = await build_stats(session, payload.user_id)
             return {"status": "ok", "stats": fresh_stats}

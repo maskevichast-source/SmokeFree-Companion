@@ -1,6 +1,6 @@
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 
 from bot.handlers.common import user_and_stats
 
@@ -8,10 +8,14 @@ router = Router(name="stats")
 
 
 @router.message(Command("status"))
-async def status(message: Message) -> None:
-    user, stats = await user_and_stats(message)
+@router.callback_query(F.data == "status_refresh")
+async def status(event: Message | CallbackQuery) -> None:
+    user, stats = await user_and_stats(event)
     if stats is None:
-        await message.answer("Сначала пройди короткий онбординг: /start")
+        if isinstance(event, CallbackQuery):
+            await event.answer("Сначала пройди короткий онбординг: /start", show_alert=True)
+        else:
+            await event.answer("Сначала пройди короткий онбординг: /start")
         return
     from bot.keyboards.inline import tracker_keyboard
     time_str = f"{stats['days_free']} дн. {stats.get('hours_free', 0)} ч. {stats.get('minutes_free', 0)} мин."
@@ -22,16 +26,30 @@ async def status(message: Message) -> None:
             quit_label = f"\n🕒 Отказ: {str(user_info['quit_at'])[:16].replace('T', ' ')}"
         except Exception:
             quit_label = ""
-    await message.answer(
+    text = (
         f"Твой трек, {user.first_name}:\n\n"
         f"🟢 Чистота: {time_str}\n"
         f"💰 Сэкономлено: {stats.get('saved_kzt', 0):,.0f} ₸\n"
         f"⏱ Возвращено жизни: {stats.get('minutes_returned', 0):,.0f} минут\n"
         f"🧭 Чистота трека: {stats.get('clean_track_percent', 100.0):.1f}%\n"
         f"🧠 Тяг преодолено: {stats.get('cravings_resisted', 0)}{quit_label}\n\n"
-        "Сменить точное время отказа: /time",
-        reply_markup=tracker_keyboard(user.id),
+        "Сменить точное время отказа: /time"
     )
+    if isinstance(event, CallbackQuery):
+        await event.answer("Прогресс обновлен! 🔄")
+        try:
+            await event.message.edit_text(text, reply_markup=tracker_keyboard(user.id))
+        except Exception:
+            # If message content didn't change, Telegram raises exception
+            pass
+    else:
+        await message_or_event_answer(event, text, tracker_keyboard(user.id))
+
+async def message_or_event_answer(event: Message | CallbackQuery, text: str, reply_markup) -> None:
+    if isinstance(event, CallbackQuery):
+        await event.message.answer(text, reply_markup=reply_markup)
+    else:
+        await event.answer(text, reply_markup=reply_markup)
 
 
 @router.message(Command("money"))

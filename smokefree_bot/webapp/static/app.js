@@ -269,21 +269,34 @@
   /* -------------------------------------------------------------
      ACHIEVEMENTS
   ------------------------------------------------------------- */
+  const ACHIEVEMENT_META = {
+    first_day: { title: "Первый чистый день", description: "24 часа без табака — организм очищается от CO", icon: "🌱" },
+    week_free: { title: "Неделя свободы", description: "7 дней без сигарет — пик физической тяги позади", icon: "✦" },
+    month_free: { title: "Месяц нового ритма", description: "30 дней без дыма — дыхание восстановлено", icon: "◆" },
+    craving_master: { title: "Мастер тяги", description: "10 побед над приступами тяги", icon: "◉" },
+  };
+
   function renderAchievements(items) {
     const el = $("achievements");
     if (!el) return;
     if ($("achievementCount")) $("achievementCount").textContent = items.length;
 
     el.innerHTML = items.length
-      ? items.map((item) => `
+      ? items.map((item) => {
+        const meta = ACHIEVEMENT_META[item.code] || {};
+        const title = item.title || meta.title || item.code || "Награда";
+        const desc = item.description || meta.description || "Награда получена!";
+        const icon = item.icon || meta.icon || "🏅";
+        return `
         <article class="achievement-item unlocked">
-          <span class="ach-icon">🏅</span>
+          <span class="ach-icon">${icon}</span>
           <div>
-            <strong>${item.title}</strong>
-            <p>${item.description}</p>
+            <strong>${title}</strong>
+            <p>${desc}</p>
           </div>
         </article>
-      `).join("")
+      `;
+      }).join("")
       : `<div class="info-note"><p>Первая награда откроется уже через 24 часа чистой свободы!</p></div>`;
   }
 

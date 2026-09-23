@@ -26,7 +26,16 @@ EVENING_TEMPLATES = [
 ]
 
 def days_free(user: User, today: date) -> int:
-    return max(0, (today - user.quit_date).days) if user.quit_date else 0
+    if user.quit_date:
+        return max(0, (today - user.quit_date).days)
+    if user.quit_at:
+        try:
+            user_tz = ZoneInfo(user.timezone or get_settings().timezone)
+            quit_dt = user.quit_at if user.quit_at.tzinfo else user.quit_at.replace(tzinfo=timezone.utc)
+            return max(0, (today - quit_dt.astimezone(user_tz).date()).days)
+        except Exception:
+            pass
+    return 0
 
 async def send_daily_messages(bot: Bot, kind: str) -> None:
     async with SessionFactory() as session:
@@ -71,7 +80,8 @@ async def radar_job(bot: Bot) -> None:
 
                 today = local_now.date()
                 if trigger.last_radar_sent:
-                    last_sent_day = trigger.last_radar_sent.astimezone(user_tz).date()
+                    sent_dt = trigger.last_radar_sent if trigger.last_radar_sent.tzinfo else trigger.last_radar_sent.replace(tzinfo=timezone.utc)
+                    last_sent_day = sent_dt.astimezone(user_tz).date()
                     if last_sent_day == today:
                         continue
 
