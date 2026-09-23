@@ -43,6 +43,7 @@ import {
 } from 'lucide-react';
 import { UserProfile, FreedomStats, CravingRecord, TriggerItem, RelapseRecord, UnitTestItem } from '../types';
 import { WHO_HEALTH_MILESTONES } from '../data/auditReport';
+import { playMilestoneChime } from '../utils/audioFeedback';
 
 interface AnalyticsViewProps {
   profile: UserProfile;
@@ -1090,7 +1091,10 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
                   <button
                     onClick={() => {
                       const latest = weeklyMilestones.filter((m) => m.isCompleted).slice(-1)[0];
-                      if (latest) setCelebratingMilestone(latest.week);
+                      if (latest) {
+                        setCelebratingMilestone(latest.week);
+                        playMilestoneChime();
+                      }
                     }}
                     className="shrink-0 px-3.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold transition-all shadow-md flex items-center gap-1"
                   >
@@ -1106,7 +1110,10 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
               {weeklyMilestones.map((m) => (
                 <div
                   key={m.week}
-                  onClick={() => setCelebratingMilestone(m.week)}
+                  onClick={() => {
+                    setCelebratingMilestone(m.week);
+                    if (m.isCompleted) playMilestoneChime();
+                  }}
                   className={`p-4 rounded-2xl border transition-all duration-300 relative cursor-pointer group ${
                     m.isCompleted
                       ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950/40 border-emerald-500/40 hover:border-emerald-400 shadow-lg shadow-emerald-950/20 hover:scale-[1.02]'

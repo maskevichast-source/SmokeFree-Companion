@@ -986,10 +986,90 @@
   }
 
   /* -------------------------------------------------------------
+     WEB AUDIO API NOTIFICATION SOUNDS (SYNTHESIZED HARMONICS)
+  ------------------------------------------------------------- */
+  let webAudioCtx = null;
+
+  function getWebAudioContext() {
+    try {
+      if (!webAudioCtx || webAudioCtx.state === "closed") {
+        const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtxClass) webAudioCtx = new AudioCtxClass();
+      }
+      if (webAudioCtx && webAudioCtx.state === "suspended") {
+        webAudioCtx.resume().catch(() => {});
+      }
+      return webAudioCtx;
+    } catch {
+      return null;
+    }
+  }
+
+  function playWebAudioChime(type = "milestone") {
+    const ctx = getWebAudioContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+
+    if (type === "milestone") {
+      // Harmonic arpeggio: C5 -> E5 -> G5 -> C6 (subtle celebratory chime)
+      const notes = [523.25, 659.25, 783.99, 1046.50];
+      notes.forEach((freq, idx) => {
+        try {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const start = now + idx * 0.08;
+          const end = start + 0.5;
+
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(freq, start);
+
+          gain.gain.setValueAtTime(0.0001, start);
+          gain.gain.exponentialRampToValueAtTime(0.07, start + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.0001, end);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(start);
+          osc.stop(end);
+        } catch {}
+      });
+    } else if (type === "sos_end") {
+      // Grounding & relief dual-tone: 528 Hz (calm) -> 432 Hz
+      const tones = [
+        { freq: 528, start: now, duration: 0.6, volume: 0.08 },
+        { freq: 432, start: now + 0.28, duration: 0.8, volume: 0.07 },
+      ];
+      tones.forEach(({ freq, start, duration, volume }) => {
+        try {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(freq, start);
+
+          gain.gain.setValueAtTime(0.0001, start);
+          gain.gain.exponentialRampToValueAtTime(volume, start + 0.04);
+          gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(start);
+          osc.stop(start + duration);
+        } catch {}
+      });
+    }
+  }
+
+  /* -------------------------------------------------------------
      CELEBRATION CONFETTI & POPUP EFFECT
   ------------------------------------------------------------- */
   function triggerCelebrationEffect(title, desc, amount) {
-    // 1. Trigger Screen Confetti Particles
+    // 1. Play subtle celebratory Web Audio chime
+    playWebAudioChime("milestone");
+
+    // 2. Trigger Screen Confetti Particles
     const confettiContainer = document.createElement("div");
     confettiContainer.className = "confetti-overlay-wrap";
     document.body.appendChild(confettiContainer);
@@ -1178,6 +1258,7 @@
       updateSosCountdown();
       if (sosSecondsLeft <= 0) {
         clearInterval(sosTimer);
+        playWebAudioChime("sos_end");
         toast("🎉 3 минуты позади! Острая тяга отступила.");
       }
     }, 1000);
@@ -1270,6 +1351,7 @@
   // Victory inside SOS modal
   $("btnSosResisted")?.addEventListener("click", async () => {
     haptic("success");
+    playWebAudioChime("sos_end");
     closeSosModal();
     try {
       await api("/api/cravings", {

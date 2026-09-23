@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ShieldAlert, X, Check, Droplets, Wind, Sparkles, Volume2, VolumeX, Heart, Eye } from 'lucide-react';
+import { playSosTimerEndChime } from '../utils/audioFeedback';
 
 interface SosModalProps {
   isOpen: boolean;
@@ -93,7 +94,7 @@ export const SosModal: React.FC<SosModalProps> = ({
       setSecondsRemaining((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          playTone(528, 0.6);
+          playSosTimerEndChime();
           return 0;
         }
         return prev - 1;
