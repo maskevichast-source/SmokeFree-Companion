@@ -449,7 +449,7 @@ export default function App() {
         )}
 
         {activeTab === 'health' && (
-          <HealthTimelineView stats={stats} />
+          <HealthTimelineView stats={stats} profile={profile} />
         )}
 
         {activeTab === 'analytics' && (

@@ -150,6 +150,30 @@ export interface UnitTestItem {
   details?: string;
 }
 
+export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'mythic';
+export type BadgeCategory = 'streak' | 'money' | 'endurance' | 'cellular' | 'willpower';
+export type BadgeRarity = 'Common' | 'Rare' | 'Epic' | 'Legendary' | 'Mythic';
+
+export interface BadgeItem {
+  id: string;
+  code: string;
+  title: string;
+  subtitle: string;
+  category: BadgeCategory;
+  tier: BadgeTier;
+  rarity: BadgeRarity;
+  icon: string;
+  points: number;
+  requirement: string;
+  description: string;
+  medicalInsight: string;
+  isUnlocked: boolean;
+  progressPercent: number; // 0 - 100
+  currentProgressText: string;
+  targetRequirementText: string;
+  unlockedAtDate?: string;
+}
+
 export interface FullAppState {
   profile: UserProfile;
   triggers: TriggerItem[];

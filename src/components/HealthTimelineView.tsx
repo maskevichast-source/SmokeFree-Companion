@@ -20,34 +20,47 @@ import {
   BarChart3,
   Flame,
   Info,
+  Medal,
+  Trophy,
+  Coins,
+  Compass,
 } from 'lucide-react';
-import { FreedomStats, HealthMilestone } from '../types';
+import { FreedomStats, HealthMilestone, UserProfile } from '../types';
 import { WHO_HEALTH_MILESTONES } from '../data/auditReport';
 import { calculatePhysiologicalPhases } from '../data/recoveryPhases';
+import { calculateUserBadges } from '../data/badges';
+import { BadgeCard } from './BadgeCard';
 
 interface HealthTimelineViewProps {
   stats: FreedomStats;
+  profile?: UserProfile;
 }
 
-export const HealthTimelineView: React.FC<HealthTimelineViewProps> = ({ stats }) => {
-  const [activeTab, setActiveTab] = useState<'phases' | 'milestones'>('phases');
+export const HealthTimelineView: React.FC<HealthTimelineViewProps> = ({ stats, profile }) => {
+  const [activeTab, setActiveTab] = useState<'badges' | 'phases' | 'milestones'>('badges');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'unlocked' | 'in-progress' | 'locked'>('all');
+  const [badgeCategoryFilter, setBadgeCategoryFilter] = useState<string>('all');
+  const [badgeStatusFilter, setBadgeStatusFilter] = useState<'all' | 'unlocked' | 'locked'>('all');
   const [expandedMilestoneId, setExpandedMilestoneId] = useState<string | null>(null);
   const [expandedPhaseId, setExpandedPhaseId] = useState<string | null>('phase-1');
+
+  // Compute live user badges
+  const userBadges = useMemo(() => {
+    return calculateUserBadges(stats, profile);
+  }, [stats, profile]);
+
+  const unlockedBadgesCount = userBadges.filter((b) => b.isUnlocked).length;
+  const totalBadgePoints = userBadges
+    .filter((b) => b.isUnlocked)
+    .reduce((acc, curr) => acc + curr.points, 0);
+  const maxBadgePoints = userBadges.reduce((acc, curr) => acc + curr.points, 0);
 
   // Compute physiological recovery phases
   const recoveryPhases = useMemo(() => {
     return calculatePhysiologicalPhases(stats.totalSeconds);
   }, [stats.totalSeconds]);
-
-  // Active or upcoming phase
-  const currentActivePhase = useMemo(() => {
-    return recoveryPhases.find((p) => p.status === 'in-progress') ||
-      recoveryPhases.find((p) => p.status === 'upcoming') ||
-      recoveryPhases[recoveryPhases.length - 1];
-  }, [recoveryPhases]);
 
   const categories = [
     { id: 'all', label: 'Все системы', icon: Activity, count: WHO_HEALTH_MILESTONES.length },
@@ -56,6 +69,15 @@ export const HealthTimelineView: React.FC<HealthTimelineViewProps> = ({ stats })
     { id: 'Нейробиология', label: 'Мозг и дофамин', icon: Brain },
     { id: 'Внешность и метаболизм', label: 'Внешность и энергия', icon: Sparkles },
     { id: 'Долголетие и онкозащита', label: 'Онкозащита и жизнь', icon: ShieldAlert },
+  ];
+
+  const badgeCategories = [
+    { id: 'all', label: 'Все награды', icon: Trophy, count: userBadges.length },
+    { id: 'streak', label: 'Серии чистоты', icon: Flame },
+    { id: 'money', label: 'Финансовые рубежи', icon: Coins },
+    { id: 'endurance', label: 'Выносливость', icon: ShieldAlert },
+    { id: 'willpower', label: 'Победы над тягой', icon: Zap },
+    { id: 'cellular', label: 'Биомаркеры и клетки', icon: Sparkles },
   ];
 
   // Calculate milestones progress
@@ -115,6 +137,25 @@ export const HealthTimelineView: React.FC<HealthTimelineViewProps> = ({ stats })
     return `${minutes} мин.`;
   };
 
+  // Filtered badges
+  const filteredBadges = useMemo(() => {
+    return userBadges.filter((b) => {
+      const matchesSearch =
+        b.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        b.subtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        b.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        b.requirement.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesCat = badgeCategoryFilter === 'all' || b.category === badgeCategoryFilter;
+      const matchesStatus =
+        badgeStatusFilter === 'all' ||
+        (badgeStatusFilter === 'unlocked' && b.isUnlocked) ||
+        (badgeStatusFilter === 'locked' && !b.isUnlocked);
+
+      return matchesSearch && matchesCat && matchesStatus;
+    });
+  }, [userBadges, searchQuery, badgeCategoryFilter, badgeStatusFilter]);
+
   // Filtered milestones list
   const filteredMilestones = useMemo(() => {
     return enrichedMilestones.filter((m) => {
@@ -157,34 +198,40 @@ export const HealthTimelineView: React.FC<HealthTimelineViewProps> = ({ stats })
     <div className="max-w-6xl mx-auto py-6 px-4 sm:px-6 space-y-6">
       {/* Top Banner & Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Main Status */}
+        {/* Main Status & XP Counter */}
         <div className="lg:col-span-2 p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 Доказательная медицина &bull; ВОЗ, AHA, CDC
               </span>
-              <span className="text-xs text-slate-400">5 фаз &bull; 32 этапа</span>
+              <span className="text-xs text-slate-400">Награды &bull; 5 фаз &bull; 32 этапа</span>
             </div>
-            <span className="text-xs font-mono text-emerald-400 font-bold">
-              {unlockedCount} из {WHO_HEALTH_MILESTONES.length} пройдено
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono font-bold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 flex items-center gap-1">
+                <Sparkles className="w-3.5 h-3.5" />
+                {totalBadgePoints} / {maxBadgePoints} XP
+              </span>
+              <span className="text-xs font-mono text-emerald-400 font-bold">
+                {unlockedBadgesCount}/{userBadges.length} Бейджей
+              </span>
+            </div>
           </div>
 
           <div>
             <h2 className="text-2xl font-black text-slate-100 tracking-tight">
-              Физиологическая карта регенерации организма
+              Система наград и физиологическая карта регенерации
             </h2>
             <p className="text-xs text-slate-400 mt-1 max-w-2xl leading-relaxed">
-              Поэтапный мониторинг нормализации уровня кислорода, детоксикации от угарного газа (CO),
-              оживления нервных окончаний и увеличения емкости легких.
+              Зарабатывай интерактивные 3D-бейджи за чистые серии, финансовые рубежи ($100 Milestone, 7 Days Clean)
+              и победы над тягой. Следи за биомаркерами O₂, CO и емкостью легких.
             </p>
           </div>
 
           {/* Progress Bar */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs font-medium">
-              <span className="text-slate-300">Совокупный индекс регенерации всех систем:</span>
+              <span className="text-slate-300">Совокупный прогресс регенерации организма:</span>
               <span className="text-emerald-400 font-mono font-bold">{overallHealthScore}%</span>
             </div>
             <div className="w-full h-3.5 rounded-full bg-slate-950 overflow-hidden p-0.5 border border-slate-800">
@@ -238,18 +285,33 @@ export const HealthTimelineView: React.FC<HealthTimelineViewProps> = ({ stats })
         </div>
       </div>
 
-      {/* Main View Switcher: 5 Phases breakdown vs All Milestones Grid */}
-      <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+      {/* Main View Switcher: 3 Tabs (Badges with 3D flip, 5 Phases breakdown, All 32 Milestones) */}
+      <div className="flex items-center gap-2 border-b border-slate-800 pb-3 overflow-x-auto">
+        <button
+          onClick={() => setActiveTab('badges')}
+          className={`px-4 py-2 rounded-2xl text-xs font-bold flex items-center gap-2 transition-all whitespace-nowrap ${
+            activeTab === 'badges'
+              ? 'bg-amber-400 text-slate-950 shadow-md shadow-amber-400/20'
+              : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+          }`}
+        >
+          <Trophy className="w-4 h-4" />
+          <span>Коллекция 3D-бейджей</span>
+          <span className="px-2 py-0.5 rounded-full text-[10px] bg-slate-950/40 font-mono">
+            {unlockedBadgesCount}/{userBadges.length}
+          </span>
+        </button>
+
         <button
           onClick={() => setActiveTab('phases')}
-          className={`px-4 py-2 rounded-2xl text-xs font-bold flex items-center gap-2 transition-all ${
+          className={`px-4 py-2 rounded-2xl text-xs font-bold flex items-center gap-2 transition-all whitespace-nowrap ${
             activeTab === 'phases'
               ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/10'
               : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
           }`}
         >
           <Layers className="w-4 h-4" />
-          <span>5 физиологических фаз восстановления</span>
+          <span>5 физиологических фаз</span>
           <span className="px-2 py-0.5 rounded-full text-[10px] bg-slate-950/40 font-mono">
             {recoveryPhases.filter((p) => p.status === 'completed').length}/5
           </span>
@@ -257,9 +319,9 @@ export const HealthTimelineView: React.FC<HealthTimelineViewProps> = ({ stats })
 
         <button
           onClick={() => setActiveTab('milestones')}
-          className={`px-4 py-2 rounded-2xl text-xs font-bold flex items-center gap-2 transition-all ${
+          className={`px-4 py-2 rounded-2xl text-xs font-bold flex items-center gap-2 transition-all whitespace-nowrap ${
             activeTab === 'milestones'
-              ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/10'
+              ? 'bg-sky-400 text-slate-950 shadow-md shadow-sky-400/10'
               : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
           }`}
         >
@@ -270,6 +332,101 @@ export const HealthTimelineView: React.FC<HealthTimelineViewProps> = ({ stats })
           </span>
         </button>
       </div>
+
+      {/* Tab 0: BADGES SYSTEM WITH 3D CSS FLIP CARDS */}
+      {activeTab === 'badges' && (
+        <div className="space-y-6">
+          {/* Badge Filter & Search Bar */}
+          <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+              {/* Search */}
+              <div className="relative w-full md:w-80">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Поиск бейджа ('7 Days Clean', '$100', 'Endurance')..."
+                  className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-400 transition-colors"
+                />
+              </div>
+
+              {/* Status Filter */}
+              <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-medium w-full md:w-auto overflow-x-auto">
+                <button
+                  onClick={() => setBadgeStatusFilter('all')}
+                  className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
+                    badgeStatusFilter === 'all'
+                      ? 'bg-slate-800 text-amber-300 font-bold'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  Все ({userBadges.length})
+                </button>
+                <button
+                  onClick={() => setBadgeStatusFilter('unlocked')}
+                  className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap flex items-center gap-1 ${
+                    badgeStatusFilter === 'unlocked'
+                      ? 'bg-amber-400 text-slate-950 font-bold'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5 text-slate-950" />
+                  Разблокированные ({unlockedBadgesCount})
+                </button>
+                <button
+                  onClick={() => setBadgeStatusFilter('locked')}
+                  className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap flex items-center gap-1 ${
+                    badgeStatusFilter === 'locked'
+                      ? 'bg-slate-800 text-slate-200 font-bold'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <Lock className="w-3.5 h-3.5 text-slate-500" />
+                  В процессе ({userBadges.length - unlockedBadgesCount})
+                </button>
+              </div>
+            </div>
+
+            {/* Category Pills */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+              {badgeCategories.map((cat) => {
+                const Icon = cat.icon;
+                const isSelected = badgeCategoryFilter === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setBadgeCategoryFilter(cat.id)}
+                    className={`px-3 py-1.5 rounded-xl border flex items-center gap-1.5 shrink-0 transition-all ${
+                      isSelected
+                        ? 'bg-amber-400 text-slate-950 font-bold border-amber-300 shadow-sm'
+                        : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-200 hover:bg-slate-850'
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{cat.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Interactive 3D Flip Badge Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filteredBadges.map((badge) => (
+              <BadgeCard key={badge.id} badge={badge} />
+            ))}
+          </div>
+
+          {filteredBadges.length === 0 && (
+            <div className="text-center py-12 bg-slate-900 rounded-3xl border border-slate-800 space-y-2">
+              <Search className="w-8 h-8 text-slate-600 mx-auto" />
+              <h4 className="text-sm font-bold text-slate-300">Награды не найдены</h4>
+              <p className="text-xs text-slate-500">Попробуйте изменить поисковый запрос или фильтры категорий</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Tab 1: 5 Detailed Physiological Phases with Granular Indicators & Progress Bars */}
       {activeTab === 'phases' && (
