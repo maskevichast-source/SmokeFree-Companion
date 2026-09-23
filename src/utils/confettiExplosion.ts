@@ -77,6 +77,35 @@ const TIER_CONFIG: Record<
 };
 
 /**
+ * Simple point or screen center confetti burst
+ */
+export function triggerConfetti(clientX?: number, clientY?: number): void {
+  try {
+    let originX = 0.5;
+    let originY = 0.5;
+
+    if (clientX !== undefined && clientY !== undefined && typeof window !== 'undefined') {
+      originX = Math.max(0.1, Math.min(0.9, clientX / window.innerWidth));
+      originY = Math.max(0.1, Math.min(0.9, clientY / window.innerHeight));
+    }
+
+    confetti({
+      particleCount: 60,
+      spread: 70,
+      origin: { x: originX, y: originY },
+      colors: ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6'],
+      ticks: 180,
+      gravity: 0.9,
+      scalar: 1.0,
+      disableForReducedMotion: true,
+      zIndex: 9999,
+    });
+  } catch (e) {
+    console.warn('Confetti burst failed:', e);
+  }
+}
+
+/**
  * Fires a particle explosion positioned directly over the clicked badge element.
  */
 export function triggerBadgeExplosion(

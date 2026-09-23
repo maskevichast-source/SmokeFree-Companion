@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Header, MainTabType } from './components/Header';
 import { CompanionView } from './components/CompanionView';
 import { HealthTimelineView } from './components/HealthTimelineView';
+import { SocialDashboardView } from './components/SocialDashboardView';
 import { AnalyticsView } from './components/AnalyticsView';
 import { AiCoachView } from './components/AiCoachView';
 import { AuditView } from './components/AuditView';
@@ -542,6 +543,16 @@ export default function App() {
 
         {activeTab === 'health' && (
           <HealthTimelineView stats={stats} profile={profile} />
+        )}
+
+        {activeTab === 'social' && (
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+            <SocialDashboardView
+              profile={profile}
+              stats={stats}
+              showToast={showToast}
+            />
+          </div>
         )}
 
         {activeTab === 'analytics' && (

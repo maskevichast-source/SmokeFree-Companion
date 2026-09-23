@@ -1,7 +1,7 @@
 import React from 'react';
-import { ShieldCheck, Smartphone, Monitor, Activity, Cpu, FileCode2, Sparkles, HeartPulse, BarChart3, Bot } from 'lucide-react';
+import { ShieldCheck, Smartphone, Monitor, Activity, Cpu, FileCode2, Sparkles, HeartPulse, BarChart3, Bot, Users } from 'lucide-react';
 
-export type MainTabType = 'companion' | 'health' | 'analytics' | 'coach' | 'audit' | 'architecture' | 'patches';
+export type MainTabType = 'companion' | 'health' | 'social' | 'analytics' | 'coach' | 'audit' | 'architecture' | 'patches';
 
 interface HeaderProps {
   activeTab: MainTabType;
@@ -35,7 +35,7 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </div>
             <p className="text-xs text-slate-400 hidden sm:block">
-              Аналитика &bull; 32 этапа здоровья &bull; КПТ-коуч &bull; Защита от сброса при редеплое
+              Аналитика &bull; 32 этапа здоровья &bull; Соц-лидерборд &bull; КПТ-коуч
             </p>
           </div>
         </div>
@@ -66,6 +66,19 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <HeartPulse className="w-3.5 h-3.5 text-rose-400" />
             <span>Здоровье (32)</span>
+          </button>
+
+          <button
+            id="tab-social"
+            onClick={() => setActiveTab('social')}
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
+              activeTab === 'social'
+                ? 'bg-emerald-500 text-slate-950 font-semibold shadow-sm'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
+          >
+            <Users className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Соц-круг</span>
           </button>
 
           <button

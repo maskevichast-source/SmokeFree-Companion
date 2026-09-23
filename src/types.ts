@@ -74,6 +74,61 @@ export interface MoodRecord {
   timestamp: string; // ISO string
 }
 
+export type NudgeType = 'high_five' | 'shield' | 'coffee' | 'fist_bump' | 'rocket' | 'lungs' | 'heart' | 'medal';
+
+export interface NudgeOption {
+  type: NudgeType;
+  emoji: string;
+  label: string;
+  phrase: string;
+  color: string;
+}
+
+export interface NudgeMessage {
+  id: string;
+  fromFriendId: string;
+  fromFriendName: string;
+  fromAvatar: string;
+  toFriendId: string;
+  type: NudgeType;
+  emoji: string;
+  label: string;
+  customText?: string;
+  timestamp: string;
+  read?: boolean;
+}
+
+export interface FriendPeer {
+  id: string;
+  name: string;
+  avatar: string;
+  statusMessage: string;
+  daysClean: number;
+  moneySaved: number;
+  cigarettesAvoided: number;
+  cravingsResisted: number;
+  currentRankBadge: string;
+  rankBadgeEmoji: string;
+  lastActive: string;
+  isCurrentUser?: boolean;
+  squadName?: string;
+  nudgesReceived: number;
+}
+
+export interface SharedMilestone {
+  id: string;
+  friendId: string;
+  friendName: string;
+  avatar: string;
+  title: string;
+  category: 'health' | 'money' | 'streak' | 'cbt' | 'mastery';
+  description: string;
+  badgeEmoji: string;
+  timestamp: string;
+  cheersCount: number;
+  userCheered: boolean;
+}
+
 export interface HealthMilestone {
   id: string;
   title: string;
