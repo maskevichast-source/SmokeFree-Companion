@@ -1,160 +1,3721 @@
-diff --git a/railway.json b/railway.json
-new file mode 100644
-index 0000000..84790e1
---- /dev/null
-+++ b/railway.json
-@@ -0,0 +1,15 @@
-+{
-+  "$schema": "https://railway.app/railway.schema.json",
-+  "build": {
-+    "builder": "NIXPACKS",
-+    "watchPatterns": ["smokefree_bot/**"],
-+    "buildCommand": "cd smokefree_bot && pip install --no-cache-dir -r requirements.txt"
-+  },
-+  "deploy": {
-+    "startCommand": "cd smokefree_bot && python main.py",
-+    "healthcheckPath": "/health",
-+    "healthcheckTimeout": 30,
-+    "restartPolicyType": "ON_FAILURE",
-+    "restartPolicyMaxRetries": 5
-+  }
-+}
+diff --git a/.gitignore b/.gitignore
+index 3a079d4..8528046 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -53,5 +53,5 @@ venv/
+ .venv/
+ 
+ # sqlite data dir
+-data/
++/data/
+ *.db-journal
+diff --git a/bun.lock b/bun.lock
+index c81f6d1..ae46f1b 100644
+--- a/bun.lock
++++ b/bun.lock
+@@ -14,6 +14,7 @@
+         "motion": "^12.23.24",
+         "react": "^19.0.1",
+         "react-dom": "^19.0.1",
++        "recharts": "^3.10.1",
+         "vite": "^8.3.0",
+       },
+       "devDependencies": {
+@@ -114,6 +115,8 @@
+ 
+     "@protobufjs/utf8": ["@protobufjs/utf8@1.1.2", "", {}, "sha512-b1UQwcEZ4yCnMCD8DAL1VlbvBJE9/IX4FTIp7BG1xYpf29SLazLSrqUkj4w7Y5y7cCVP6E5tcqqcI0xemPkHug=="],
+ 
++    "@reduxjs/toolkit": ["@reduxjs/toolkit@2.12.0", "", { "dependencies": { "@standard-schema/spec": "^1.0.0", "@standard-schema/utils": "^0.3.0", "immer": "^11.0.0", "redux": "^5.0.1", "redux-thunk": "^3.1.0", "reselect": "^5.1.0" }, "peerDependencies": { "react": "^16.9.0 || ^17.0.0 || ^18 || ^19", "react-redux": "^7.2.1 || ^8.1.3 || ^9.0.0" }, "optionalPeers": ["react", "react-redux"] }, "sha512-KiT+RzZbp6mQET+Mg+h2c97+9j1sNflUxQkIHI7Yuzf6Peu+OYpmkn6nbHWmLLWj+1ZODUJFwGZ7gx3L9R9EOw=="],
++
+     "@rolldown/binding-android-arm-eabi": ["@rolldown/binding-android-arm-eabi@1.2.9", "", { "os": "android", "cpu": "arm" }, "sha512-tNISae1QEf/vkb3xkRcjV5SEdzPE97We5IVaa2Z8jSszQPZ8U60B/YCYpw4QI7VidYsBtKavczXf+DyDs9WGxw=="],
+ 
+     "@rolldown/binding-android-arm64": ["@rolldown/binding-android-arm64@1.2.9", "", { "os": "android", "cpu": "arm64" }, "sha512-YC8YsI30o606GTZi0VyzYlsDKFP8W61i/QzayHDkLbNEz/IShqAmTa+hsJRj13xTHA0H+6fk4b2UmGn+Q/cMlg=="],
+@@ -146,6 +149,10 @@
+ 
+     "@rolldown/pluginutils": ["@rolldown/pluginutils@1.0.1", "", {}, "sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw=="],
+ 
++    "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
++
++    "@standard-schema/utils": ["@standard-schema/utils@0.3.0", "", {}, "sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g=="],
++
+     "@tailwindcss/node": ["@tailwindcss/node@4.3.3", "", { "dependencies": { "@jridgewell/remapping": "^2.3.5", "enhanced-resolve": "^5.24.1", "jiti": "^2.7.0", "lightningcss": "1.32.0", "magic-string": "^0.30.21", "source-map-js": "^1.2.1", "tailwindcss": "4.3.3" } }, "sha512-/T8IKEsf9VTU6tLjgC7+sv2mOPtQxzE2jMw7u4Tt40Tx+QSZxpzh95/H6cMKoja9XuW7iMdLJYBB0o9G1CaAgg=="],
+ 
+     "@tailwindcss/oxide": ["@tailwindcss/oxide@4.3.3", "", { "optionalDependencies": { "@tailwindcss/oxide-android-arm64": "4.3.3", "@tailwindcss/oxide-darwin-arm64": "4.3.3", "@tailwindcss/oxide-darwin-x64": "4.3.3", "@tailwindcss/oxide-freebsd-x64": "4.3.3", "@tailwindcss/oxide-linux-arm-gnueabihf": "4.3.3", "@tailwindcss/oxide-linux-arm64-gnu": "4.3.3", "@tailwindcss/oxide-linux-arm64-musl": "4.3.3", "@tailwindcss/oxide-linux-x64-gnu": "4.3.3", "@tailwindcss/oxide-linux-x64-musl": "4.3.3", "@tailwindcss/oxide-wasm32-wasi": "4.3.3", "@tailwindcss/oxide-win32-arm64-msvc": "4.3.3", "@tailwindcss/oxide-win32-x64-msvc": "4.3.3" } }, "sha512-krXjAikiaFSPaK/FkAQT5UTx3VormQaiZ5hBFlJZ9UFQGB/rwg1MZIhHAG9smMQRTdyJxP6Qt5MwMtdyU5FWrA=="],
+@@ -180,6 +187,24 @@
+ 
+     "@types/connect": ["@types/connect@3.4.38", "", { "dependencies": { "@types/node": "*" } }, "sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug=="],
+ 
++    "@types/d3-array": ["@types/d3-array@3.2.2", "", {}, "sha512-hOLWVbm7uRza0BYXpIIW5pxfrKe0W+D5lrFiAEYR+pb6w3N2SwSMaJbXdUfSEv+dT4MfHBLtn5js0LAWaO6otw=="],
++
++    "@types/d3-color": ["@types/d3-color@3.1.3", "", {}, "sha512-iO90scth9WAbmgv7ogoq57O9YpKmFBbmoEoCHDB2xMBY0+/KVrqAaCDyCE16dUspeOvIxFFRI+0sEtqDqy2b4A=="],
++
++    "@types/d3-ease": ["@types/d3-ease@3.0.2", "", {}, "sha512-NcV1JjO5oDzoK26oMzbILE6HW7uVXOHLQvHshBUW4UMdZGfiY6v5BeQwh9a9tCzv+CeefZQHJt5SRgK154RtiA=="],
++
++    "@types/d3-interpolate": ["@types/d3-interpolate@3.0.4", "", { "dependencies": { "@types/d3-color": "*" } }, "sha512-mgLPETlrpVV1YRJIglr4Ez47g7Yxjl1lj7YKsiMCb27VJH9W8NVM6Bb9d8kkpG/uAQS5AmbA48q2IAolKKo1MA=="],
++
++    "@types/d3-path": ["@types/d3-path@3.1.1", "", {}, "sha512-VMZBYyQvbGmWyWVea0EHs/BwLgxc+MKi1zLDCONksozI4YJMcTt8ZEuIR4Sb1MMTE8MMW49v0IwI5+b7RmfWlg=="],
++
++    "@types/d3-scale": ["@types/d3-scale@4.0.9", "", { "dependencies": { "@types/d3-time": "*" } }, "sha512-dLmtwB8zkAeO/juAMfnV+sItKjlsw2lKdZVVy6LRr0cBmegxSABiLEpGVmSJJ8O08i4+sGR6qQtb6WtuwJdvVw=="],
++
++    "@types/d3-shape": ["@types/d3-shape@3.2.0", "", { "dependencies": { "@types/d3-path": "*" } }, "sha512-kVd74ta9eof3eJOvbNd1vGKS/XERRyQbT26Og63hIsvDO84cjD5gEOhsXf26w3FSoNlPVz84DOFcKv/oou+fMw=="],
++
++    "@types/d3-time": ["@types/d3-time@3.0.4", "", {}, "sha512-yuzZug1nkAAaBlBBikKZTgzCeA+k1uy4ZFwWANOfKw5z5LRhV0gNA7gNkKm7HoK+HRN0wX3EkxGk0fpbWhmB7g=="],
++
++    "@types/d3-timer": ["@types/d3-timer@3.0.2", "", {}, "sha512-Ps3T8E8dZDam6fUyNiMkekK3XUsaUEik+idO9/YjPtfj2qruF8tFBXS7XhtE4iIXBLxhmLjP3SXpLhVf21I9Lw=="],
++
+     "@types/express": ["@types/express@4.17.25", "", { "dependencies": { "@types/body-parser": "*", "@types/express-serve-static-core": "^4.17.33", "@types/qs": "*", "@types/serve-static": "^1" } }, "sha512-dVd04UKsfpINUnK0yBoYHDF3xu7xVH4BuDotC/xGuycx4CgbP48X/KF/586bcObxT0HENHXEU8Nqtu6NR+eKhw=="],
+ 
+     "@types/express-serve-static-core": ["@types/express-serve-static-core@4.19.9", "", { "dependencies": { "@types/node": "*", "@types/qs": "*", "@types/range-parser": "*", "@types/send": "*" } }, "sha512-QP2ESEe/ImWY0HDwNAnK9PvEffUyhLTnWkk7KXzHfyeWAnlrDe1fN77bXl6ia8KT3wPlmA7t9/VPRpnf4Ex9sg=="],
+@@ -204,6 +229,8 @@
+ 
+     "@types/serve-static": ["@types/serve-static@1.15.10", "", { "dependencies": { "@types/http-errors": "*", "@types/node": "*", "@types/send": "<1" } }, "sha512-tRs1dB+g8Itk72rlSI2ZrW6vZg0YrLI81iQSTkMmOqnqCaNr/8Ek4VwWcN5vZgCYWbg/JJSGBlUaYGAOP73qBw=="],
+ 
++    "@types/use-sync-external-store": ["@types/use-sync-external-store@0.0.6", "", {}, "sha512-zFDAD+tlpf2r4asuHEj0XH6pY6i0g5NeAHPn+15wk3BV6JA69eERFXC1gyGThDkVa1zCyKr5jox1+2LbV/AMLg=="],
++
+     "@vitejs/plugin-react": ["@vitejs/plugin-react@6.1.1", "", { "dependencies": { "@rolldown/pluginutils": "^1.0.1" }, "peerDependencies": { "@rolldown/plugin-babel": "^0.1.7 || ^0.2.0", "babel-plugin-react-compiler": "^1.0.0", "oxc-transform-react": "^0.145.0", "vite": "^8.0.0" }, "optionalPeers": ["@rolldown/plugin-babel", "babel-plugin-react-compiler", "oxc-transform-react"] }, "sha512-yxLaQV9gkhS8ezJqCM6+ndU7mDY6gqAg75NQ+0IjwEI8IYOmQCgkRwHKVSfWXW076DsqMo0Dk+0FK1U+M5RgFw=="],
+ 
+     "accepts": ["accepts@1.3.8", "", { "dependencies": { "mime-types": "~2.1.34", "negotiator": "0.6.3" } }, "sha512-PYAthTa2m2VKxuvSD3DPC/Gy+U+sOA1LAuT8mkmRuvw+NACSaeXEQ+NHcVF7rONl6qcaxV3Uuemwawk+7+SJLw=="],
+@@ -234,6 +261,8 @@
+ 
+     "caniuse-lite": ["caniuse-lite@1.0.30001810", "", {}, "sha512-TITQPUkaz+aVk5GL6NhOdwk1aEaNTSDPsGFWrTuhKGtjTF70jL/Oht2W4c6rXUe5fu7Ie19VIahAXHIIiWWNeg=="],
+ 
++    "clsx": ["clsx@2.1.1", "", {}, "sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA=="],
++
+     "content-disposition": ["content-disposition@0.5.4", "", { "dependencies": { "safe-buffer": "5.2.1" } }, "sha512-FveZTNuGw04cxlAiWbzi6zTAL/lhehaWbTtgluJh4/E95DqMwTmha3KZN1aAWA8cFIhHzMZUvLevkw5Rqk+tSQ=="],
+ 
+     "content-type": ["content-type@1.0.5", "", {}, "sha512-nTjqfcBFEipKdXCv4YDQWCfmcLZKm81ldF0pAopTvyrFGVbcR6P/VAAd5G7N+0tTr8QqiU0tFadD6FK4NtJwOA=="],
+@@ -244,10 +273,34 @@
+ 
+     "csstype": ["csstype@3.2.3", "", {}, "sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ=="],
+ 
++    "d3-array": ["d3-array@3.2.4", "", { "dependencies": { "internmap": "1 - 2" } }, "sha512-tdQAmyA18i4J7wprpYq8ClcxZy3SC31QMeByyCFyRt7BVHdREQZ5lpzoe5mFEYZUWe+oq8HBvk9JjpibyEV4Jg=="],
++
++    "d3-color": ["d3-color@3.1.0", "", {}, "sha512-zg/chbXyeBtMQ1LbD/WSoW2DpC3I0mpmPdW+ynRTj/x2DAWYrIY7qeZIHidozwV24m4iavr15lNwIwLxRmOxhA=="],
++
++    "d3-ease": ["d3-ease@3.0.1", "", {}, "sha512-wR/XK3D3XcLIZwpbvQwQ5fK+8Ykds1ip7A2Txe0yxncXSdq1L9skcG7blcedkOX+ZcgxGAmLX1FrRGbADwzi0w=="],
++
++    "d3-format": ["d3-format@3.1.2", "", {}, "sha512-AJDdYOdnyRDV5b6ArilzCPPwc1ejkHcoyFarqlPqT7zRYjhavcT3uSrqcMvsgh2CgoPbK3RCwyHaVyxYcP2Arg=="],
++
++    "d3-interpolate": ["d3-interpolate@3.0.1", "", { "dependencies": { "d3-color": "1 - 3" } }, "sha512-3bYs1rOD33uo8aqJfKP3JWPAibgw8Zm2+L9vBKEHJ2Rg+viTR7o5Mmv5mZcieN+FRYaAOWX5SJATX6k1PWz72g=="],
++
++    "d3-path": ["d3-path@3.1.0", "", {}, "sha512-p3KP5HCf/bvjBSSKuXid6Zqijx7wIfNW+J/maPs+iwR35at5JCbLUT0LzF1cnjbCHWhqzQTIN2Jpe8pRebIEFQ=="],
++
++    "d3-scale": ["d3-scale@4.0.2", "", { "dependencies": { "d3-array": "2.10.0 - 3", "d3-format": "1 - 3", "d3-interpolate": "1.2.0 - 3", "d3-time": "2.1.1 - 3", "d3-time-format": "2 - 4" } }, "sha512-GZW464g1SH7ag3Y7hXjf8RoUuAFIqklOAq3MRl4OaWabTFJY9PN/E1YklhXLh+OQ3fM9yS2nOkCoS+WLZ6kvxQ=="],
++
++    "d3-shape": ["d3-shape@3.2.0", "", { "dependencies": { "d3-path": "^3.1.0" } }, "sha512-SaLBuwGm3MOViRq2ABk3eLoxwZELpH6zhl3FbAoJ7Vm1gofKx6El1Ib5z23NUEhF9AsGl7y+dzLe5Cw2AArGTA=="],
++
++    "d3-time": ["d3-time@3.1.0", "", { "dependencies": { "d3-array": "2 - 3" } }, "sha512-VqKjzBLejbSMT4IgbmVgDjpkYrNWUYJnbCGo874u7MMKIWsILRX+OpX/gTk8MqjpT1A/c6HY2dCA77ZN0lkQ2Q=="],
++
++    "d3-time-format": ["d3-time-format@4.1.0", "", { "dependencies": { "d3-time": "1 - 3" } }, "sha512-dJxPBlzC7NugB2PDLwo9Q8JiTR3M3e4/XANkreKSUxF8vvXKqm1Yfq4Q5dl8budlunRVlUUaDUgFt7eA8D6NLg=="],
++
++    "d3-timer": ["d3-timer@3.0.1", "", {}, "sha512-ndfJ/JxxMd3nw31uyKoY2naivF+r29V+Lc0svZxe1JvvIRmi8hUsrMvdOwgS1o6uBHmiz91geQ0ylPP0aj1VUA=="],
++
+     "data-uri-to-buffer": ["data-uri-to-buffer@4.0.1", "", {}, "sha512-0R9ikRb668HB7QDxT1vkpuUBtqc53YyAwMwGeUFKRojY/NWKvdZ+9UYtRfGmhqNbRkTSVpMbmyhXipFFv2cb/A=="],
+ 
+     "debug": ["debug@2.6.9", "", { "dependencies": { "ms": "2.0.0" } }, "sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA=="],
+ 
++    "decimal.js-light": ["decimal.js-light@2.5.1", "", {}, "sha512-qIMFpTMZmny+MMIitAB6D7iVPEorVw6YQRWkvarTkT4tBeSLLiHzcwj6q0MmYSFCiVpiqPJTJEYIrpcPzVEIvg=="],
++
+     "depd": ["depd@2.0.0", "", {}, "sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw=="],
+ 
+     "destroy": ["destroy@1.2.0", "", {}, "sha512-2sJGJTaXIIaR1w4iJSNoN0hnMY7Gpc/n8D4qSCJw8QqFWXf7cuAgnEHxBpweaVcPevC2l3KpjYCx3NypQQgaJg=="],
+@@ -274,6 +327,8 @@
+ 
+     "es-object-atoms": ["es-object-atoms@1.1.2", "", { "dependencies": { "es-errors": "^1.3.0" } }, "sha512-HWcBoN6NileqtSydK2FqHbS/LoDd2pqrnQHLyJzBj4kOp/ky2MWMN694xOfkK8/SnUsW2DH7EfyVlydKCsm1Zw=="],
+ 
++    "es-toolkit": ["es-toolkit@1.52.0", "", {}, "sha512-XTNEJQh1tY1ZJVcf6ayP/2n4ZPyaHlW2FWs7xvw5ddPuhUVjLD3olQVQS7kf58JbAB48iL0uL/jerTrjtV3lDA=="],
++
+     "esbuild": ["esbuild@0.25.12", "", { "optionalDependencies": { "@esbuild/aix-ppc64": "0.25.12", "@esbuild/android-arm": "0.25.12", "@esbuild/android-arm64": "0.25.12", "@esbuild/android-x64": "0.25.12", "@esbuild/darwin-arm64": "0.25.12", "@esbuild/darwin-x64": "0.25.12", "@esbuild/freebsd-arm64": "0.25.12", "@esbuild/freebsd-x64": "0.25.12", "@esbuild/linux-arm": "0.25.12", "@esbuild/linux-arm64": "0.25.12", "@esbuild/linux-ia32": "0.25.12", "@esbuild/linux-loong64": "0.25.12", "@esbuild/linux-mips64el": "0.25.12", "@esbuild/linux-ppc64": "0.25.12", "@esbuild/linux-riscv64": "0.25.12", "@esbuild/linux-s390x": "0.25.12", "@esbuild/linux-x64": "0.25.12", "@esbuild/netbsd-arm64": "0.25.12", "@esbuild/netbsd-x64": "0.25.12", "@esbuild/openbsd-arm64": "0.25.12", "@esbuild/openbsd-x64": "0.25.12", "@esbuild/openharmony-arm64": "0.25.12", "@esbuild/sunos-x64": "0.25.12", "@esbuild/win32-arm64": "0.25.12", "@esbuild/win32-ia32": "0.25.12", "@esbuild/win32-x64": "0.25.12" }, "bin": { "esbuild": "bin/esbuild" } }, "sha512-bbPBYYrtZbkt6Os6FiTLCTFxvq4tt3JKall1vRwshA3fdVztsLAatFaZobhkBC8/BrPetoa0oksYoKXoG4ryJg=="],
+ 
+     "escalade": ["escalade@3.2.0", "", {}, "sha512-WUj2qlxaQtO4g6Pq5c29GTcWGDyd8itL8zTlipgECz3JesAiiOKotd8JU6otB3PACgG6xkJUyVhboMS+bje/jA=="],
+@@ -282,6 +337,8 @@
+ 
+     "etag": ["etag@1.8.1", "", {}, "sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg=="],
+ 
++    "eventemitter3": ["eventemitter3@5.0.4", "", {}, "sha512-mlsTRyGaPBjPedk6Bvw+aqbsXDtoAyAzm5MO7JgU+yVRyMQ5O8bD4Kcci7BS85f93veegeCPkL8R4GLClnjLFw=="],
++
+     "express": ["express@4.22.3", "", { "dependencies": { "accepts": "~1.3.8", "array-flatten": "1.1.1", "body-parser": "~1.20.5", "content-disposition": "~0.5.4", "content-type": "~1.0.4", "cookie": "~0.7.1", "cookie-signature": "~1.0.6", "debug": "2.6.9", "depd": "2.0.0", "encodeurl": "~2.0.0", "escape-html": "~1.0.3", "etag": "~1.8.1", "finalhandler": "~1.3.1", "fresh": "~0.5.2", "http-errors": "~2.0.0", "merge-descriptors": "1.0.3", "methods": "~1.1.2", "on-finished": "~2.4.1", "parseurl": "~1.3.3", "path-to-regexp": "~0.1.13", "proxy-addr": "~2.0.7", "qs": "~6.16.0", "range-parser": "~1.2.1", "safe-buffer": "5.2.1", "send": "~0.19.0", "serve-static": "~1.16.2", "setprototypeof": "1.2.0", "statuses": "~2.0.1", "type-is": "~1.6.18", "utils-merge": "1.0.1", "vary": "~1.1.2" } }, "sha512-Bdcs4+3qlpVlx2NRn6fgX2Ue2/gGRaPeawebgclM0ERSCqDpA+owF1fdPwjJUTAJWMTuAaxjDf+hzb0/4eKvvw=="],
+ 
+     "extend": ["extend@3.0.2", "", {}, "sha512-fjquC59cD7CyW6urNXK0FBufkZcoiGG80wTuPujX590cB5Ttln20E2UB4S/WARVqhXffZl2LNgS+gQdPIIim/g=="],
+@@ -332,8 +389,12 @@
+ 
+     "iconv-lite": ["iconv-lite@0.4.24", "", { "dependencies": { "safer-buffer": ">= 2.1.2 < 3" } }, "sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA=="],
+ 
++    "immer": ["immer@11.1.18", "", {}, "sha512-EQyQtLiYW029lyoczMl/Hh4Xu7cDecSc58JRYpHyL4tIAu3eqd1yJzQX04d2BZHDkzFFvm6qJEJWOtfDSWAXbQ=="],
++
+     "inherits": ["inherits@2.0.4", "", {}, "sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ=="],
+ 
++    "internmap": ["internmap@2.0.3", "", {}, "sha512-5Hh7Y1wQbvY5ooGgPbDaL5iYLAPzMTUrjMulskHLH6wnv/A+1q5rgEaiuqEjB+oxGXIVZs1FF+R/KPN3ZSQYYg=="],
++
+     "ipaddr.js": ["ipaddr.js@1.9.1", "", {}, "sha512-0KI/607xoxSToH7GjN1FfSbLoU0+btTicjsQSWQlh/hZykN8KpmMf7uYwPW3R+akZ6R/w18ZlXSHBYXiYUPO3g=="],
+ 
+     "jiti": ["jiti@2.7.0", "", { "bin": { "jiti": "lib/jiti-cli.mjs" } }, "sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ=="],
+@@ -438,6 +499,18 @@
+ 
+     "react-dom": ["react-dom@19.3.0", "", { "dependencies": { "scheduler": "^0.28.0" }, "peerDependencies": { "react": "^19.3.0" } }, "sha512-JDk8dgif51OjFoDE70+OT9ICyYr+69HlmihNwp1+Nsfbna3t5sIiCa9ZJktDmQ4/1b/rn26hIAR2uYXDMr5r0Q=="],
+ 
++    "react-is": ["react-is@19.3.0", "", {}, "sha512-UpMYezM4v5/18F28aC66AEsjXIgE02kyEMH6yLdgLXu/UTfa1Ntwck/nNLrbqJsEXW7gPb0coNO9FQse9WTovA=="],
++
++    "react-redux": ["react-redux@9.3.0", "", { "dependencies": { "@types/use-sync-external-store": "^0.0.6", "use-sync-external-store": "^1.4.0" }, "peerDependencies": { "@types/react": "^18.2.25 || ^19", "react": "^18.0 || ^19", "redux": "^5.0.0" }, "optionalPeers": ["@types/react", "redux"] }, "sha512-KQopgqFo/p/fgmAs5qz6p5RWaNAzq40WAu7fJIXnQpYxFPbJYtsJPWvGeF2rOBaY/kEuV77AVsX8TsQzKm+A/g=="],
++
++    "recharts": ["recharts@3.10.1", "", { "dependencies": { "@reduxjs/toolkit": "^1.9.0 || 2.x.x", "clsx": "^2.1.1", "decimal.js-light": "^2.5.1", "es-toolkit": "^1.39.3", "eventemitter3": "^5.0.1", "immer": "^11.1.8", "react-redux": "8.x.x || 9.x.x", "reselect": "5.2.0", "tiny-invariant": "^1.3.3", "use-sync-external-store": "^1.2.2", "victory-vendor": "^37.0.2" }, "peerDependencies": { "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-dom": "^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-is": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-QXFrvt6IVcw7eeZCoyXTwkIJAX3Dv1nyVhMicXJ47GsGDDpcN8z6o644DibE9XjpBTThtsomLKnTV6lc+cVFUA=="],
++
++    "redux": ["redux@5.0.1", "", {}, "sha512-M9/ELqF6fy8FwmkpnF0S3YKOqMyoWJ4+CS5Efg2ct3oY9daQvd/Pc71FpGZsVsbl3Cpb+IIcjBDUnnyBdQbq4w=="],
++
++    "redux-thunk": ["redux-thunk@3.1.0", "", { "peerDependencies": { "redux": "^5.0.0" } }, "sha512-NW2r5T6ksUKXCabzhL9z+h206HQw/NJkcLm1GPImRQ8IzfXwRGqjVhKJGauHirT0DAuyy6hjdnMZaRoAcy0Klw=="],
++
++    "reselect": ["reselect@5.2.0", "", {}, "sha512-AgZ3UOZm3YndfrJ4OYjgrT7bmCm/1iqkjvEfH/oYjzh6PD2qw4QuT3jjnXIrpdt4MTpMXclMT3lXbmRY+XRakw=="],
++
+     "retry": ["retry@0.13.1", "", {}, "sha512-XQBQ3I8W1Cge0Seh+6gjj03LbmRFWuoszgK9ooCpwYIrhhoO80pfq4cUkU5DkknwfOfFteRwlZ56PYOGYyFWdg=="],
+ 
+     "rolldown": ["rolldown@1.2.9", "", { "dependencies": { "@oxc-project/types": "=0.150.0", "@rolldown/pluginutils": "^1.0.0" }, "optionalDependencies": { "@rolldown/binding-android-arm-eabi": "1.2.9", "@rolldown/binding-android-arm64": "1.2.9", "@rolldown/binding-darwin-arm64": "1.2.9", "@rolldown/binding-darwin-x64": "1.2.9", "@rolldown/binding-freebsd-x64": "1.2.9", "@rolldown/binding-linux-arm-gnueabihf": "1.2.9", "@rolldown/binding-linux-arm64-gnu": "1.2.9", "@rolldown/binding-linux-arm64-musl": "1.2.9", "@rolldown/binding-linux-ppc64-gnu": "1.2.9", "@rolldown/binding-linux-s390x-gnu": "1.2.9", "@rolldown/binding-linux-x64-gnu": "1.2.9", "@rolldown/binding-linux-x64-musl": "1.2.9", "@rolldown/binding-openharmony-arm64": "1.2.9", "@rolldown/binding-win32-arm64-msvc": "1.2.9", "@rolldown/binding-win32-x64-msvc": "1.2.9" }, "bin": { "rolldown": "./bin/cli.mjs" } }, "sha512-hx/Pv0N1haXRb11qkfnK5MXB/iqr7i0yjWQqmO9uHqZpBgQSqzc8UsSnEpalsh+j1I8qQ2CkXAkJC8Br3dKSlg=="],
+@@ -470,6 +543,8 @@
+ 
+     "tapable": ["tapable@2.3.3", "", {}, "sha512-uxc/zpqFg6x7C8vOE7lh6Lbda8eEL9zmVm/PLeTPBRhh1xCgdWaQ+J1CUieGpIfm2HdtsUpRv+HshiasBMcc6A=="],
+ 
++    "tiny-invariant": ["tiny-invariant@1.3.3", "", {}, "sha512-+FbBPE1o9QAYvviau/qC5SE3caw21q3xkvWKBtja5vgqOWIHHJ3ioaq1VPfn/Szqctz2bU/oYeKd9/z5BL+PVg=="],
++
+     "tinyglobby": ["tinyglobby@0.2.17", "", { "dependencies": { "fdir": "^6.5.0", "picomatch": "^4.0.4" } }, "sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g=="],
+ 
+     "toidentifier": ["toidentifier@1.0.1", "", {}, "sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA=="],
+@@ -488,10 +563,14 @@
+ 
+     "update-browserslist-db": ["update-browserslist-db@1.3.3", "", { "dependencies": { "escalade": "^3.2.0", "picocolors": "^1.1.1" }, "peerDependencies": { "browserslist": ">= 4.21.0" }, "bin": { "update-browserslist-db": "cli.js" } }, "sha512-pJ2sYawQS0R/WI928Gj5GlPhTGzbMelq0+4INtSYNDV9ErKJcX6xjGWkoG/VnB3dpUm00zALaqkrUD77pO5TDQ=="],
+ 
++    "use-sync-external-store": ["use-sync-external-store@1.7.0", "", { "peerDependencies": { "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-6L+EeigHMQhdaIPNIFUKwfWJSwWFQ8gJbJ2DLOs5sDIegTwR9fRxvnM3uciHKjIZhFz+KAv2emhWMRvDmMcY8A=="],
++
+     "utils-merge": ["utils-merge@1.0.1", "", {}, "sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA=="],
+ 
+     "vary": ["vary@1.1.2", "", {}, "sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg=="],
+ 
++    "victory-vendor": ["victory-vendor@37.3.6", "", { "dependencies": { "@types/d3-array": "^3.0.3", "@types/d3-ease": "^3.0.0", "@types/d3-interpolate": "^3.0.1", "@types/d3-scale": "^4.0.2", "@types/d3-shape": "^3.1.0", "@types/d3-time": "^3.0.0", "@types/d3-timer": "^3.0.0", "d3-array": "^3.1.6", "d3-ease": "^3.0.1", "d3-interpolate": "^3.0.1", "d3-scale": "^4.0.2", "d3-shape": "^3.1.0", "d3-time": "^3.0.0", "d3-timer": "^3.0.1" } }, "sha512-SbPDPdDBYp+5MJHhBCAyI7wKM3d5ivekigc2Dk2s7pgbZ9wIgIBYGVw4zGHBml/qTFbexrofXW6Gu4noGxrOwQ=="],
++
+     "vite": ["vite@8.3.0", "", { "dependencies": { "lightningcss": "^1.33.0", "picomatch": "^4.0.7", "postcss": "^8.5.28", "rolldown": "~1.2.6", "tinyglobby": "^0.2.17" }, "optionalDependencies": { "fsevents": "~2.3.3" }, "peerDependencies": { "@types/node": "^20.19.0 || >=22.12.0", "@vitejs/devtools": "^0.7.1", "esbuild": "^0.27.0 || ^0.28.0", "jiti": ">=1.21.0", "less": "^4.0.0", "sass": "^1.70.0", "sass-embedded": "^1.70.0", "stylus": ">=0.54.8", "sugarss": "^5.0.0", "terser": "^5.16.0", "tsx": "^4.8.1", "yaml": "^2.4.2" }, "optionalPeers": ["@types/node", "@vitejs/devtools", "esbuild", "jiti", "less", "sass", "sass-embedded", "stylus", "sugarss", "terser", "tsx", "yaml"], "bin": { "vite": "bin/vite.js" } }, "sha512-lhZBVvEHefgE+HQZC9O7EBJgCU/nVzFNl7vkS4RE0APtWLP02/8QVIkQtzBxPquh7lq5/78NHipTj7ODQ6XuyQ=="],
+ 
+     "web-streams-polyfill": ["web-streams-polyfill@3.3.3", "", {}, "sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw=="],
+diff --git a/data/smokefree_db.json b/data/smokefree_db.json
+index d19729b..2afb72d 100644
+--- a/data/smokefree_db.json
++++ b/data/smokefree_db.json
+@@ -2,7 +2,7 @@
+   "profile": {
+     "id": "user-default-1",
+     "name": "Азамат",
+-    "quitAt": "2026-09-15T22:28:04.563Z",
++    "quitAt": "2026-09-19T19:20:20.870Z",
+     "nicotineType": "Сигареты",
+     "currency": "KZT",
+     "currencySymbol": "₸",
+@@ -49,14 +49,14 @@
+       "intensity": 8,
+       "trigger": "Кофе с коллегами",
+       "outcome": "resisted",
+-      "timestamp": "2026-09-19T06:28:04.574Z"
++      "timestamp": "2026-09-23T03:20:20.889Z"
+     },
+     {
+       "id": "c-2",
+       "intensity": 7,
+       "trigger": "Пробка на мосту",
+       "outcome": "resisted",
+-      "timestamp": "2026-09-18T10:28:04.574Z"
++      "timestamp": "2026-09-22T07:20:20.889Z"
+     }
+   ],
+   "relapses": [],
+@@ -65,9 +65,9 @@
+       "id": "msg-welcome",
+       "sender": "coach",
+       "text": "Привет! Я твой КПТ-наставник по свободе от никотина. Каждая преодоленная тяга делает нейронные связи зависимости слабее. В чем тебе нужна поддержка прямо сейчас?",
+-      "timestamp": "2026-09-19T10:55:31.646Z",
++      "timestamp": "2026-09-23T07:20:20.870Z",
+       "persona": "cbt"
+     }
+   ],
+-  "updatedAt": "2026-09-19T11:16:19.393Z"
++  "updatedAt": "2026-09-23T07:48:29.645Z"
+ }
+\ No newline at end of file
+diff --git a/package.json b/package.json
+index 8b708a3..268cc61 100644
+--- a/package.json
++++ b/package.json
+@@ -21,6 +21,7 @@
+     "motion": "^12.23.24",
+     "react": "^19.0.1",
+     "react-dom": "^19.0.1",
++    "recharts": "^3.10.1",
+     "vite": "^8.3.0"
+   },
+   "devDependencies": {
+diff --git a/smokefree_bot/bot/handlers/stats.py b/smokefree_bot/bot/handlers/stats.py
+index 8133e26..968135f 100644
+--- a/smokefree_bot/bot/handlers/stats.py
++++ b/smokefree_bot/bot/handlers/stats.py
+@@ -1,6 +1,6 @@
+-from aiogram import Router
++from aiogram import Router, F
+ from aiogram.filters import Command
+-from aiogram.types import Message
++from aiogram.types import Message, CallbackQuery
+ 
+ from bot.handlers.common import user_and_stats
+ 
+@@ -8,10 +8,14 @@ router = Router(name="stats")
+ 
+ 
+ @router.message(Command("status"))
+-async def status(message: Message) -> None:
+-    user, stats = await user_and_stats(message)
++@router.callback_query(F.data == "status_refresh")
++async def status(event: Message | CallbackQuery) -> None:
++    user, stats = await user_and_stats(event)
+     if stats is None:
+-        await message.answer("Сначала пройди короткий онбординг: /start")
++        if isinstance(event, CallbackQuery):
++            await event.answer("Сначала пройди короткий онбординг: /start", show_alert=True)
++        else:
++            await event.answer("Сначала пройди короткий онбординг: /start")
+         return
+     from bot.keyboards.inline import tracker_keyboard
+     time_str = f"{stats['days_free']} дн. {stats.get('hours_free', 0)} ч. {stats.get('minutes_free', 0)} мин."
+@@ -22,16 +26,30 @@ async def status(message: Message) -> None:
+             quit_label = f"\n🕒 Отказ: {str(user_info['quit_at'])[:16].replace('T', ' ')}"
+         except Exception:
+             quit_label = ""
+-    await message.answer(
++    text = (
+         f"Твой трек, {user.first_name}:\n\n"
+         f"🟢 Чистота: {time_str}\n"
+         f"💰 Сэкономлено: {stats.get('saved_kzt', 0):,.0f} ₸\n"
+         f"⏱ Возвращено жизни: {stats.get('minutes_returned', 0):,.0f} минут\n"
+         f"🧭 Чистота трека: {stats.get('clean_track_percent', 100.0):.1f}%\n"
+         f"🧠 Тяг преодолено: {stats.get('cravings_resisted', 0)}{quit_label}\n\n"
+-        "Сменить точное время отказа: /time",
+-        reply_markup=tracker_keyboard(user.id),
++        "Сменить точное время отказа: /time"
+     )
++    if isinstance(event, CallbackQuery):
++        await event.answer("Прогресс обновлен! 🔄")
++        try:
++            await event.message.edit_text(text, reply_markup=tracker_keyboard(user.id))
++        except Exception:
++            # If message content didn't change, Telegram raises exception
++            pass
++    else:
++        await message_or_event_answer(event, text, tracker_keyboard(user.id))
++
++async def message_or_event_answer(event: Message | CallbackQuery, text: str, reply_markup) -> None:
++    if isinstance(event, CallbackQuery):
++        await event.message.answer(text, reply_markup=reply_markup)
++    else:
++        await event.answer(text, reply_markup=reply_markup)
+ 
+ 
+ @router.message(Command("money"))
+@@ -62,40 +80,97 @@ async def health(message: Message) -> None:
+     if stats is None:
+         await message.answer("Сначала пройди онбординг: /start")
+         return
++
+     days = stats["days_free"]
+-    if days < 1:
+-        phase = "Первые часы: пульс и давление возвращаются к норме, CO покидает кровь."
+-    elif days < 3:
+-        phase = "1–3 дня: никотин выходит из организма, вкусы и запахи становятся ярче."
++    hours = stats.get("hours_free", 0)
++    total_sec = stats.get("total_seconds_free", days * 86400)
++
++    # Detailed WHO Medical timeline analysis
++    if total_sec < 20 * 60:
++        current_status = "Первые 20 минут: пульс замедляется, артериальное давление начинает снижаться к норме."
++        next_goal = "Через 8 часов: угарный газ (CO) в крови снизится вдвое, клетки насытятся кислородом."
++    elif total_sec < 8 * 3600:
++        current_status = "Первые часы: сосуды конечностей расширяются, температура ладоней и стоп нормализуется."
++        next_goal = "К 8 часам: уровень кислорода в крови вернется к идеальному оптимуму."
++    elif total_sec < 24 * 3600:
++        current_status = "8–24 часа: угарный газ полностью вытеснен кислородом. Риск внезапного инфаркта уже пошел на спад."
++        next_goal = "К 24 часам: легкие начнут активный дренаж слизи и продуктов горения."
++    elif total_sec < 48 * 3600:
++        current_status = "1–2 дня: никотин и его метаболиты выводятся из организма. Обоняние и вкус становятся ярче."
++        next_goal = "К 48 часам: нервные окончания начнут ускоренную регенерацию."
++    elif total_sec < 72 * 3600:
++        current_status = "2–3 дня: пик никотиновой абстиненции позади! Бронхиальные трубки расслабляются, дыхание глубже."
++        next_goal = "К 72 часам: спад физической тяги, прилив физической энергии."
+     elif days < 7:
+-        phase = "4–7 дней: пик физической тяги пройден, дыхание становится глубже."
++        current_status = "4–7 дней: кровь полностью очищена от котинина. Улучшается микроциркуляция и сон."
++        next_goal = "К 7 дням: утренний пульс станет стабильным, первая победная неделя."
++    elif days < 14:
++        current_status = "1–2 недели: детокс печени завершен. Проходят головные боли, стабилизируется давление."
++        next_goal = "К 14 дням: прирост функции легких до +30%."
+     elif days < 30:
+-        phase = "2–4 недели: кровообращение улучшается, функция легких растет."
++        current_status = "2–4 недели: кровообращение во всем теле возросло. Шаги и подъемы по лестнице не вызывают одышки."
++        next_goal = "К 30 дням: регенерация ресничек мерцательного эпителия бронхов."
++    elif days < 90:
++        current_status = "1–3 месяца: утренний кашель исчез. Реснички легких полностью самоочищают дыхательные пути."
++        next_goal = "К 90 дням: прирост объема форсированного выдоха (ФЖЕЛ) до +15%."
++    elif days < 180:
++        current_status = "3–6 месяцев: пазухи носа свободны, застойные явления в бронхах полностью угасли."
++        next_goal = "К 6 месяцам: полное восстановление дофаминовых нейромедиаторов."
++    elif days < 365:
++        current_status = "6–12 месяцев: маркеры сосудистого воспаления (СРБ) в крови упали до нормы некурящего человека."
++        next_goal = "К 1 году: снижение риска ишемической болезни сердца (ИБС) на 50%!"
+     else:
+-        phase = "1+ месяц: кашель уходит, дофаминовая система перестроилась."
++        current_status = "1+ год: риск сердечно-сосудистых катастроф снизился вдвое! Твое тело спасено."
++        next_goal = "К 5 годам: риск инсульта сравняется с показателями никогда не куривших людей."
++
+     await message.answer(
+-        f"🫁 Восстановление тела (ВОЗ):\n\n"
+-        f"Чистых дней: {days}\n"
+-        f"Возвращено жизни: ~{stats['minutes_returned']:,.0f} минут\n\n"
+-        f"Фаза: {phase}"
++        f"🫁 <b>Медицинский статус тела (ВОЗ & Stanford):</b>\n\n"
++        f"⏱ <b>Чистый трек:</b> {days} дн. {hours} ч.\n"
++        f"⏱ <b>Возвращено жизни:</b> ~{stats.get('minutes_returned', 0):,.0f} минут\n\n"
++        f"🔬 <b>Что происходит сейчас:</b>\n{current_status}\n\n"
++        f"🎯 <b>Следующий рубеж:</b>\n{next_goal}\n\n"
++        f"Все фазы восстановления смотри в трекере по кнопке ниже:",
++        reply_markup=tracker_keyboard(user.id),
++        parse_mode="HTML"
+     )
+ 
+ 
+ @router.message(Command("achievements"))
+ async def achievements(message: Message) -> None:
+-    _, stats = await user_and_stats(message)
++    user, stats = await user_and_stats(message)
+     if stats is None:
+         await message.answer("Сначала пройди онбординг: /start")
+         return
+-    names = {
+-        "first_day": "🌱 Первый чистый день",
+-        "week_free": "✦ Неделя свободы",
+-        "month_free": "◆ Месяц нового ритма",
+-        "craving_master": "◉ Мастер тяги (10 побед)",
+-    }
+-    earned = {item["code"] for item in stats["achievements"]}
++
++    from database.crud import ACHIEVEMENT_METADATA
++    earned_codes = {item["code"] for item in stats.get("achievements", [])}
++    total_count = len(ACHIEVEMENT_METADATA)
++    earned_count = len(earned_codes)
++    pct = round((earned_count / total_count) * 100) if total_count else 0
++
+     lines = []
+-    for code, title in names.items():
+-        mark = "✅" if code in earned else "🔒"
+-        lines.append(f"{mark} {title}")
+-    await message.answer("🏆 Твои достижения:\n\n" + "\n".join(lines))
++    lines.append(f"🏆 <b>Твои достижения ({earned_count}/{total_count} · {pct}%):</b>\n")
++
++    # Group by category
++    categories = [
++        ("health", "🫁 Здоровье и восстановление"),
++        ("mindset", "🧠 Осознанность и победа над тягой"),
++        ("money", "💰 Финансовая свобода"),
++        ("mastery", "🎯 Мастерство чистоты"),
++    ]
++
++    for cat_id, cat_title in categories:
++        items = [
++            (code, meta) for code, meta in ACHIEVEMENT_METADATA.items()
++            if meta.get("category", "health") == cat_id
++        ]
++        if not items:
++            continue
++        lines.append(f"<b>{cat_title}:</b>")
++        for code, meta in items:
++            is_unlocked = code in earned_codes
++            mark = "✅" if is_unlocked else "🔒"
++            lines.append(f"{mark} {meta['icon']} {meta['title']} — <i>{meta['description']}</i>")
++        lines.append("")
++
++    await message.answer("\n".join(lines).strip(), reply_markup=tracker_keyboard(user.id), parse_mode="HTML")
+diff --git a/smokefree_bot/bot/keyboards/inline.py b/smokefree_bot/bot/keyboards/inline.py
+index 92eb660..a17f076 100644
+--- a/smokefree_bot/bot/keyboards/inline.py
++++ b/smokefree_bot/bot/keyboards/inline.py
+@@ -1,7 +1,10 @@
+ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+ from aiogram.types.web_app_info import WebAppInfo
+ from bot.config import get_settings
+-from webapp.api import make_user_token
++try:
++    from webapp.api import make_user_token
++except ImportError:
++    from smokefree_bot.webapp.api import make_user_token
+ 
+ def tracker_keyboard(user_id: int) -> InlineKeyboardMarkup:
+     settings = get_settings()
 diff --git a/smokefree_bot/bot/scheduler/jobs.py b/smokefree_bot/bot/scheduler/jobs.py
-index ab1248c..8e34935 100644
+index c0c66b1..b787ac9 100644
 --- a/smokefree_bot/bot/scheduler/jobs.py
 +++ b/smokefree_bot/bot/scheduler/jobs.py
-@@ -1,6 +1,6 @@
- import logging
- import random
--from datetime import date, datetime
-+from datetime import date, datetime, timezone
- from zoneinfo import ZoneInfo
- from aiogram import Bot
- from apscheduler.schedulers.asyncio import AsyncIOScheduler
-@@ -33,11 +33,15 @@ async def send_daily_message(bot: Bot, kind: str) -> None:
-         users = (
-             await session.scalars(select(User).where(User.onboarding_complete.is_(True)))
-         ).all()
--        today = datetime.now(ZoneInfo(get_settings().timezone)).date()
-         templates = MORNING_TEMPLATES if kind == "morning" else EVENING_TEMPLATES
--
-+        default_tz = ZoneInfo(get_settings().timezone)
-         for user in users:
-             try:
-+                try:
-+                    user_tz = ZoneInfo(user.timezone or get_settings().timezone)
-+                except Exception:
-+                    user_tz = default_tz
-+                today = datetime.now(user_tz).date()
-                 msg = random.choice(templates).format(
-                     name=user.first_name or "друг",
-                     days=days_free(user, today)
-@@ -45,36 +49,46 @@ async def send_daily_message(bot: Bot, kind: str) -> None:
-                 await bot.send_message(
-                     user.id,
-                     msg,
--                    reply_markup=tracker_keyboard()
-+                    reply_markup=tracker_keyboard(user.id)
-                 )
-             except Exception:
-                 logger.exception("Daily message failed for user %s", user.id)
+@@ -26,7 +26,16 @@ EVENING_TEMPLATES = [
+ ]
  
- async def radar_job(bot: Bot) -> None:
--    tz = ZoneInfo(get_settings().timezone)
--    now = datetime.now(tz)
--    current_minutes = now.hour * 60 + now.minute
--    target_minutes = current_minutes + 15
--    if target_minutes >= 24 * 60:
--        target_minutes -= 24 * 60
--    today = now.date()
--
-+    default_tz = ZoneInfo(get_settings().timezone)
+ def days_free(user: User, today: date) -> int:
+-    return max(0, (today - user.quit_date).days) if user.quit_date else 0
++    if user.quit_date:
++        return max(0, (today - user.quit_date).days)
++    if user.quit_at:
++        try:
++            user_tz = ZoneInfo(user.timezone or get_settings().timezone)
++            quit_dt = user.quit_at if user.quit_at.tzinfo else user.quit_at.replace(tzinfo=timezone.utc)
++            return max(0, (today - quit_dt.astimezone(user_tz).date()).days)
++        except Exception:
++            pass
++    return 0
+ 
+ async def send_daily_messages(bot: Bot, kind: str) -> None:
      async with SessionFactory() as session:
-         for trigger, user in await radar_targets(session):
--            if trigger.time_minutes != target_minutes or trigger.last_sent_date == today:
--                continue
--            claimed = await mark_radar_sent(session, trigger.id, today)
--            if claimed is None:
-+            try:
-+                user_tz = ZoneInfo(user.timezone or get_settings().timezone)
-+            except Exception:
-+                user_tz = default_tz
-+            now = datetime.now(user_tz)
-+            today = now.date()
-+            current_minutes = now.hour * 60 + now.minute
-+            target_minutes = (current_minutes + 15) % 1440
-+
-+            if trigger.time_minutes != target_minutes:
-                 continue
-+
-+            # Проверяем last_radar_sent
-+            if trigger.last_radar_sent:
-+                sent_dt = trigger.last_radar_sent
-+                sent_date = sent_dt.astimezone(user_tz).date() if sent_dt.tzinfo else sent_dt.date()
-+                if sent_date == today:
-+                    continue
-+
-+            # Отмечаем отправку в базе (принимает session и trigger.id)
-+            await mark_radar_sent(session, trigger.id)
-+
-             try:
-                 await bot.send_message(
-                     user.id,
--                    f"⚡️ Триггер-радар (за 15 минут)\n\n"
-+                    "⚡️ Триггер-радар (за 15 минут)\n\n"
-                     f"Приближается твой триггер: «{trigger.label}».\n"
-                     "Пик желания длится ровно 3 минуты. Сделай глоток воды, смени позу "
-                     "или включи дыхание SOS в приложении.\n\n"
--                    f"Ты чист уже {days_free(user, today)} дней. Ты сильнее этой привычки!",
--                    reply_markup=tracker_keyboard(),
-+                    f"Ты чист уже {days_free(user, today)} дн. Ты сильнее этой привычки!",
-+                    reply_markup=tracker_keyboard(user.id),
-                 )
-             except Exception:
-                 logger.exception("Radar message failed for user %s", user.id)
-@@ -82,7 +96,6 @@ async def radar_job(bot: Bot) -> None:
- def build_scheduler(bot: Bot) -> AsyncIOScheduler:
-     scheduler = AsyncIOScheduler(timezone=ZoneInfo(get_settings().timezone))
-     scheduler.add_job(radar_job, "interval", minutes=1, args=[bot], id="trigger-radar", max_instances=1)
--    # Утреннее сообщение в 09:00 по времени пользователя
-     scheduler.add_job(
-         send_daily_message,
-         "cron",
-@@ -92,7 +105,6 @@ def build_scheduler(bot: Bot) -> AsyncIOScheduler:
-         id="morning-checkin",
-         max_instances=1,
-     )
--    # Вечернее сообщение в 21:00
-     scheduler.add_job(
-         send_daily_message,
-         "cron",
+@@ -71,7 +80,8 @@ async def radar_job(bot: Bot) -> None:
+ 
+                 today = local_now.date()
+                 if trigger.last_radar_sent:
+-                    last_sent_day = trigger.last_radar_sent.astimezone(user_tz).date()
++                    sent_dt = trigger.last_radar_sent if trigger.last_radar_sent.tzinfo else trigger.last_radar_sent.replace(tzinfo=timezone.utc)
++                    last_sent_day = sent_dt.astimezone(user_tz).date()
+                     if last_sent_day == today:
+                         continue
+ 
 diff --git a/smokefree_bot/database/connection.py b/smokefree_bot/database/connection.py
-index e923260..a19de0d 100644
+index 765b133..3d35c09 100644
 --- a/smokefree_bot/database/connection.py
 +++ b/smokefree_bot/database/connection.py
-@@ -8,6 +8,10 @@ engine = create_async_engine(
-     settings.database_dsn,
-     echo=settings.debug,
-     future=True,
-+    pool_pre_ping=True,      # Защита от обрыва TCP-сессий на Railway
-+    pool_recycle=1800,       # Пересоздание соединений каждые 30 мин
-+    pool_size=10,
-+    max_overflow=20,
- )
+@@ -1,3 +1,4 @@
++import ssl
+ from pathlib import Path
+ from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
+ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+@@ -25,28 +26,31 @@ if not _dsn.startswith("sqlite"):
+     # commonly hand out URLs with libpq-style query params such as
+     # `sslmode=require` or `channel_binding=require`. asyncpg's driver does not
+     # understand those kwargs directly, so they're stripped here and translated
+-    # into the connect_args asyncpg actually expects. TLS is requested whenever
+-    # the original URL asked for it (or said nothing, which we treat as "yes"
+-    # since virtually every managed Postgres free tier requires TLS).
++    # into the connect_args asyncpg actually expects.
+     parts = urlsplit(_dsn)
+     query = dict(parse_qsl(parts.query))
+     sslmode = query.pop("sslmode", None)
+     query.pop("channel_binding", None)
+     _dsn = urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment))
  
- SessionFactory = async_sessionmaker(
-@@ -16,7 +20,6 @@ SessionFactory = async_sessionmaker(
-     expire_on_commit=False,
- )
+-    connect_args: dict = {}
+-    if sslmode not in ("disable",):
+-        connect_args["ssl"] = "require"
++    connect_args: dict = {
++        # Neon and PgBouncer connection poolers in transaction mode do not support
++        # server-side prepared statements. Disabling statement caching prevents
++        # "prepared statement does not exist" errors.
++        "statement_cache_size": 0,
++        "prepared_statement_cache_size": 0,
++    }
++    # asyncpg expects an ssl.SSLContext object or boolean, NOT a string like "require"
++    # which causes AttributeError: 'str' object has no attribute 'wrap_bio'
++    if sslmode not in ("disable", "false", "0"):
++        ssl_ctx = ssl.create_default_context()
++        connect_args["ssl"] = ssl_ctx
  
--
- async def init_db() -> None:
-     async with engine.begin() as connection:
+     engine_kwargs.update({
+         "pool_pre_ping": True,
+         "pool_recycle": 1800,
+-        # A single-user personal bot never needs a large pool, and free-tier
+-        # managed Postgres (e.g. Neon's free plan) caps concurrent connections
+-        # low — keep this modest so the app never gets rejected for exceeding
+-        # the provider's connection limit.
+-        "pool_size": 3,
+-        "max_overflow": 2,
++        "pool_size": 5,
++        "max_overflow": 5,
+         "connect_args": connect_args,
+     })
+ 
+@@ -63,18 +67,32 @@ async def init_db() -> None:
          await connection.run_sync(Base.metadata.create_all)
-@@ -26,6 +29,5 @@ async def init_db() -> None:
-         except Exception:
-             pass
+         from sqlalchemy import text
+         # Best-effort additive migrations for databases created by older
+-        # versions of the schema (each wrapped separately so one already
+-        # having the column doesn't stop the rest from running).
+-        for stmt in (
+-            "ALTER TABLE users ADD COLUMN quit_at TIMESTAMP;",
+-            "ALTER TABLE relapse_incidents ADD COLUMN cigarettes INTEGER DEFAULT 1;",
+-            "ALTER TABLE relapse_incidents ADD COLUMN reflection TEXT DEFAULT '';",
+-            "ALTER TABLE relapse_incidents ADD COLUMN plan TEXT DEFAULT '';",
+-        ):
+-            try:
+-                await connection.execute(text(stmt))
+-            except Exception:
+-                pass
++        # versions of the schema. In PostgreSQL, IF NOT EXISTS prevents transaction aborts.
++        is_sqlite = engine.dialect.name == "sqlite"
++        if not is_sqlite:
++            for stmt in (
++                "ALTER TABLE users ADD COLUMN IF NOT EXISTS quit_at TIMESTAMPTZ;",
++                "ALTER TABLE users ADD COLUMN IF NOT EXISTS timezone VARCHAR(64) DEFAULT 'Asia/Almaty';",
++                "ALTER TABLE users ADD COLUMN IF NOT EXISTS currency VARCHAR(10) DEFAULT 'KZT';",
++                "ALTER TABLE relapse_incidents ADD COLUMN IF NOT EXISTS cigarettes INTEGER DEFAULT 1;",
++                "ALTER TABLE relapse_incidents ADD COLUMN IF NOT EXISTS reflection TEXT DEFAULT '';",
++                "ALTER TABLE relapse_incidents ADD COLUMN IF NOT EXISTS plan TEXT DEFAULT '';",
++            ):
++                try:
++                    await connection.execute(text(stmt))
++                except Exception:
++                    pass
++        else:
++            for stmt in (
++                "ALTER TABLE users ADD COLUMN quit_at TIMESTAMP;",
++                "ALTER TABLE relapse_incidents ADD COLUMN cigarettes INTEGER DEFAULT 1;",
++                "ALTER TABLE relapse_incidents ADD COLUMN reflection TEXT DEFAULT '';",
++                "ALTER TABLE relapse_incidents ADD COLUMN plan TEXT DEFAULT '';",
++            ):
++                try:
++                    await connection.execute(text(stmt))
++                except Exception:
++                    pass
  
--
  async def close_db() -> None:
      await engine.dispose()
+diff --git a/smokefree_bot/database/crud.py b/smokefree_bot/database/crud.py
+index c6fbeff..b0a7c13 100644
+--- a/smokefree_bot/database/crud.py
++++ b/smokefree_bot/database/crud.py
+@@ -15,6 +15,170 @@ DEFAULT_TRIGGERS = (
+     ("Домашний вечерний отдых", 21 * 60),
+ )
+ 
++ACHIEVEMENT_METADATA: dict[str, dict[str, str]] = {
++    # Хронология здоровья и восстановление органов (ВОЗ & Медицинские стандарты)
++    "first_hours": {
++        "title": "Чистый кислород",
++        "description": "8 часов без дыма — угарный газ (CO) в крови снизился вдвое, клетки насыщаются O₂",
++        "icon": "🫁",
++        "category": "health",
++    },
++    "first_day": {
++        "title": "Первый чистый день",
++        "description": "24 часа без табака — CO полностью покинул кровь, легкие начали интенсивный детокс",
++        "icon": "🌱",
++        "category": "health",
++    },
++    "two_days": {
++        "title": "Возрождение вкуса",
++        "description": "48 часов — организм свободен от никотина, обоняние и вкусовые рецепторы оживают",
++        "icon": "🍓",
++        "category": "health",
++    },
++    "three_days": {
++        "title": "Бронхиальный прорыв",
++        "description": "72 часа — бронхи расслабляются, пик физической никотиновой ломки успешно пройден!",
++        "icon": "🌬️",
++        "category": "health",
++    },
++    "five_days": {
++        "title": "Чистый котинин",
++        "description": "5 дней — метаболиты никотина полностью выведены из печени и почек",
++        "icon": "🛡️",
++        "category": "health",
++    },
++    "week_free": {
++        "title": "Неделя триумфа",
++        "description": "7 дней — утренний пульс спокоен, кровообращение и сон заметно улучшились",
++        "icon": "⚡",
++        "category": "health",
++    },
++    "ten_days": {
++        "title": "Свежее дыхание",
++        "description": "10 дней — налет на зубах и запах дыма от кожи полностью ушли",
++        "icon": "✨",
++        "category": "health",
++    },
++    "two_weeks": {
++        "title": "Кардио-разгон",
++        "description": "14 дней — функция легких выросла на 30%, шаги и лестницы даются легко",
++        "icon": "❤️",
++        "category": "health",
++    },
++    "three_weeks": {
++        "title": "Нейропластичность",
++        "description": "21 день — сломан старый поведенческий паттерн тянуться за сигаретой",
++        "icon": "🧠",
++        "category": "health",
++    },
++    "month_free": {
++        "title": "Бронхиальный щит",
++        "description": "30 дней — реснички бронхов восстановились, исчез хронический утренний кашель",
++        "icon": "🌿",
++        "category": "health",
++    },
++    "two_months": {
++        "title": "Дофаминовый баланс",
++        "description": "60 дней — ацетилхолиновые рецепторы откалиброваны, радость без стимуляторов",
++        "icon": "☀️",
++        "category": "health",
++    },
++    "three_months": {
++        "title": "Железные легкие",
++        "description": "90 дней — жизненная емкость легких выросла на 15%, физические тренировки в кайф",
++        "icon": "🏔️",
++        "category": "health",
++    },
++    "half_year": {
++        "title": "Полгода свободы",
++        "description": "180 дней — пазухи носа чисты, риск бронхоспазма снижен на 90%",
++        "icon": "💎",
++        "category": "health",
++    },
++    "nine_months": {
++        "title": "Чистые артерии",
++        "description": "270 дней — маркер сосудистого воспаления (СРБ) в норме, артерии эластичны",
++        "icon": "🩸",
++        "category": "health",
++    },
++    "year_free": {
++        "title": "Новое сердце",
++        "description": "365 дней — риск ишемической болезни сердца снизился в 2 раза!",
++        "icon": "🏆",
++        "category": "health",
++    },
++    "two_years": {
++        "title": "Стальной рубеж",
++        "description": "2 года — риск инфаркта миокарда сравнялся с никогда не курившими",
++        "icon": "👑",
++        "category": "health",
++    },
++    "five_years": {
++        "title": "Золотой стандарт ВОЗ",
++        "description": "5 лет чистоты — риск инсульта снижен до уровня абсолютно некурящего человека",
++        "icon": "🌟",
++        "category": "health",
++    },
++
++    # Осознанность и преодоление тяги
++    "first_craving": {
++        "title": "Первая победа",
++        "description": "Ты доказал, что тяга — это просто 3-минутная волна, и остался верен себе",
++        "icon": "🔥",
++        "category": "mindset",
++    },
++    "craving_pro": {
++        "title": "Страж спокойствия",
++        "description": "5 преодоленных приступов тяги — осознанный контроль над импульсом",
++        "icon": "🥋",
++        "category": "mindset",
++    },
++    "craving_master": {
++        "title": "Мастер тяги",
++        "description": "10 преодоленных приступов — уверенный контроль над биохимией зависимости",
++        "icon": "🥊",
++        "category": "mindset",
++    },
++    "craving_legend": {
++        "title": "Непоколебимый стоик",
++        "description": "25 побед над импульсом — твоя внутренняя опора сильнее любого триггера",
++        "icon": "🏛️",
++        "category": "mindset",
++    },
++    "zen_master": {
++        "title": "Дзен-мастер свободы",
++        "description": "50 преодоленных приступов — абсолютный иммунитет к никотиновым манипуляциям",
++        "icon": "🧘",
++        "category": "mindset",
++    },
++
++    # Финансовые победы
++    "money_saver_1": {
++        "title": "Первая копилка",
++        "description": "Сэкономлено 10 000 ₸ — деньги остались в твоем кармане, а не сгорели в пепел",
++        "icon": "💰",
++        "category": "money",
++    },
++    "money_saver_2": {
++        "title": "Финансовый щит",
++        "description": "Сэкономлено 50 000 ₸ — солидный капитал на реальные цели и здоровье",
++        "icon": "💎",
++        "category": "money",
++    },
++    "money_saver_3": {
++        "title": "Инвестор в жизнь",
++        "description": "Сэкономлено 100 000 ₸ — ощутимая независимость от табачных корпораций",
++        "icon": "🏦",
++        "category": "money",
++    },
++    "clean_month_track": {
++        "title": "Безупречный трек",
++        "description": "30 дней подряд со 100% чистотой без единого срыва",
++        "icon": "🎯",
++        "category": "mastery",
++    },
++}
++
+ 
+ async def get_user(session: AsyncSession, user_id: int) -> User | None:
+     return await session.get(User, user_id)
+@@ -44,7 +208,13 @@ async def complete_onboarding(
+     pack_price_kzt: float,
+     units_per_day: float,
+     financial_goal_kzt: float = 0,
++    name: str | None = None,
++    timezone_name: str | None = None,
+ ) -> User:
++    if name:
++        user.first_name = name
++    if timezone_name:
++        user.timezone = timezone_name
+     user_tz = ZoneInfo(user.timezone or "Asia/Almaty")
+     if isinstance(quit_at, datetime):
+         if quit_at.tzinfo is None:
+@@ -281,14 +451,64 @@ async def build_stats(session: AsyncSession, user_id: int) -> dict:
+     clean_pct_val = round(max(0.0, (total_days - relapse_count) / total_days * 100), 1)
+ 
+     achievements = await list_achievements(session, user_id)
++    # Health & Time milestones
++    if seconds_free >= 8 * 3600:
++        await add_achievement(session, user_id, "first_hours")
+     if clean_days >= 1:
+         await add_achievement(session, user_id, "first_day")
++    if clean_days >= 2:
++        await add_achievement(session, user_id, "two_days")
++    if clean_days >= 3:
++        await add_achievement(session, user_id, "three_days")
++    if clean_days >= 5:
++        await add_achievement(session, user_id, "five_days")
+     if clean_days >= 7:
+         await add_achievement(session, user_id, "week_free")
++    if clean_days >= 10:
++        await add_achievement(session, user_id, "ten_days")
++    if clean_days >= 14:
++        await add_achievement(session, user_id, "two_weeks")
++    if clean_days >= 21:
++        await add_achievement(session, user_id, "three_weeks")
+     if clean_days >= 30:
+         await add_achievement(session, user_id, "month_free")
++    if clean_days >= 60:
++        await add_achievement(session, user_id, "two_months")
++    if clean_days >= 90:
++        await add_achievement(session, user_id, "three_months")
++    if clean_days >= 180:
++        await add_achievement(session, user_id, "half_year")
++    if clean_days >= 270:
++        await add_achievement(session, user_id, "nine_months")
++    if clean_days >= 365:
++        await add_achievement(session, user_id, "year_free")
++    if clean_days >= 730:
++        await add_achievement(session, user_id, "two_years")
++    if clean_days >= 1825:
++        await add_achievement(session, user_id, "five_years")
++
++    # Craving mastery milestones
++    if cravings_resisted >= 1:
++        await add_achievement(session, user_id, "first_craving")
++    if cravings_resisted >= 5:
++        await add_achievement(session, user_id, "craving_pro")
+     if cravings_resisted >= 10:
+         await add_achievement(session, user_id, "craving_master")
++    if cravings_resisted >= 25:
++        await add_achievement(session, user_id, "craving_legend")
++    if cravings_resisted >= 50:
++        await add_achievement(session, user_id, "zen_master")
++
++    # Financial and track milestones
++    if saved >= 10000:
++        await add_achievement(session, user_id, "money_saver_1")
++    if saved >= 50000:
++        await add_achievement(session, user_id, "money_saver_2")
++    if saved >= 100000:
++        await add_achievement(session, user_id, "money_saver_3")
++    if clean_days >= 30 and relapse_count == 0:
++        await add_achievement(session, user_id, "clean_month_track")
++
+     achievements = await list_achievements(session, user_id)
+ 
+     cravings_by_day_list = await get_cravings_by_day(session, user_id, days=14)
+@@ -297,6 +517,8 @@ async def build_stats(session: AsyncSession, user_id: int) -> dict:
+         "user": {
+             "id": user.id,
+             "first_name": user.first_name,
++            "name": user.first_name or "Друг",
++            "username": user.username,
+             "city": user.city,
+             "nicotine_type": user.nicotine_type,
+             "quit_date": user.quit_date.isoformat() if user.quit_date else None,
+@@ -304,7 +526,18 @@ async def build_stats(session: AsyncSession, user_id: int) -> dict:
+             "pack_price_kzt": user.pack_price_kzt,
+             "units_per_day": user.units_per_day,
+             "financial_goal_kzt": user.financial_goal_kzt,
++            "currency": user.currency or "KZT",
++            "timezone": user.timezone or "Asia/Almaty",
+         },
++        "quit_at": iso_str,
++        "first_name": user.first_name or "Друг",
++        "name": user.first_name or "Друг",
++        "nicotine_type": user.nicotine_type,
++        "pack_price_kzt": user.pack_price_kzt,
++        "units_per_day": user.units_per_day,
++        "financial_goal_kzt": user.financial_goal_kzt,
++        "currency": user.currency or "KZT",
++        "timezone": user.timezone or "Asia/Almaty",
+         "days_free": clean_days,
+         "hours_free": clean_hours,
+         "minutes_free": clean_minutes,
+@@ -319,7 +552,14 @@ async def build_stats(session: AsyncSession, user_id: int) -> dict:
+         "clean_track_percent": clean_pct_val,
+         "cravings_by_day": cravings_by_day_list,
+         "achievements": [
+-            {"code": item.code, "earned_at": item.unlocked_at.isoformat()} for item in achievements
++            {
++                "code": item.code,
++                "title": ACHIEVEMENT_METADATA.get(item.code, {}).get("title", item.code),
++                "description": ACHIEVEMENT_METADATA.get(item.code, {}).get("description", "Достижение открыто"),
++                "icon": ACHIEVEMENT_METADATA.get(item.code, {}).get("icon", "🏅"),
++                "earned_at": item.unlocked_at.isoformat() if item.unlocked_at else None,
++            }
++            for item in achievements
+         ],
+     }
+ 
+@@ -370,7 +610,7 @@ async def get_cravings_by_day(session: AsyncSession, user_id: int, days: int = 1
+ 
+ 
+ async def recent_cravings(session: AsyncSession, user_id: int, days: int = 14) -> list[dict]:
+-    threshold = datetime.utcnow() - timedelta(days=days)
++    threshold = datetime.now(timezone.utc) - timedelta(days=days)
+     records = (
+         await session.scalars(
+             select(CravingLog)
+diff --git a/smokefree_bot/database/models.py b/smokefree_bot/database/models.py
+index 4b4e511..e003cb5 100644
+--- a/smokefree_bot/database/models.py
++++ b/smokefree_bot/database/models.py
+@@ -1,7 +1,10 @@
+-from datetime import date, datetime
++from datetime import date, datetime, timezone
+ from sqlalchemy import BigInteger, Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text
+ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+ 
++def now_utc() -> datetime:
++    return datetime.now(timezone.utc)
++
+ class Base(DeclarativeBase):
+     pass
+ 
+@@ -22,7 +25,7 @@ class User(Base):
+     units_per_day: Mapped[float] = mapped_column(Float, default=15.0)
+     financial_goal_kzt: Mapped[float] = mapped_column(Float, default=0.0)
+     onboarding_complete: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
++    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+ 
+     cravings: Mapped[list["CravingLog"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+     relapses: Mapped[list["RelapseIncident"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+@@ -38,7 +41,7 @@ class CravingLog(Base):
+     trigger: Mapped[str] = mapped_column(String(120), default="неизвестно")
+     outcome: Mapped[str] = mapped_column(String(40), default="resisted")
+     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+-    logged_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
++    logged_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc, index=True)
+ 
+     user: Mapped["User"] = relationship(back_populates="cravings")
+ 
+@@ -64,7 +67,7 @@ class RelapseIncident(Base):
+     reflection: Mapped[str] = mapped_column(Text, default="")
+     plan: Mapped[str] = mapped_column(Text, default="")
+     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+-    occurred_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
++    occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc, index=True)
+ 
+     user: Mapped["User"] = relationship(back_populates="relapses")
+ 
+@@ -74,6 +77,6 @@ class Achievement(Base):
+     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"), index=True)
+     code: Mapped[str] = mapped_column(String(64), index=True)
+-    unlocked_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
++    unlocked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+ 
+     user: Mapped["User"] = relationship(back_populates="achievements")
+diff --git a/smokefree_bot/webapp/api.py b/smokefree_bot/webapp/api.py
+index e068cb5..071856e 100644
+--- a/smokefree_bot/webapp/api.py
++++ b/smokefree_bot/webapp/api.py
+@@ -273,6 +273,8 @@ def create_app() -> FastAPI:
+                 pack_price_kzt=payload.pack_price_kzt or user.pack_price_kzt or 900.0,
+                 units_per_day=payload.units_per_day or user.units_per_day or 20.0,
+                 financial_goal_kzt=payload.financial_goal_kzt or user.financial_goal_kzt or 0.0,
++                name=payload.name or user.first_name or "Друг",
++                timezone_name=payload.timezone or user.timezone or "Asia/Almaty",
+             )
+             fresh_stats = await build_stats(session, payload.user_id)
+             return {"status": "ok", "stats": fresh_stats}
+diff --git a/smokefree_bot/webapp/static/app.js b/smokefree_bot/webapp/static/app.js
+index 2c0e664..001aaa5 100644
+--- a/smokefree_bot/webapp/static/app.js
++++ b/smokefree_bot/webapp/static/app.js
+@@ -174,7 +174,7 @@
+     const currencyConfig = CURRENCY_RATES[currentCurrency];
+ 
+     if ($("greeting")) {
+-      $("greeting").textContent = `${data.user.name || "Друг"}, твой стаж свободы:`;
++      $("greeting").textContent = `${data.user.name || data.user.first_name || "Друг"}, твой стаж свободы:`;
+     }
+ 
+     // Money
+@@ -224,17 +224,28 @@
+   }
+ 
+   /* -------------------------------------------------------------
+-     WHO RECOVERY TIMELINE (DYNAMIC COMPUTED)
++     WHO RECOVERY TIMELINE (DYNAMIC COMPUTED & EXPANDED)
+   ------------------------------------------------------------- */
+   const WHO_STAGES = [
+-    { id: "20m", targetSec: 20 * 60, title: "20 минут: Пульс и давление", desc: "Частота сердечных сокращений и артериальное давление возвращаются к норме. Кровообращение в конечностях улучшается." },
+-    { id: "8h", targetSec: 8 * 3600, title: "8 часов: Кислород в крови", desc: "Уровень угарного газа (CO) снижается вдвое. Концентрация кислорода в артериальной крови достигает оптимальных значений." },
+-    { id: "24h", targetSec: 24 * 3600, title: "24 часа: Очищение легких", desc: "Риск инфаркта начинает снижаться. Легкие начинают избавляться от остатков слизи и продуктов горения табака." },
+-    { id: "48h", targetSec: 48 * 3600, title: "48 часов: Вкус и обоняние", desc: "Организм полностью освободился от никотина. Нервные окончания начинают восстанавливаться, вкусы и запахи становятся ярче." },
+-    { id: "72h", targetSec: 72 * 3600, title: "72 часа: Легкость дыхания", desc: "Бронхиальные трубки расслабляются, дыхание становится глубже. Пик физиологической никотиновой ломки пройден!" },
+-    { id: "14d", targetSec: 14 * 86400, title: "2 недели: Энергия и выносливость", desc: "Кровообращение во всем теле существенно улучшилось. Функционирование легких увеличивается на 30%." },
+-    { id: "30d", targetSec: 30 * 86400, title: "1 месяц: Регенерация бронхов", desc: "Уходит одышка и кашель курильщика. Реснички бронхиального эпителия восстанавливают способность очищать дыхательные пути." },
+-    { id: "365d", targetSec: 365 * 86400, title: "1 год: Здоровое сердце", desc: "Риск развития ишемической болезни сердца снижается на 50% по сравнению с продолжающим курить человеком." },
++    { id: "20m", targetSec: 20 * 60, title: "20 минут: Пульс и давление", desc: "Частота сердечных сокращений и артериальное давление возвращаются к норме. Кровообращение в конечностях заметно улучшается." },
++    { id: "8h", targetSec: 8 * 3600, title: "8 часов: Кислород в крови", desc: "Уровень токсичного угарного газа (CO) снижается вдвое. Концентрация свободного кислорода в артериальной крови достигает оптимума." },
++    { id: "12h", targetSec: 12 * 3600, title: "12 часов: Детоксикация CO", desc: "Угарный газ полностью вытеснен кислородом. Гемоглобин транспортирует максимум O₂ к клеткам сердца и головного мозга." },
++    { id: "24h", targetSec: 24 * 3600, title: "24 часа: Дренаж легких", desc: "Риск внезапного инфаркта начинает неуклонно снижаться. Легкие запускают процесс выведения мокроты и остатков продуктов горения." },
++    { id: "48h", targetSec: 48 * 3600, title: "48 часов: Вкус и обоняние", desc: "Организм полностью свободен от никотина. Нервные окончания регенерируют, вкусы любимых блюд и ароматы становятся яркими и тонкими." },
++    { id: "72h", targetSec: 72 * 3600, title: "72 часа: Легкость дыхания", desc: "Бронхиальные трубки расслабляются, вдох становится свободным. Пик физиологической никотиновой ломки успешно пройден!" },
++    { id: "5d", targetSec: 5 * 86400, title: "5 дней: Вывод котинина", desc: "Печень и почки полностью очищены от метаболита никотина — котинина. Физическая зависимость уступила место психологической победе." },
++    { id: "7d", targetSec: 7 * 86400, title: "7 дней: Неделя триумфа", desc: "Восстанавливается здоровая архитектура медленного сна. Утренний пульс стабилен, уходит навязчивая тахикардия." },
++    { id: "10d", targetSec: 10 * 86400, title: "10 дней: Свежее дыхание", desc: "Исчезает специфический табачный налет на зубах и запах от кожи. Улучшается микрофлора ротовой полости." },
++    { id: "14d", targetSec: 14 * 86400, title: "2 недели: Энергия и выносливость", desc: "Кровообращение во всех органах возросло на 30%. Подъем по лестнице и быстрый шаг больше не вызывают одышки." },
++    { id: "21d", targetSec: 21 * 86400, title: "21 день: Нейропластичность", desc: "Разрушен старый рефлекс «стресс — сигарета». Мозг учится вырабатывать эндорфины и дофамин естественным путем." },
++    { id: "30d", targetSec: 30 * 86400, title: "1 месяц: Регенерация бронхов", desc: "Реснички мерцательного эпителия бронхов восстановились и очищают легкие. Исчезает хронический утренний кашель курильщика." },
++    { id: "60d", targetSec: 60 * 86400, title: "2 месяца: Дофаминовый баланс", desc: "Плотность никотиновых ацетилхолиновых рецепторов нормализовалась. Естественные события приносят глубокое удовольствие." },
++    { id: "90d", targetSec: 90 * 86400, title: "3 месяца: Железные легкие", desc: "Форсированная жизненная емкость легких (ФЖЕЛ) увеличивается до +15%. Спорт и кардионагрузки даются легко и в кайф." },
++    { id: "180d", targetSec: 180 * 86400, title: "6 месяцев: Чистые пазухи носа", desc: "Хроническое воспаление в носоглотке и бронхах полностью угасло. Сезонные простуды проходят быстро и без осложнений." },
++    { id: "270d", targetSec: 270 * 86400, title: "9 месяцев: Защита сосудов (СРБ)", desc: "Маркер сосудистого воспаления (СРБ) в крови снизился до нормы некурящего человека. Артерии защищены от склероза." },
++    { id: "365d", targetSec: 365 * 86400, title: "1 год: Новое сердце", desc: "Избыточный риск развития ишемической болезни сердца снижен ровно на 50% по сравнению с курящим человеком!" },
++    { id: "730d", targetSec: 730 * 86400, title: "2 года: Стальной барьер", desc: "Риск инфаркта миокарда упал до уровня среднестатистического никогда не курившего человека." },
++    { id: "1825d", targetSec: 1825 * 86400, title: "5 лет: Золотой стандарт ВОЗ", desc: "Риск ишемического инсульта и сосудистых катастроф мозга снизился до показателей абсолютно некурящего человека!" }
+   ];
+ 
+   function renderHealthTimeline(currentSec) {
+@@ -267,24 +278,106 @@
+   }
+ 
+   /* -------------------------------------------------------------
+-     ACHIEVEMENTS
++     ACHIEVEMENTS SYSTEM (EXPANDED HEALTH & MASTERY)
+   ------------------------------------------------------------- */
++  const ACHIEVEMENT_META = {
++    // Здоровье (ВОЗ & Медицинские вехи)
++    first_hours: { title: "Чистый кислород", description: "8 часов без дыма — угарный газ (CO) в крови снизился вдвое", icon: "🫁", category: "health" },
++    first_day: { title: "Первый чистый день", description: "24 часа без табака — CO полностью покинул кровь", icon: "🌱", category: "health" },
++    two_days: { title: "Возрождение вкуса", description: "48 часов — организм чист от никотина, обоняние и вкус оживают", icon: "🍓", category: "health" },
++    three_days: { title: "Бронхиальный прорыв", description: "72 часа — бронхи расслабляются, пик физической ломки позади!", icon: "🌬️", category: "health" },
++    five_days: { title: "Чистый котинин", description: "5 дней — метаболиты никотина выведены из печени и почек", icon: "🛡️", category: "health" },
++    week_free: { title: "Неделя триумфа", description: "7 дней — утренний пульс спокоен, кровообращение восстановилось", icon: "⚡", category: "health" },
++    ten_days: { title: "Свежее дыхание", description: "10 дней — налет на зубах и запах дыма полностью ушли", icon: "✨", category: "health" },
++    two_weeks: { title: "Кардио-разгон", description: "14 дней — функция легких выросла на 30%, шаги даются легко", icon: "❤️", category: "health" },
++    three_weeks: { title: "Нейропластичность", description: "21 день — сломан старый рефлекс «стресс — сигарета»", icon: "🧠", category: "health" },
++    month_free: { title: "Бронхиальный щит", description: "30 дней — реснички бронхов очищают легкие, ушел кашель", icon: "🌿", category: "health" },
++    two_months: { title: "Дофаминовый баланс", description: "60 дней — ацетилхолиновые рецепторы откалиброваны", icon: "☀️", category: "health" },
++    three_months: { title: "Железные легкие", description: "90 дней — жизненная емкость легких выросла на 15%", icon: "🏔️", category: "health" },
++    half_year: { title: "Полгода свободы", description: "180 дней — пазухи носа чисты, риск бронхоспазма снижен на 90%", icon: "💎", category: "health" },
++    nine_months: { title: "Чистые артерии", description: "270 дней — маркер сосудистого воспаления (СРБ) в норме", icon: "🩸", category: "health" },
++    year_free: { title: "Новое сердце", description: "365 дней — риск ишемической болезни сердца снизился в 2 раза!", icon: "🏆", category: "health" },
++    two_years: { title: "Стальной рубеж", description: "2 года — риск инфаркта миокарда сравнялся с некурящими", icon: "👑", category: "health" },
++    five_years: { title: "Золотой стандарт ВОЗ", description: "5 лет чистоты — риск инсульта как у абсолютно некурящего человека", icon: "🌟", category: "health" },
++
++    // Осознанность и преодоление тяги
++    first_craving: { title: "Первая победа", description: "Ты доказал, что тяга — это просто 3-минутная волна", icon: "🔥", category: "mindset" },
++    craving_pro: { title: "Страж спокойствия", description: "5 преодоленных приступов тяги — осознанный контроль над импульсом", icon: "🥋", category: "mindset" },
++    craving_master: { title: "Мастер тяги", description: "10 побед над импульсом — уверенный контроль биохимии", icon: "🥊", category: "mindset" },
++    craving_legend: { title: "Непоколебимый стоик", description: "25 побед над импульсом — твоя опора сильнее любого триггера", icon: "🏛️", category: "mindset" },
++    zen_master: { title: "Дзен-мастер свободы", description: "50 побед — абсолютный иммунитет к никотиновым провокациям", icon: "🧘", category: "mindset" },
++
++    // Финансы и мастерство
++    money_saver_1: { title: "Первая копилка", description: "Сэкономлено 10 000 ₸ — деньги в кармане, а не в пепле", icon: "💰", category: "money" },
++    money_saver_2: { title: "Финансовый щит", description: "Сэкономлено 50 000 ₸ — реальный капитал на цели и здоровье", icon: "💎", category: "money" },
++    money_saver_3: { title: "Инвестор в жизнь", description: "Сэкономлено 100 000 ₸ — независимость от табачных гигантов", icon: "🏦", category: "money" },
++    clean_month_track: { title: "Безупречный трек", description: "30 дней подряд со 100% чистотой без единого срыва", icon: "🎯", category: "mastery" },
++  };
++
++  let activeAchievementFilter = "all";
++
+   function renderAchievements(items) {
+     const el = $("achievements");
+     if (!el) return;
+-    if ($("achievementCount")) $("achievementCount").textContent = items.length;
+-
+-    el.innerHTML = items.length
+-      ? items.map((item) => `
+-        <article class="achievement-item unlocked">
+-          <span class="ach-icon">🏅</span>
+-          <div>
+-            <strong>${item.title}</strong>
+-            <p>${item.description}</p>
+-          </div>
+-        </article>
+-      `).join("")
+-      : `<div class="info-note"><p>Первая награда откроется уже через 24 часа чистой свободы!</p></div>`;
++
++    const earnedCodes = new Set((items || []).map((item) => item.code));
++    const allEntries = Object.entries(ACHIEVEMENT_META);
++    const totalCount = allEntries.length;
++    const earnedCount = allEntries.filter(([code]) => earnedCodes.has(code)).length;
++
++    if ($("achievementCount")) {
++      $("achievementCount").textContent = `${earnedCount} / ${totalCount}`;
++    }
++
++    const filteredEntries = allEntries.filter(([code, meta]) => {
++      if (activeAchievementFilter === "unlocked") return earnedCodes.has(code);
++      if (activeAchievementFilter === "locked") return !earnedCodes.has(code);
++      if (activeAchievementFilter === "health") return meta.category === "health";
++      if (activeAchievementFilter === "mindset") return meta.category === "mindset";
++      if (activeAchievementFilter === "money") return meta.category === "money" || meta.category === "mastery";
++      return true;
++    });
++
++    el.innerHTML = `
++      <div class="ach-filters-wrap" style="grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
++        <button class="ach-filter-btn ${activeAchievementFilter === 'all' ? 'active' : ''}" data-filter="all">Все (${totalCount})</button>
++        <button class="ach-filter-btn ${activeAchievementFilter === 'unlocked' ? 'active' : ''}" data-filter="unlocked">Получено (${earnedCount})</button>
++        <button class="ach-filter-btn ${activeAchievementFilter === 'health' ? 'active' : ''}" data-filter="health">🫁 Здоровье</button>
++        <button class="ach-filter-btn ${activeAchievementFilter === 'mindset' ? 'active' : ''}" data-filter="mindset">🧠 Осознанность</button>
++        <button class="ach-filter-btn ${activeAchievementFilter === 'money' ? 'active' : ''}" data-filter="money">💰 Финансы</button>
++      </div>
++      ${
++        filteredEntries.map(([code, meta]) => {
++          const isUnlocked = earnedCodes.has(code);
++          const icon = meta.icon || "🏅";
++          const title = meta.title || code;
++          const desc = meta.description || "";
++          const statusBadge = isUnlocked
++            ? `<span class="ach-status-badge ach-done">Открыто ✓</span>`
++            : `<span class="ach-status-badge ach-locked">🔒 Предстоит</span>`;
++
++          return `
++            <article class="achievement-item ${isUnlocked ? 'unlocked' : 'locked'}">
++              <span class="ach-icon">${icon}</span>
++              <div class="ach-body">
++                <div class="ach-item-header">
++                  <strong>${title}</strong>
++                  ${statusBadge}
++                </div>
++                <p>${desc}</p>
++              </div>
++            </article>
++          `;
++        }).join("")
++      }
++    `;
++
++    el.querySelectorAll(".ach-filter-btn").forEach((btn) => {
++      btn.addEventListener("click", () => {
++        activeAchievementFilter = btn.dataset.filter || "all";
++        renderAchievements(items);
++      });
++    });
+   }
+ 
+   /* -------------------------------------------------------------
+@@ -1093,23 +1186,24 @@
+         const cached = localStorage.getItem("smokefree_cached_stats");
+         if (cached) {
+           const cachedObj = JSON.parse(cached);
+-          if (cachedObj && cachedObj.quit_at) {
+-            await api("/api/user/sync", {
++          const cachedQuitAt = cachedObj.quit_at || cachedObj.user?.quit_at;
++          if (cachedObj && cachedQuitAt) {
++            const syncRes = await api("/api/user/sync", {
+               method: "POST",
+               body: JSON.stringify({
+-                user_id: userId,
+-                name: cachedObj.first_name || "Друг",
+-                quit_at: cachedObj.quit_at,
+-                nicotine_type: cachedObj.nicotine_type || "Сигареты",
+-                pack_price_kzt: cachedObj.pack_price_kzt || 900,
+-                units_per_day: cachedObj.units_per_day || 20,
+-                financial_goal_kzt: cachedObj.financial_goal_kzt || 0,
++                user_id: Number(userId),
++                name: cachedObj.user?.name || cachedObj.user?.first_name || cachedObj.name || cachedObj.first_name || "Друг",
++                quit_at: cachedQuitAt,
++                nicotine_type: cachedObj.user?.nicotine_type || cachedObj.nicotine_type || "Сигареты",
++                pack_price_kzt: cachedObj.user?.pack_price_kzt || cachedObj.pack_price_kzt || 900,
++                units_per_day: cachedObj.user?.units_per_day || cachedObj.units_per_day || 20,
++                financial_goal_kzt: cachedObj.user?.financial_goal_kzt || cachedObj.financial_goal_kzt || 0,
+               })
+             });
+-            const restored = await api(`/api/stats/${userId}`);
++            const restored = syncRes?.stats || (await api(`/api/stats/${userId}`));
+             renderStats(restored, true);
+             await loadTriggers();
+-            toast("Прогресс успешно восстановлен!");
++            toast("Прогресс успешно синхронизирован!");
+             return;
+           }
+         }
+@@ -1127,35 +1221,36 @@
+       return;
+     }
+ 
+-    // Step 2 — auto-heal: server DB was wiped on redeploy or has a reset/
+-    // missing quit_at, but we have a newer value cached locally. This does
+-    // its own network calls and can fail on its own without that meaning
+-    // we're offline — `data` from Step 1 is always a valid fallback.
++    // Step 2 — auto-heal: server DB was wiped on redeploy or has an uninitialized
++    // quit_at, but we have a valid value cached locally.
+     try {
+       const cached = localStorage.getItem("smokefree_cached_stats");
+       if (cached && data) {
+         const cachedObj = JSON.parse(cached);
+-        const cachedQuitAt = cachedObj.quit_at || (cachedObj.user && cachedObj.user.quit_at);
+-        const serverQuitAt = data.user?.quit_at;
++        const cachedQuitAt = cachedObj.quit_at || cachedObj.user?.quit_at;
++        const serverQuitAt = data.user?.quit_at || data.quit_at;
+ 
+         const isServerQuitMissing = !serverQuitAt && !data.user?.quit_date;
+-        const isServerQuitReset = cachedQuitAt && serverQuitAt && (new Date(cachedQuitAt).getTime() < new Date(serverQuitAt).getTime() - 600000);
+ 
+-        if (cachedQuitAt && (isServerQuitMissing || isServerQuitReset)) {
+-          await api("/api/user/sync", {
++        if (cachedQuitAt && isServerQuitMissing) {
++          const syncRes = await api("/api/user/sync", {
+             method: "POST",
+             body: JSON.stringify({
+               user_id: Number(userId),
+-              name: cachedObj.first_name || cachedObj.user?.name || "Друг",
++              name: cachedObj.user?.name || cachedObj.user?.first_name || cachedObj.name || cachedObj.first_name || "Друг",
+               quit_at: cachedQuitAt,
+-              nicotine_type: cachedObj.nicotine_type || cachedObj.user?.nicotine_type || "Сигареты",
+-              pack_price_kzt: cachedObj.pack_price_kzt || cachedObj.user?.pack_price_kzt || 900,
+-              units_per_day: cachedObj.units_per_day || cachedObj.user?.units_per_day || 20,
+-              financial_goal_kzt: cachedObj.financial_goal_kzt || cachedObj.user?.financial_goal_kzt || 0,
++              nicotine_type: cachedObj.user?.nicotine_type || cachedObj.nicotine_type || "Сигареты",
++              pack_price_kzt: cachedObj.user?.pack_price_kzt || cachedObj.pack_price_kzt || 900,
++              units_per_day: cachedObj.user?.units_per_day || cachedObj.units_per_day || 20,
++              financial_goal_kzt: cachedObj.user?.financial_goal_kzt || cachedObj.financial_goal_kzt || 0,
+             })
+           });
+-          data = await api(`/api/stats/${userId}`);
+-          toast("Прогресс успешно восстановлен!");
++          if (syncRes?.stats) {
++            data = syncRes.stats;
++          } else {
++            data = await api(`/api/stats/${userId}`);
++          }
++          toast("Прогресс синхронизирован с сервером!");
+         }
+       }
+     } catch (syncErr) {
+diff --git a/smokefree_bot/webapp/static/styles.css b/smokefree_bot/webapp/static/styles.css
+index b704e2b..6e12fa0 100644
+--- a/smokefree_bot/webapp/static/styles.css
++++ b/smokefree_bot/webapp/static/styles.css
+@@ -712,39 +712,116 @@ h1 {
+ 
+ .achievement-list {
+   display: grid;
+-  grid-template-columns: 1fr 1fr;
++  grid-template-columns: 1fr;
+   gap: 10px;
+ }
+ 
++@media (min-width: 480px) {
++  .achievement-list {
++    grid-template-columns: 1fr 1fr;
++  }
++}
++
++.ach-filter-btn {
++  background: var(--panel-soft);
++  border: 1px solid var(--line);
++  color: var(--muted);
++  font-size: 11px;
++  font-weight: 600;
++  padding: 6px 12px;
++  border-radius: 999px;
++  cursor: pointer;
++  transition: all 0.15s ease;
++}
++
++.ach-filter-btn:hover {
++  color: var(--text);
++  border-color: var(--line-strong);
++}
++
++.ach-filter-btn.active {
++  background: rgba(245, 158, 11, 0.15);
++  border-color: rgba(245, 158, 11, 0.4);
++  color: #fbbf24;
++  font-weight: 700;
++}
++
+ .achievement-item {
+   background: var(--panel-soft);
+   border: 1px solid var(--line);
+   border-radius: 14px;
+   padding: 12px;
+   display: flex;
+-  gap: 10px;
++  gap: 12px;
+   align-items: flex-start;
++  transition: all 0.2s ease;
+ }
+ 
+ .achievement-item.unlocked {
+-  border-color: rgba(245, 158, 11, 0.3);
+-  background: rgba(245, 158, 11, 0.05);
++  border-color: rgba(245, 158, 11, 0.35);
++  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(20, 28, 40, 0.8));
++  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.08);
++}
++
++.achievement-item.locked {
++  opacity: 0.65;
++  border-color: rgba(255, 255, 255, 0.05);
++  background: rgba(255, 255, 255, 0.02);
++}
++
++.achievement-item.locked:hover {
++  opacity: 0.9;
+ }
+ 
+ .achievement-item .ach-icon {
+-  font-size: 24px;
++  font-size: 26px;
+   flex-shrink: 0;
++  line-height: 1;
++}
++
++.ach-body {
++  flex: 1;
++  min-width: 0;
++}
++
++.ach-item-header {
++  display: flex;
++  justify-content: space-between;
++  align-items: center;
++  gap: 6px;
++  margin-bottom: 4px;
+ }
+ 
+ .achievement-item strong {
+   display: block;
+-  font-size: 12px;
++  font-size: 13px;
++  font-weight: 700;
++  color: var(--text);
++}
++
++.ach-status-badge {
++  font-size: 9px;
+   font-weight: 700;
++  padding: 2px 6px;
++  border-radius: 6px;
++  white-space: nowrap;
++}
++
++.ach-status-badge.ach-done {
++  background: rgba(16, 185, 129, 0.15);
++  color: #34d399;
++}
++
++.ach-status-badge.ach-locked {
++  background: rgba(255, 255, 255, 0.06);
++  color: var(--muted);
+ }
+ 
+ .achievement-item p {
+-  font-size: 10px;
++  font-size: 11px;
+   color: var(--muted);
++  line-height: 1.4;
++  margin: 0;
+ }
+ 
+ /* HEALTH TIMELINE */
+diff --git a/src/App.tsx b/src/App.tsx
+index b795e3b..4e19577 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -435,6 +435,8 @@ export default function App() {
+             triggers={triggers}
+             cravings={cravings}
+             relapses={relapses}
++            chatMessages={chatMessages}
++            setChatMessages={setChatMessages}
+             onOpenSos={() => setIsSosOpen(true)}
+             onOpenRelapse={() => setIsRelapseOpen(true)}
+             onOpenSettings={() => setIsSettingsOpen(true)}
+diff --git a/src/components/AnalyticsView.tsx b/src/components/AnalyticsView.tsx
+index d1cebd7..3f688b9 100644
+--- a/src/components/AnalyticsView.tsx
++++ b/src/components/AnalyticsView.tsx
+@@ -1,4 +1,15 @@
+ import React, { useState, useMemo } from 'react';
++import {
++  ResponsiveContainer,
++  LineChart,
++  Line,
++  XAxis,
++  YAxis,
++  CartesianGrid,
++  Tooltip,
++  Legend,
++  ReferenceLine,
++} from 'recharts';
+ import {
+   TrendingUp,
+   DollarSign,
+@@ -19,6 +30,8 @@ import {
+   Sliders,
+   ChevronRight,
+   Target,
++  ArrowUpRight,
++  Info,
+ } from 'lucide-react';
+ import { UserProfile, FreedomStats, CravingRecord, TriggerItem, RelapseRecord, UnitTestItem } from '../types';
+ import { WHO_HEALTH_MILESTONES } from '../data/auditReport';
+@@ -170,6 +183,82 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
+     ? Math.ceil((profile.financialGoal - stats.moneySaved) / stats.dailyExpense)
+     : 0;
+ 
++  // Chart timeframe state for cumulative savings vs goal
++  const [chartHorizon, setChartHorizon] = useState<'30d' | '90d' | '180d' | '1y' | 'goal'>('goal');
++
++  // Projected Goal Target Date
++  const goalTargetDate = useMemo(() => {
++    if (profile.financialGoal <= 0 || stats.dailyExpense <= 0) return null;
++    const daysNeeded = Math.ceil(profile.financialGoal / stats.dailyExpense);
++    const quitDate = new Date(profile.quitAt || Date.now());
++    const target = new Date(quitDate.getTime() + daysNeeded * 86400000);
++    return target.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
++  }, [profile.financialGoal, stats.dailyExpense, profile.quitAt]);
++
++  // Cumulative savings timeline dataset for Recharts
++  const savingsTimelineData = useMemo(() => {
++    const daily = stats.dailyExpense > 0 ? stats.dailyExpense : 1000;
++    const currentDays = Math.max(0, stats.fractionalDays);
++    const goal = profile.financialGoal || 0;
++    const daysToReachGoal = goal > 0 ? Math.ceil(goal / daily) : 60;
++
++    let targetTotalDays = 60;
++    if (chartHorizon === '30d') targetTotalDays = Math.max(30, Math.ceil(currentDays) + 7);
++    else if (chartHorizon === '90d') targetTotalDays = Math.max(90, Math.ceil(currentDays) + 14);
++    else if (chartHorizon === '180d') targetTotalDays = Math.max(180, Math.ceil(currentDays) + 30);
++    else if (chartHorizon === '1y') targetTotalDays = Math.max(365, Math.ceil(currentDays) + 30);
++    else if (chartHorizon === 'goal') {
++      targetTotalDays = Math.max(Math.ceil(daysToReachGoal * 1.15), Math.ceil(currentDays) + 14, 30);
++    }
++
++    // Step calculation to ensure optimal resolution (approx 16-24 data points)
++    const step = Math.max(1, Math.round(targetTotalDays / 20));
++    const dayPoints = new Set<number>();
++    dayPoints.add(0);
++    for (let d = step; d < targetTotalDays; d += step) {
++      dayPoints.add(d);
++    }
++
++    const roundedToday = Math.round(currentDays);
++    dayPoints.add(roundedToday);
++    if (daysToReachGoal > 0 && daysToReachGoal <= targetTotalDays) {
++      dayPoints.add(daysToReachGoal);
++    }
++    dayPoints.add(targetTotalDays);
++
++    const sortedDays = Array.from(dayPoints).sort((a, b) => a - b);
++    const quitDate = new Date(profile.quitAt || Date.now());
++
++    return sortedDays.map((d) => {
++      const pointDate = new Date(quitDate.getTime() + d * 86400000);
++      const dateLabel = pointDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
++      const isPastOrToday = d <= roundedToday;
++      const isToday = d === roundedToday;
++      const isGoalDay = daysToReachGoal > 0 && d === daysToReachGoal;
++
++      // Actual savings only available for past and today
++      const actualSaved = isPastOrToday
++        ? isToday
++          ? Math.round(stats.moneySaved)
++          : Math.round(d * daily)
++        : null;
++
++      const projectedSaved = Math.round(d * daily);
++
++      return {
++        day: d,
++        label: isToday ? `Сегодня (д. ${d})` : isGoalDay ? `Цель (д. ${d})` : `${dateLabel} (д. ${d})`,
++        shortLabel: isToday ? 'Сегодня' : `${d}д`,
++        dateFormatted: dateLabel,
++        actualSaved,
++        projectedSaved,
++        financialGoal: goal > 0 ? goal : undefined,
++        isToday,
++        isGoalDay,
++      };
++    });
++  }, [stats.dailyExpense, stats.fractionalDays, stats.moneySaved, profile.financialGoal, profile.quitAt, chartHorizon]);
++
+   // Run all Unit Tests in browser
+   const handleRunAllTests = () => {
+     setRunningTests(true);
+@@ -369,6 +458,278 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
+             </div>
+           </div>
+ 
++          {/* Cumulative Money Saved vs Financial Goal Line Chart (Recharts) */}
++          <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-5">
++            {/* Header & Controls */}
++            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
++              <div>
++                <div className="flex items-center gap-2 mb-1">
++                  <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
++                    <DollarSign className="w-3.5 h-3.5" />
++                    Накопления vs Цель
++                  </span>
++                  <span className="text-xs text-slate-400 font-medium">Recharts Динамика</span>
++                </div>
++                <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
++                  <TrendingUp className="w-5 h-5 text-emerald-400" />
++                  <span>График кумулятивной экономии и цель</span>
++                </h3>
++                <p className="text-xs text-slate-400 mt-0.5">
++                  Траектория накопленных средств от дня отказа до пересечения финансовой цели
++                </p>
++              </div>
++
++              {/* Time Horizon Selector Buttons */}
++              <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 self-start sm:self-auto text-xs">
++                <button
++                  onClick={() => setChartHorizon('30d')}
++                  className={`px-2.5 py-1.5 rounded-lg transition-all font-medium ${
++                    chartHorizon === '30d'
++                      ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
++                      : 'text-slate-400 hover:text-slate-200'
++                  }`}
++                >
++                  30 дн
++                </button>
++                <button
++                  onClick={() => setChartHorizon('90d')}
++                  className={`px-2.5 py-1.5 rounded-lg transition-all font-medium ${
++                    chartHorizon === '90d'
++                      ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
++                      : 'text-slate-400 hover:text-slate-200'
++                  }`}
++                >
++                  90 дн
++                </button>
++                <button
++                  onClick={() => setChartHorizon('180d')}
++                  className={`px-2.5 py-1.5 rounded-lg transition-all font-medium ${
++                    chartHorizon === '180d'
++                      ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
++                      : 'text-slate-400 hover:text-slate-200'
++                  }`}
++                >
++                  180 дн
++                </button>
++                <button
++                  onClick={() => setChartHorizon('1y')}
++                  className={`px-2.5 py-1.5 rounded-lg transition-all font-medium ${
++                    chartHorizon === '1y'
++                      ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
++                      : 'text-slate-400 hover:text-slate-200'
++                  }`}
++                >
++                  1 год
++                </button>
++                <button
++                  onClick={() => setChartHorizon('goal')}
++                  className={`px-2.5 py-1.5 rounded-lg transition-all font-medium flex items-center gap-1 ${
++                    chartHorizon === 'goal'
++                      ? 'bg-amber-400 text-slate-950 font-bold shadow-sm'
++                      : 'text-amber-400/80 hover:text-amber-300'
++                  }`}
++                >
++                  <Target className="w-3 h-3" />
++                  <span>К цели</span>
++                </button>
++              </div>
++            </div>
++
++            {/* Micro KPI Ribbon */}
++            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800/80">
++              <div className="space-y-0.5">
++                <span className="text-[11px] text-slate-400">Накоплено сейчас</span>
++                <div className="text-base font-black text-emerald-400 font-mono">
++                  {Math.round(stats.moneySaved).toLocaleString()} {profile.currencySymbol}
++                </div>
++              </div>
++              <div className="space-y-0.5">
++                <span className="text-[11px] text-slate-400">Цель: {profile.financialGoalLabel || 'Покупка'}</span>
++                <div className="text-base font-black text-amber-400 font-mono">
++                  {profile.financialGoal > 0 ? `${profile.financialGoal.toLocaleString()} ${profile.currencySymbol}` : 'Не задана'}
++                </div>
++              </div>
++              <div className="space-y-0.5">
++                <span className="text-[11px] text-slate-400">Прогресс к цели</span>
++                <div className="text-base font-black text-slate-200 font-mono">
++                  {goalProgress}%
++                </div>
++              </div>
++              <div className="space-y-0.5">
++                <span className="text-[11px] text-slate-400">Осталось до цели</span>
++                <div className="text-base font-black text-sky-400 font-mono">
++                  {daysToGoal > 0 ? `${daysToGoal} дн.` : 'Достигнута! 🎉'}
++                </div>
++              </div>
++            </div>
++
++            {/* Recharts Canvas */}
++            <div className="w-full h-80 pt-2">
++              <ResponsiveContainer width="100%" height="100%">
++                <LineChart
++                  data={savingsTimelineData}
++                  margin={{ top: 15, right: 30, left: 10, bottom: 5 }}
++                >
++                  <CartesianGrid stroke="#1e293b" strokeDasharray="3 3" vertical={false} />
++                  <XAxis
++                    dataKey="shortLabel"
++                    stroke="#64748b"
++                    tick={{ fill: '#94a3b8', fontSize: 11 }}
++                    tickLine={false}
++                    axisLine={{ stroke: '#334155' }}
++                  />
++                  <YAxis
++                    stroke="#64748b"
++                    tick={{ fill: '#94a3b8', fontSize: 11 }}
++                    tickLine={false}
++                    axisLine={{ stroke: '#334155' }}
++                    tickFormatter={(val: number) => {
++                      if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
++                      if (val >= 1000) return `${Math.round(val / 1000)}k`;
++                      return `${val}`;
++                    }}
++                  />
++                  <Tooltip
++                    content={({ active, payload }: any) => {
++                      if (!active || !payload || !payload.length) return null;
++                      const pt = payload[0]?.payload;
++                      if (!pt) return null;
++
++                      return (
++                        <div className="p-3.5 rounded-2xl bg-slate-950/95 border border-slate-700 shadow-2xl backdrop-blur-md text-xs space-y-2 min-w-[210px]">
++                          <div className="flex items-center justify-between border-b border-slate-800 pb-1.5">
++                            <span className="font-bold text-slate-100">{pt.label}</span>
++                            {pt.isToday && (
++                              <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-400 font-bold">
++                                Сегодня
++                              </span>
++                            )}
++                            {pt.isGoalDay && (
++                              <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-amber-500/20 text-amber-400 font-bold">
++                                День цели
++                              </span>
++                            )}
++                          </div>
++
++                          {pt.actualSaved !== null && pt.actualSaved !== undefined && (
++                            <div className="flex items-center justify-between text-emerald-400 font-mono">
++                              <span className="flex items-center gap-1.5 text-slate-300 font-sans">
++                                <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />
++                                Фактически:
++                              </span>
++                              <span className="font-bold">
++                                {pt.actualSaved.toLocaleString()} {profile.currencySymbol}
++                              </span>
++                            </div>
++                          )}
++
++                          <div className="flex items-center justify-between text-sky-400 font-mono">
++                            <span className="flex items-center gap-1.5 text-slate-300 font-sans">
++                              <span className="w-2 h-2 rounded-full bg-sky-400 inline-block" />
++                              Траектория:
++                            </span>
++                            <span className="font-bold">
++                              {pt.projectedSaved.toLocaleString()} {profile.currencySymbol}
++                            </span>
++                          </div>
++
++                          {profile.financialGoal > 0 && (
++                            <div className="pt-1.5 border-t border-slate-800 space-y-1">
++                              <div className="flex items-center justify-between text-amber-400 font-mono">
++                                <span className="flex items-center gap-1.5 text-slate-300 font-sans">
++                                  <Target className="w-3 h-3 text-amber-400" />
++                                  Цель:
++                                </span>
++                                <span className="font-bold">
++                                  {profile.financialGoal.toLocaleString()} {profile.currencySymbol}
++                                </span>
++                              </div>
++                              <div className="flex justify-between text-[11px] text-slate-400">
++                                <span>Прогресс:</span>
++                                <span className="text-slate-200 font-mono font-medium">
++                                  {Math.min(100, Math.round((pt.projectedSaved / profile.financialGoal) * 100))}%
++                                </span>
++                              </div>
++                            </div>
++                          )}
++                        </div>
++                      );
++                    }}
++                  />
++                  <Legend
++                    wrapperStyle={{ paddingTop: '10px', fontSize: '12px' }}
++                    formatter={(val) => <span className="text-slate-300 text-xs">{val}</span>}
++                  />
++
++                  {/* Financial Goal Reference Line */}
++                  {profile.financialGoal > 0 && (
++                    <ReferenceLine
++                      y={profile.financialGoal}
++                      stroke="#f59e0b"
++                      strokeDasharray="6 4"
++                      strokeWidth={2}
++                      label={{
++                        value: `Цель: ${profile.financialGoal.toLocaleString()} ${profile.currencySymbol}`,
++                        fill: '#fbbf24',
++                        position: 'insideTopRight',
++                        fontSize: 11,
++                        fontWeight: 700,
++                      }}
++                    />
++                  )}
++
++                  {/* Lines for actual and projected trajectory */}
++                  <Line
++                    type="monotone"
++                    dataKey="actualSaved"
++                    name="Фактически сэкономлено"
++                    stroke="#10b981"
++                    strokeWidth={3}
++                    dot={{ r: 3, fill: '#10b981', stroke: '#064e3b', strokeWidth: 1.5 }}
++                    activeDot={{ r: 6, fill: '#34d399', stroke: '#ffffff', strokeWidth: 2 }}
++                    connectNulls={false}
++                  />
++                  <Line
++                    type="monotone"
++                    dataKey="projectedSaved"
++                    name="Траектория / Прогноз"
++                    stroke="#38bdf8"
++                    strokeWidth={2}
++                    strokeDasharray="4 4"
++                    dot={false}
++                    activeDot={{ r: 5, fill: '#38bdf8' }}
++                  />
++                </LineChart>
++              </ResponsiveContainer>
++            </div>
++
++            {/* Context Insight Banner */}
++            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3.5 rounded-2xl bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800 text-xs text-slate-400">
++              <div className="flex items-center gap-2 text-slate-300">
++                <Info className="w-4 h-4 text-sky-400 shrink-0" />
++                <span>
++                  Каждый день свободы сберегает{' '}
++                  <strong className="text-emerald-400 font-mono">
++                    {Math.round(stats.dailyExpense).toLocaleString()} {profile.currencySymbol}
++                  </strong>
++                  . За 30 дней это{' '}
++                  <strong className="text-emerald-400 font-mono">
++                    ~{Math.round(stats.dailyExpense * 30).toLocaleString()} {profile.currencySymbol}
++                  </strong>
++                  .
++                </span>
++              </div>
++              {goalTargetDate && daysToGoal > 0 && (
++                <div className="text-amber-300 flex items-center gap-1.5 shrink-0">
++                  <Target className="w-3.5 h-3.5 text-amber-400" />
++                  <span>
++                    Ориентир закрытия цели: <strong className="font-semibold text-amber-200">{goalTargetDate}</strong>
++                  </span>
++                </div>
++              )}
++            </div>
++          </div>
++
+           {/* Dynamic Financial Forecast & Goal */}
+           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+             {/* Financial Multi-Year Forecast */}
+diff --git a/src/components/CompanionView.tsx b/src/components/CompanionView.tsx
+index 3196def..340ef49 100644
+--- a/src/components/CompanionView.tsx
++++ b/src/components/CompanionView.tsx
+@@ -1,4 +1,4 @@
+-import React, { useState } from 'react';
++import React, { useState, useMemo } from 'react';
+ import {
+   ShieldAlert,
+   Check,
+@@ -17,6 +17,7 @@ import {
+   HelpCircle,
+   Flame,
+   CheckCircle2,
++  Award,
+ } from 'lucide-react';
+ import {
+   UserProfile,
+@@ -27,6 +28,7 @@ import {
+   ChatMessage,
+ } from '../types';
+ import { WHO_HEALTH_MILESTONES } from '../data/auditReport';
++import { APP_ACHIEVEMENTS } from '../data/achievements';
+ 
+ interface CompanionViewProps {
+   profile: UserProfile;
+@@ -34,6 +36,8 @@ interface CompanionViewProps {
+   triggers: TriggerItem[];
+   cravings: CravingRecord[];
+   relapses: RelapseRecord[];
++  chatMessages: ChatMessage[];
++  setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
+   onOpenSos: () => void;
+   onOpenRelapse: () => void;
+   onOpenSettings: () => void;
+@@ -50,6 +54,8 @@ export const CompanionView: React.FC<CompanionViewProps> = ({
+   triggers,
+   cravings,
+   relapses,
++  chatMessages,
++  setChatMessages,
+   onOpenSos,
+   onOpenRelapse,
+   onOpenSettings,
+@@ -59,19 +65,30 @@ export const CompanionView: React.FC<CompanionViewProps> = ({
+   onDeleteTrigger,
+   isMobilePreview,
+ }) => {
+-  const [subTab, setSubTab] = useState<'health' | 'radar' | 'coach' | 'diary'>('health');
++  const [subTab, setSubTab] = useState<'health' | 'achievements' | 'radar' | 'coach' | 'diary'>('health');
++  const [achievementFilter, setAchievementFilter] = useState<'all' | 'unlocked' | 'health' | 'mindset' | 'money'>('all');
+   const [newTriggerTime, setNewTriggerTime] = useState('18:30');
+   const [newTriggerLabel, setNewTriggerLabel] = useState('');
+ 
++  // Achievements calculation
++  const cravingsResistedCount = stats.cravingsResistedCount || cravings.filter((c) => c.outcome === 'resisted').length;
++  const enrichedAchievements = useMemo(() => {
++    return APP_ACHIEVEMENTS.map((ach) => ({
++      ...ach,
++      unlocked: ach.checkUnlocked({
++        totalSeconds: stats.totalSeconds,
++        days: stats.days,
++        hours: stats.hours,
++        moneySaved: stats.moneySaved,
++        cravingsResisted: cravingsResistedCount,
++        relapseCount: relapses.length,
++      }),
++    }));
++  }, [stats.totalSeconds, stats.days, stats.hours, stats.moneySaved, cravingsResistedCount, relapses.length]);
++
++  const unlockedAchCount = enrichedAchievements.filter((a) => a.unlocked).length;
++
+   // AI Coach state
+-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+-    {
+-      id: 'msg-welcome',
+-      sender: 'coach',
+-      text: `Привет, ${profile.name}! Ты держишь чистоту уже ${stats.days} дн. ${stats.hours} ч. Твой мозг прямо сейчас освобождается от никотиновой ловушки. Если возникнет тяга — жми кнопку SOS или напиши мне сюда в любой момент.`,
+-      timestamp: 'Только что',
+-    },
+-  ]);
+   const [inputMessage, setInputMessage] = useState('');
+   const [isCoachTyping, setIsCoachTyping] = useState(false);
+ 
+@@ -87,7 +104,8 @@ export const CompanionView: React.FC<CompanionViewProps> = ({
+       timestamp: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
+     };
+ 
+-    setChatMessages((prev) => [...prev, userMsg]);
++    const nextMessages = [...chatMessages, userMsg];
++    setChatMessages(nextMessages);
+     if (!textToSend) setInputMessage('');
+     setIsCoachTyping(true);
+ 
+@@ -98,7 +116,15 @@ export const CompanionView: React.FC<CompanionViewProps> = ({
+         body: JSON.stringify({
+           message: text,
+           daysFree: stats.days,
++          hoursFree: stats.hours,
++          moneySaved: Math.round(stats.moneySaved),
++          cigsAvoided: stats.cigarettesAvoided,
+           trigger: profile.nicotineType,
++          nicotineType: profile.nicotineType,
++          history: nextMessages.slice(-6).map((m) => ({
++            role: m.sender === 'user' ? 'user' : 'model',
++            text: m.text,
++          })),
+         }),
+       });
+       const data = await response.json();
+@@ -436,6 +462,21 @@ export const CompanionView: React.FC<CompanionViewProps> = ({
+             <span>Здоровье (ВОЗ)</span>
+           </button>
+ 
++          <button
++            onClick={() => setSubTab('achievements')}
++            className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
++              subTab === 'achievements'
++                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
++                : 'text-slate-400 hover:text-slate-200'
++            }`}
++          >
++            <Award className="w-3.5 h-3.5 text-amber-400" />
++            <span>Награды</span>
++            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500/20 text-amber-300 font-mono font-bold">
++              {unlockedAchCount}/{APP_ACHIEVEMENTS.length}
++            </span>
++          </button>
++
+           <button
+             onClick={() => setSubTab('radar')}
+             className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+@@ -556,7 +597,154 @@ export const CompanionView: React.FC<CompanionViewProps> = ({
+         </div>
+       )}
+ 
+-      {/* Subtab 2: Trigger Radar */}
++      {/* Subtab: Expanded Health & Mastery Achievements */}
++      {subTab === 'achievements' && (
++        <div className="space-y-4">
++          {/* Header Summary */}
++          <div className="p-4 bg-gradient-to-r from-amber-500/10 via-slate-900 to-slate-900 border border-amber-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
++            <div>
++              <div className="flex items-center gap-2">
++                <Award className="w-5 h-5 text-amber-400" />
++                <h3 className="text-sm font-bold text-slate-100">Медицинские и ментальные достижения</h3>
++              </div>
++              <p className="text-xs text-slate-400 mt-1">
++                26 подтвержденных ВОЗ этапов регенерации органов, преодоления дофаминовой тяги и финансовой свободы.
++              </p>
++            </div>
++            <div className="flex items-center gap-2 sm:self-center shrink-0">
++              <span className="text-xs text-slate-400">Прогресс:</span>
++              <span className="text-sm font-mono font-black text-amber-400 bg-amber-500/20 px-3 py-1 rounded-xl border border-amber-500/30">
++                {unlockedAchCount} / {APP_ACHIEVEMENTS.length}
++              </span>
++            </div>
++          </div>
++
++          {/* Filter Bar */}
++          <div className="flex flex-wrap items-center gap-2">
++            <button
++              onClick={() => setAchievementFilter('all')}
++              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
++                achievementFilter === 'all'
++                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
++                  : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'
++              }`}
++            >
++              Все ({APP_ACHIEVEMENTS.length})
++            </button>
++            <button
++              onClick={() => setAchievementFilter('unlocked')}
++              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
++                achievementFilter === 'unlocked'
++                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
++                  : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'
++              }`}
++            >
++              ✓ Получено ({unlockedAchCount})
++            </button>
++            <button
++              onClick={() => setAchievementFilter('health')}
++              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
++                achievementFilter === 'health'
++                  ? 'bg-sky-500/20 text-sky-300 border border-sky-500/40'
++                  : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'
++              }`}
++            >
++              🫁 Здоровье (ВОЗ)
++            </button>
++            <button
++              onClick={() => setAchievementFilter('mindset')}
++              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
++                achievementFilter === 'mindset'
++                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
++                  : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'
++              }`}
++            >
++              🧠 Осознанность
++            </button>
++            <button
++              onClick={() => setAchievementFilter('money')}
++              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
++                achievementFilter === 'money'
++                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
++                  : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'
++              }`}
++            >
++              💰 Финансы & Трек
++            </button>
++          </div>
++
++          {/* Cards Grid */}
++          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
++            {enrichedAchievements
++              .filter((ach) => {
++                if (achievementFilter === 'unlocked') return ach.unlocked;
++                if (achievementFilter === 'health') return ach.category === 'health';
++                if (achievementFilter === 'mindset') return ach.category === 'mindset';
++                if (achievementFilter === 'money') return ach.category === 'money' || ach.category === 'mastery';
++                return true;
++              })
++              .map((ach) => {
++                return (
++                  <div
++                    key={ach.id}
++                    className={`p-4 rounded-2xl border transition-all ${
++                      ach.unlocked
++                        ? 'bg-gradient-to-br from-amber-500/10 via-slate-900 to-slate-950 border-amber-500/40 shadow-lg shadow-amber-500/5'
++                        : 'bg-slate-900/60 border-slate-800/80 opacity-70'
++                    }`}
++                  >
++                    <div className="flex items-start gap-3">
++                      <span className="text-3xl shrink-0 p-2 rounded-2xl bg-slate-950/80 border border-slate-800/80">
++                        {ach.icon}
++                      </span>
++                      <div className="flex-1 min-w-0">
++                        <div className="flex items-start justify-between gap-2">
++                          <div>
++                            <h4 className="text-xs font-bold text-slate-100 flex items-center gap-1.5">
++                              {ach.title}
++                              {ach.timeframe && (
++                                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">
++                                  {ach.timeframe}
++                                </span>
++                              )}
++                            </h4>
++                            <span className="text-[10px] text-slate-400">
++                              Требуется: {ach.requirement}
++                            </span>
++                          </div>
++                          {ach.unlocked ? (
++                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
++                              Открыто ✓
++                            </span>
++                          ) : (
++                            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 shrink-0">
++                              🔒 В пути
++                            </span>
++                          )}
++                        </div>
++
++                        <p className="text-xs text-slate-300 mt-2 leading-relaxed">
++                          {ach.description}
++                        </p>
++
++                        <div className="mt-2.5 pt-2 border-t border-slate-800/60 flex items-center justify-between text-[10px] text-slate-400">
++                          <span className="italic line-clamp-1">{ach.medicalNote}</span>
++                          <span className="uppercase tracking-wider font-semibold text-slate-400 shrink-0 ml-2">
++                            {ach.category === 'health'
++                              ? 'Медицина'
++                              : ach.category === 'mindset'
++                              ? 'Психология'
++                              : 'Финансы'}
++                          </span>
++                        </div>
++                      </div>
++                    </div>
++                  </div>
++                );
++              })}
++          </div>
++        </div>
++      )}
+       {subTab === 'radar' && (
+         <div className="space-y-4">
+           <div className="p-4 bg-slate-900/80 border border-slate-800 rounded-2xl flex items-start gap-3">
+diff --git a/src/components/HealthTimelineView.tsx b/src/components/HealthTimelineView.tsx
+index 83cbdca..6bac01c 100644
+--- a/src/components/HealthTimelineView.tsx
++++ b/src/components/HealthTimelineView.tsx
+@@ -10,24 +10,44 @@ import {
+   Clock,
+   Lock,
+   ChevronRight,
++  ChevronDown,
+   BookOpen,
+   Zap,
+   Activity,
+   Award,
+   Filter,
++  Layers,
++  BarChart3,
++  Flame,
++  Info,
+ } from 'lucide-react';
+ import { FreedomStats, HealthMilestone } from '../types';
+ import { WHO_HEALTH_MILESTONES } from '../data/auditReport';
++import { calculatePhysiologicalPhases } from '../data/recoveryPhases';
+ 
+ interface HealthTimelineViewProps {
+   stats: FreedomStats;
+ }
+ 
+ export const HealthTimelineView: React.FC<HealthTimelineViewProps> = ({ stats }) => {
++  const [activeTab, setActiveTab] = useState<'phases' | 'milestones'>('phases');
+   const [searchQuery, setSearchQuery] = useState('');
+   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+   const [statusFilter, setStatusFilter] = useState<'all' | 'unlocked' | 'in-progress' | 'locked'>('all');
+-  const [expandedId, setExpandedId] = useState<string | null>(null);
++  const [expandedMilestoneId, setExpandedMilestoneId] = useState<string | null>(null);
++  const [expandedPhaseId, setExpandedPhaseId] = useState<string | null>('phase-1');
++
++  // Compute physiological recovery phases
++  const recoveryPhases = useMemo(() => {
++    return calculatePhysiologicalPhases(stats.totalSeconds);
++  }, [stats.totalSeconds]);
++
++  // Active or upcoming phase
++  const currentActivePhase = useMemo(() => {
++    return recoveryPhases.find((p) => p.status === 'in-progress') ||
++      recoveryPhases.find((p) => p.status === 'upcoming') ||
++      recoveryPhases[recoveryPhases.length - 1];
++  }, [recoveryPhases]);
+ 
+   const categories = [
+     { id: 'all', label: 'Все системы', icon: Activity, count: WHO_HEALTH_MILESTONES.length },
+@@ -95,7 +115,7 @@ export const HealthTimelineView: React.FC<HealthTimelineViewProps> = ({ stats })
+     return `${minutes} мин.`;
+   };
+ 
+-  // Filtered list
++  // Filtered milestones list
+   const filteredMilestones = useMemo(() => {
+     return enrichedMilestones.filter((m) => {
+       const matchesSearch =
+@@ -139,35 +159,35 @@ export const HealthTimelineView: React.FC<HealthTimelineViewProps> = ({ stats })
+       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+         {/* Main Status */}
+         <div className="lg:col-span-2 p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-4">
+-          <div className="flex items-center justify-between">
++          <div className="flex flex-wrap items-center justify-between gap-2">
+             <div className="flex items-center gap-2">
+               <span className="text-xs font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                 Доказательная медицина &bull; ВОЗ, AHA, CDC
+               </span>
+-              <span className="text-xs text-slate-400">32 этапа регенерации</span>
++              <span className="text-xs text-slate-400">5 фаз &bull; 32 этапа</span>
+             </div>
+             <span className="text-xs font-mono text-emerald-400 font-bold">
+-              {unlockedCount} из {WHO_HEALTH_MILESTONES.length} разблокировано
++              {unlockedCount} из {WHO_HEALTH_MILESTONES.length} пройдено
+             </span>
+           </div>
+ 
+           <div>
+             <h2 className="text-2xl font-black text-slate-100 tracking-tight">
+-              Биохимическая карта восстановления организма
++              Физиологическая карта регенерации организма
+             </h2>
+             <p className="text-xs text-slate-400 mt-1 max-w-2xl leading-relaxed">
+-              От первых 20 минут нормализации пульса до 20-летнего полного равенства с человеком, никогда не курящим.
+-              Каждая минута чистоты запускает клеточный ремонт.
++              Поэтапный мониторинг нормализации уровня кислорода, детоксикации от угарного газа (CO),
++              оживления нервных окончаний и увеличения емкости легких.
+             </p>
+           </div>
+ 
+           {/* Progress Bar */}
+           <div className="space-y-1.5">
+             <div className="flex justify-between text-xs font-medium">
+-              <span className="text-slate-300">Совокупный индекс регенерации систем:</span>
++              <span className="text-slate-300">Совокупный индекс регенерации всех систем:</span>
+               <span className="text-emerald-400 font-mono font-bold">{overallHealthScore}%</span>
+             </div>
+-            <div className="w-full h-3 rounded-full bg-slate-950 overflow-hidden p-0.5 border border-slate-800">
++            <div className="w-full h-3.5 rounded-full bg-slate-950 overflow-hidden p-0.5 border border-slate-800">
+               <div
+                 className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-sky-400 transition-all duration-700"
+                 style={{ width: `${Math.max(3, overallHealthScore)}%` }}
+@@ -218,221 +238,511 @@ export const HealthTimelineView: React.FC<HealthTimelineViewProps> = ({ stats })
+         </div>
+       </div>
+ 
+-      {/* Filter and Search Bar */}
+-      <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+-        <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+-          {/* Search */}
+-          <div className="relative w-full md:w-80">
+-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+-            <input
+-              type="text"
+-              value={searchQuery}
+-              onChange={(e) => setSearchQuery(e.target.value)}
+-              placeholder="Поиск этапа (дофамин, легкие, CO...)"
+-              className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+-            />
+-          </div>
++      {/* Main View Switcher: 5 Phases breakdown vs All Milestones Grid */}
++      <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
++        <button
++          onClick={() => setActiveTab('phases')}
++          className={`px-4 py-2 rounded-2xl text-xs font-bold flex items-center gap-2 transition-all ${
++            activeTab === 'phases'
++              ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/10'
++              : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
++          }`}
++        >
++          <Layers className="w-4 h-4" />
++          <span>5 физиологических фаз восстановления</span>
++          <span className="px-2 py-0.5 rounded-full text-[10px] bg-slate-950/40 font-mono">
++            {recoveryPhases.filter((p) => p.status === 'completed').length}/5
++          </span>
++        </button>
++
++        <button
++          onClick={() => setActiveTab('milestones')}
++          className={`px-4 py-2 rounded-2xl text-xs font-bold flex items-center gap-2 transition-all ${
++            activeTab === 'milestones'
++              ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/10'
++              : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
++          }`}
++        >
++          <BarChart3 className="w-4 h-4" />
++          <span>Каталог 32 вех ВОЗ</span>
++          <span className="px-2 py-0.5 rounded-full text-[10px] bg-slate-950/40 font-mono">
++            {unlockedCount}/{WHO_HEALTH_MILESTONES.length}
++          </span>
++        </button>
++      </div>
+ 
+-          {/* Status Filters */}
+-          <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-medium w-full md:w-auto overflow-x-auto">
+-            <button
+-              onClick={() => setStatusFilter('all')}
+-              className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
+-                statusFilter === 'all'
+-                  ? 'bg-slate-800 text-emerald-300 font-bold'
+-                  : 'text-slate-400 hover:text-slate-200'
+-              }`}
+-            >
+-              Все ({enrichedMilestones.length})
+-            </button>
+-            <button
+-              onClick={() => setStatusFilter('unlocked')}
+-              className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap flex items-center gap-1 ${
+-                statusFilter === 'unlocked'
+-                  ? 'bg-emerald-500 text-slate-950 font-bold'
+-                  : 'text-slate-400 hover:text-slate-200'
+-              }`}
+-            >
+-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+-              Пройденные ({unlockedCount})
+-            </button>
+-            <button
+-              onClick={() => setStatusFilter('in-progress')}
+-              className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap flex items-center gap-1 ${
+-                statusFilter === 'in-progress'
+-                  ? 'bg-amber-500 text-slate-950 font-bold'
+-                  : 'text-slate-400 hover:text-slate-200'
+-              }`}
+-            >
+-              <Clock className="w-3.5 h-3.5 text-amber-400" />
+-              В процессе
+-            </button>
+-            <button
+-              onClick={() => setStatusFilter('locked')}
+-              className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap flex items-center gap-1 ${
+-                statusFilter === 'locked'
+-                  ? 'bg-slate-800 text-slate-200 font-bold'
+-                  : 'text-slate-400 hover:text-slate-200'
+-              }`}
+-            >
+-              <Lock className="w-3.5 h-3.5 text-slate-500" />
+-              Предстоящие
+-            </button>
+-          </div>
+-        </div>
++      {/* Tab 1: 5 Detailed Physiological Phases with Granular Indicators & Progress Bars */}
++      {activeTab === 'phases' && (
++        <div className="space-y-6">
++          {/* Phase cards accordion / detailed breakdown */}
++          <div className="space-y-4">
++            {recoveryPhases.map((phase) => {
++              const isExpanded = expandedPhaseId === phase.id;
++              const isCurrent = phase.status === 'in-progress';
++              const isDone = phase.status === 'completed';
++
++              return (
++                <div
++                  key={phase.id}
++                  className={`rounded-3xl border transition-all duration-300 overflow-hidden ${
++                    isDone
++                      ? 'bg-slate-900/90 border-emerald-500/40 shadow-lg shadow-emerald-500/5'
++                      : isCurrent
++                      ? 'bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border-amber-500/50 shadow-xl shadow-amber-500/10 ring-1 ring-amber-500/20'
++                      : 'bg-slate-900/50 border-slate-800/80 opacity-75 hover:opacity-100'
++                  }`}
++                >
++                  {/* Phase Header */}
++                  <div
++                    onClick={() => setExpandedPhaseId(isExpanded ? null : phase.id)}
++                    className="p-5 sm:p-6 cursor-pointer select-none space-y-4"
++                  >
++                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
++                      <div className="flex items-start sm:items-center gap-3">
++                        <div
++                          className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm shrink-0 border ${
++                            isDone
++                              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
++                              : isCurrent
++                              ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse'
++                              : 'bg-slate-800 text-slate-500 border-slate-700'
++                          }`}
++                        >
++                          {isDone ? '✓' : phase.phaseNumber}
++                        </div>
++                        <div>
++                          <div className="flex items-center gap-2 flex-wrap">
++                            <span className="text-xs font-mono font-bold text-slate-400">
++                              Фаза {phase.phaseNumber} &bull; {phase.durationRange}
++                            </span>
++                            {isDone && (
++                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
++                                Завершена ✓
++                              </span>
++                            )}
++                            {isCurrent && (
++                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
++                                <Flame className="w-3 h-3 animate-bounce" />
++                                Активная фаза
++                              </span>
++                            )}
++                            {phase.status === 'upcoming' && (
++                              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">
++                                🔒 Предстоит
++                              </span>
++                            )}
++                          </div>
++                          <h3 className="text-base sm:text-lg font-black text-slate-100 mt-0.5">
++                            {phase.name}
++                          </h3>
++                        </div>
++                      </div>
+ 
+-        {/* Category Pills */}
+-        <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+-          {categories.map((cat) => {
+-            const Icon = cat.icon;
+-            const isSelected = selectedCategory === cat.id;
+-            return (
+-              <button
+-                key={cat.id}
+-                onClick={() => setSelectedCategory(cat.id)}
+-                className={`px-3 py-1.5 rounded-xl border flex items-center gap-1.5 shrink-0 transition-all ${
+-                  isSelected
+-                    ? 'bg-emerald-500 text-slate-950 font-bold border-emerald-400 shadow-sm'
+-                    : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-200 hover:bg-slate-850'
+-                }`}
+-              >
+-                <Icon className="w-3.5 h-3.5" />
+-                <span>{cat.label}</span>
+-              </button>
+-            );
+-          })}
+-        </div>
+-      </div>
++                      <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
++                        <div className="text-right">
++                          <span className="text-xs text-slate-400 block">Прогресс фазы</span>
++                          <span
++                            className={`text-sm font-mono font-black ${
++                              isDone ? 'text-emerald-400' : isCurrent ? 'text-amber-400' : 'text-slate-500'
++                            }`}
++                          >
++                            {phase.progressPercent}%
++                          </span>
++                        </div>
++                        <div
++                          className={`p-2 rounded-xl bg-slate-800/80 text-slate-300 transition-transform duration-200 ${
++                            isExpanded ? 'rotate-180' : ''
++                          }`}
++                        >
++                          <ChevronDown className="w-4 h-4" />
++                        </div>
++                      </div>
++                    </div>
+ 
+-      {/* Milestones Cards Grid */}
+-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+-        {filteredMilestones.map((m, idx) => {
+-          const isExpanded = expandedId === m.id;
+-          const badgeStyle = getCategoryColor(m.category);
+-
+-          return (
+-            <div
+-              key={m.id}
+-              className={`rounded-3xl border transition-all duration-200 overflow-hidden ${
+-                m.isPassed
+-                  ? 'bg-slate-900 border-emerald-500/30 hover:border-emerald-500/60 shadow-lg shadow-emerald-500/5'
+-                  : m.status === 'in-progress'
+-                  ? 'bg-slate-900/95 border-amber-500/40 hover:border-amber-500/70 shadow-lg shadow-amber-500/5'
+-                  : 'bg-slate-900/60 border-slate-800/80 opacity-80 hover:opacity-100'
+-              }`}
+-            >
+-              <div className="p-5 space-y-3">
+-                {/* Header row: time & status */}
+-                <div className="flex items-center justify-between gap-2">
+-                  <span className={`text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${badgeStyle}`}>
+-                    {m.category}
+-                  </span>
++                    {/* Phase Progress Bar */}
++                    <div className="space-y-1">
++                      <div className="w-full h-2.5 rounded-full bg-slate-950 overflow-hidden border border-slate-800">
++                        <div
++                          className={`h-full rounded-full transition-all duration-500 ${
++                            isDone
++                              ? 'bg-emerald-500'
++                              : isCurrent
++                              ? 'bg-gradient-to-r from-amber-500 to-emerald-400'
++                              : 'bg-slate-800'
++                          }`}
++                          style={{ width: `${phase.progressPercent}%` }}
++                        />
++                      </div>
++                    </div>
+ 
+-                  <div className="flex items-center gap-1.5">
+-                    {m.isPassed ? (
+-                      <span className="flex items-center gap-1 text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+-                        <CheckCircle2 className="w-3.5 h-3.5" />
+-                        Пройдено
+-                      </span>
+-                    ) : m.status === 'in-progress' ? (
+-                      <span className="flex items-center gap-1 text-xs font-bold text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+-                        <Clock className="w-3.5 h-3.5" />
+-                        {m.progressPercent}% ({formatRemainingTime(m.secondsLeft)})
+-                      </span>
+-                    ) : (
+-                      <span className="flex items-center gap-1 text-xs text-slate-500 bg-slate-950 px-2 py-0.5 rounded-full border border-slate-800">
+-                        <Lock className="w-3 h-3" />
+-                        Через {formatRemainingTime(m.secondsLeft)}
+-                      </span>
+-                    )}
++                    <p className="text-xs text-slate-300 leading-relaxed">
++                      {phase.description}
++                    </p>
+                   </div>
+-                </div>
+ 
+-                {/* Title and timeframe */}
+-                <div>
+-                  <div className="flex items-baseline gap-2">
+-                    <span className="text-base font-black text-slate-100">{m.title}</span>
+-                  </div>
+-                  <span className="text-xs font-mono text-emerald-400 font-bold block mt-0.5">
+-                    Срок: {m.timeframe}
+-                  </span>
+-                </div>
++                  {/* Expanded Phase Content */}
++                  {isExpanded && (
++                    <div className="px-5 pb-6 pt-2 border-t border-slate-800/80 space-y-5 animate-in fade-in">
++                      {/* Granular Physiological Indicators */}
++                      <div>
++                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
++                          <Activity className="w-4 h-4 text-emerald-400" />
++                          Ключевые физиологические биомаркеры фазы:
++                        </h4>
++
++                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
++                          {phase.indicators.map((ind) => (
++                            <div
++                              key={ind.id}
++                              className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800/90 space-y-2.5"
++                            >
++                              <div className="flex items-start justify-between gap-2">
++                                <div className="flex items-center gap-2">
++                                  <span className="text-xl p-1.5 rounded-xl bg-slate-900 border border-slate-800">
++                                    {ind.icon}
++                                  </span>
++                                  <div>
++                                    <h5 className="text-xs font-bold text-slate-100">{ind.name}</h5>
++                                    <span className="text-[10px] text-slate-400">
++                                      Цель: {ind.targetValue}
++                                    </span>
++                                  </div>
++                                </div>
++                                <div className="text-right">
++                                  <span className="text-xs font-mono font-bold text-emerald-400">
++                                    {ind.currentValue}
++                                  </span>
++                                  <span className="text-[10px] block text-slate-500 font-mono">
++                                    {ind.progressPercent}%
++                                  </span>
++                                </div>
++                              </div>
++
++                              {/* Progress bar */}
++                              <div className="w-full h-2 rounded-full bg-slate-900 overflow-hidden border border-slate-800/80">
++                                <div
++                                  className="h-full rounded-full bg-gradient-to-r from-sky-400 via-teal-400 to-emerald-400 transition-all duration-500"
++                                  style={{ width: `${ind.progressPercent}%` }}
++                                />
++                              </div>
++
++                              <p className="text-[11px] text-slate-300 leading-snug">
++                                {ind.description}
++                              </p>
++
++                              <div className="pt-2 border-t border-slate-800/60 flex items-start gap-1.5 text-[10px] text-slate-400">
++                                <Info className="w-3.5 h-3.5 text-sky-400 shrink-0 mt-0.5" />
++                                <span className="italic">{ind.medicalInsight}</span>
++                              </div>
++                            </div>
++                          ))}
++                        </div>
++                      </div>
+ 
+-                {/* Description & Benefit */}
+-                <p className="text-xs text-slate-300 leading-relaxed">{m.description}</p>
++                      {/* Key Structural Changes Checklist */}
++                      <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-2">
++                        <h4 className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
++                          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
++                          Клинические результаты этапа:
++                        </h4>
++                        <ul className="space-y-1.5">
++                          {phase.keyChanges.map((change, idx) => (
++                            <li
++                              key={idx}
++                              className="text-xs text-slate-300 flex items-start gap-2 leading-relaxed"
++                            >
++                              <span className="text-emerald-400 font-bold shrink-0">&bull;</span>
++                              <span>{change}</span>
++                            </li>
++                          ))}
++                        </ul>
++                      </div>
+ 
+-                <div className="p-3 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-1">
+-                  <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-bold">
+-                    <Award className="w-3.5 h-3.5 shrink-0" />
+-                    <span>Главный профит для тела:</span>
+-                  </div>
+-                  <p className="text-xs text-slate-300 leading-relaxed">{m.benefit}</p>
++                      {/* Milestones inside this phase */}
++                      {phase.milestones.length > 0 && (
++                        <div className="space-y-2">
++                          <div className="flex items-center justify-between">
++                            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
++                              Вехи ВОЗ в рамках этой фазы ({phase.milestones.length}):
++                            </h4>
++                          </div>
++
++                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
++                            {phase.milestones.map((m) => {
++                              const isPassed = stats.totalSeconds >= m.secondsRequired;
++                              return (
++                                <div
++                                  key={m.id}
++                                  className={`p-3 rounded-xl border flex items-center justify-between gap-2 text-xs ${
++                                    isPassed
++                                      ? 'bg-emerald-500/10 border-emerald-500/30 text-slate-100'
++                                      : 'bg-slate-950/60 border-slate-800/80 text-slate-400'
++                                  }`}
++                                >
++                                  <div className="min-w-0">
++                                    <span className="font-semibold block truncate text-slate-200">
++                                      {m.title}
++                                    </span>
++                                    <span className="text-[10px] text-slate-500 font-mono">
++                                      {m.timeframe}
++                                    </span>
++                                  </div>
++                                  <span
++                                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
++                                      isPassed
++                                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
++                                        : 'bg-slate-800 text-slate-400'
++                                    }`}
++                                  >
++                                    {isPassed ? '✓ Пройдено' : '🔒 Ожидается'}
++                                  </span>
++                                </div>
++                              );
++                            })}
++                          </div>
++                        </div>
++                      )}
++                    </div>
++                  )}
+                 </div>
++              );
++            })}
++          </div>
++        </div>
++      )}
+ 
+-                {/* Progress bar if in progress */}
+-                {!m.isPassed && (
+-                  <div className="w-full h-1.5 rounded-full bg-slate-950 overflow-hidden border border-slate-800/60">
+-                    <div
+-                      className="h-full rounded-full bg-gradient-to-r from-amber-500 to-emerald-400"
+-                      style={{ width: `${m.progressPercent}%` }}
+-                    />
+-                  </div>
+-                )}
++      {/* Tab 2: Full Catalog of 32 WHO Milestones with Search, Filters & Expanded Details */}
++      {activeTab === 'milestones' && (
++        <div className="space-y-4">
++          {/* Filter and Search Bar */}
++          <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
++            <div className="flex flex-col md:flex-row items-center justify-between gap-3">
++              {/* Search */}
++              <div className="relative w-full md:w-80">
++                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
++                <input
++                  type="text"
++                  value={searchQuery}
++                  onChange={(e) => setSearchQuery(e.target.value)}
++                  placeholder="Поиск вехи (кислород, альвеолы, пульс...)"
++                  className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
++                />
++              </div>
+ 
+-                {/* Toggle details */}
++              {/* Status Filters */}
++              <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-medium w-full md:w-auto overflow-x-auto">
+                 <button
+-                  onClick={() => setExpandedId(isExpanded ? null : m.id)}
+-                  className="w-full py-2 px-3 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-xs font-medium text-slate-300 flex items-center justify-between transition-colors"
++                  onClick={() => setStatusFilter('all')}
++                  className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
++                    statusFilter === 'all'
++                      ? 'bg-slate-800 text-emerald-300 font-bold'
++                      : 'text-slate-400 hover:text-slate-200'
++                  }`}
+                 >
+-                  <span className="flex items-center gap-1.5 text-slate-400">
+-                    <BookOpen className="w-3.5 h-3.5 text-sky-400" />
+-                    {isExpanded ? 'Скрыть клеточный механизм' : 'Клеточный механизм и советы врачей'}
+-                  </span>
+-                  <ChevronRight
+-                    className={`w-4 h-4 text-slate-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+-                  />
++                  Все ({enrichedMilestones.length})
+                 </button>
++                <button
++                  onClick={() => setStatusFilter('unlocked')}
++                  className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap flex items-center gap-1 ${
++                    statusFilter === 'unlocked'
++                      ? 'bg-emerald-500 text-slate-950 font-bold'
++                      : 'text-slate-400 hover:text-slate-200'
++                  }`}
++                >
++                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
++                  Пройденные ({unlockedCount})
++                </button>
++                <button
++                  onClick={() => setStatusFilter('in-progress')}
++                  className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap flex items-center gap-1 ${
++                    statusFilter === 'in-progress'
++                      ? 'bg-amber-500 text-slate-950 font-bold'
++                      : 'text-slate-400 hover:text-slate-200'
++                  }`}
++                >
++                  <Clock className="w-3.5 h-3.5 text-amber-400" />
++                  В процессе
++                </button>
++                <button
++                  onClick={() => setStatusFilter('locked')}
++                  className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap flex items-center gap-1 ${
++                    statusFilter === 'locked'
++                      ? 'bg-slate-800 text-slate-200 font-bold'
++                      : 'text-slate-400 hover:text-slate-200'
++                  }`}
++                >
++                  <Lock className="w-3.5 h-3.5 text-slate-500" />
++                  Предстоящие
++                </button>
++              </div>
++            </div>
+ 
+-                {/* Expanded Biological Insights */}
+-                {isExpanded && (
+-                  <div className="space-y-3 pt-2 text-xs border-t border-slate-800/80 animate-in fade-in">
+-                    {m.cellularEffect && (
+-                      <div className="p-3 rounded-xl bg-purple-950/15 border border-purple-900/30 space-y-1">
+-                        <strong className="text-purple-300 block font-bold">🔬 Что происходит на уровне клеток:</strong>
+-                        <p className="text-purple-200/90 leading-relaxed">{m.cellularEffect}</p>
++            {/* Category Pills */}
++            <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
++              {categories.map((cat) => {
++                const Icon = cat.icon;
++                const isSelected = selectedCategory === cat.id;
++                return (
++                  <button
++                    key={cat.id}
++                    onClick={() => setSelectedCategory(cat.id)}
++                    className={`px-3 py-1.5 rounded-xl border flex items-center gap-1.5 shrink-0 transition-all ${
++                      isSelected
++                        ? 'bg-emerald-500 text-slate-950 font-bold border-emerald-400 shadow-sm'
++                        : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-200 hover:bg-slate-850'
++                    }`}
++                  >
++                    <Icon className="w-3.5 h-3.5" />
++                    <span>{cat.label}</span>
++                  </button>
++                );
++              })}
++            </div>
++          </div>
++
++          {/* Milestones Cards Grid */}
++          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
++            {filteredMilestones.map((m) => {
++              const isExpanded = expandedMilestoneId === m.id;
++              const badgeStyle = getCategoryColor(m.category);
++
++              return (
++                <div
++                  key={m.id}
++                  className={`rounded-3xl border transition-all duration-200 overflow-hidden ${
++                    m.isPassed
++                      ? 'bg-slate-900 border-emerald-500/30 hover:border-emerald-500/60 shadow-lg shadow-emerald-500/5'
++                      : m.status === 'in-progress'
++                      ? 'bg-slate-900/95 border-amber-500/40 hover:border-amber-500/70 shadow-lg shadow-amber-500/5'
++                      : 'bg-slate-900/60 border-slate-800/80 opacity-80 hover:opacity-100'
++                  }`}
++                >
++                  <div className="p-5 space-y-3">
++                    {/* Header row: time & status */}
++                    <div className="flex items-center justify-between gap-2">
++                      <span
++                        className={`text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${badgeStyle}`}
++                      >
++                        {m.category}
++                      </span>
++
++                      <div className="flex items-center gap-1.5">
++                        {m.isPassed ? (
++                          <span className="flex items-center gap-1 text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
++                            <CheckCircle2 className="w-3.5 h-3.5" />
++                            Пройдено
++                          </span>
++                        ) : m.status === 'in-progress' ? (
++                          <span className="flex items-center gap-1 text-xs font-bold text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
++                            <Clock className="w-3.5 h-3.5" />
++                            {m.progressPercent}% ({formatRemainingTime(m.secondsLeft)})
++                          </span>
++                        ) : (
++                          <span className="flex items-center gap-1 text-xs text-slate-500 bg-slate-950 px-2 py-0.5 rounded-full border border-slate-800">
++                            <Lock className="w-3 h-3" />
++                            Через {formatRemainingTime(m.secondsLeft)}
++                          </span>
++                        )}
+                       </div>
+-                    )}
++                    </div>
+ 
+-                    {m.whatYouFeel && (
+-                      <div className="p-3 rounded-xl bg-sky-950/15 border border-sky-900/30 space-y-1">
+-                        <strong className="text-sky-300 block font-bold">🧠 Что вы физически ощущаете:</strong>
+-                        <p className="text-sky-200/90 leading-relaxed">{m.whatYouFeel}</p>
++                    {/* Title and timeframe */}
++                    <div>
++                      <div className="flex items-baseline gap-2">
++                        <span className="text-base font-black text-slate-100">{m.title}</span>
+                       </div>
+-                    )}
++                      <span className="text-xs font-mono text-emerald-400 font-bold block mt-0.5">
++                        Срок: {m.timeframe}
++                      </span>
++                    </div>
+ 
+-                    {m.practicalTip && (
+-                      <div className="p-3 rounded-xl bg-emerald-950/15 border border-emerald-900/30 space-y-1">
+-                        <strong className="text-emerald-300 block font-bold">💡 Практический совет нарколога/пульмонолога:</strong>
+-                        <p className="text-emerald-200/90 leading-relaxed">{m.practicalTip}</p>
++                    {/* Description & Benefit */}
++                    <p className="text-xs text-slate-300 leading-relaxed">{m.description}</p>
++
++                    <div className="p-3 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-1">
++                      <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-bold">
++                        <Award className="w-3.5 h-3.5 shrink-0" />
++                        <span>Главный профит для тела:</span>
++                      </div>
++                      <p className="text-xs text-slate-300 leading-relaxed">{m.benefit}</p>
++                    </div>
++
++                    {/* Progress bar if in progress */}
++                    {!m.isPassed && (
++                      <div className="w-full h-1.5 rounded-full bg-slate-950 overflow-hidden border border-slate-800/60">
++                        <div
++                          className="h-full rounded-full bg-gradient-to-r from-amber-500 to-emerald-400"
++                          style={{ width: `${m.progressPercent}%` }}
++                        />
+                       </div>
+                     )}
+ 
+-                    <div className="text-[10px] text-slate-500 font-mono text-right">
+-                      Источник: {m.scientificReference}
+-                    </div>
++                    {/* Toggle details */}
++                    <button
++                      onClick={() =>
++                        setExpandedMilestoneId(isExpanded ? null : m.id)
++                      }
++                      className="w-full py-2 px-3 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-xs font-medium text-slate-300 flex items-center justify-between transition-colors"
++                    >
++                      <span className="flex items-center gap-1.5 text-slate-400">
++                        <BookOpen className="w-3.5 h-3.5 text-sky-400" />
++                        {isExpanded ? 'Скрыть клеточный механизм' : 'Клеточный механизм и советы врачей'}
++                      </span>
++                      <ChevronRight
++                        className={`w-4 h-4 text-slate-400 transition-transform ${
++                          isExpanded ? 'rotate-90' : ''
++                        }`}
++                      />
++                    </button>
++
++                    {/* Expanded Biological Insights */}
++                    {isExpanded && (
++                      <div className="space-y-3 pt-2 text-xs border-t border-slate-800/80 animate-in fade-in">
++                        {m.cellularEffect && (
++                          <div className="p-3 rounded-xl bg-purple-950/15 border border-purple-900/30 space-y-1">
++                            <strong className="text-purple-300 block font-bold">
++                              🔬 Что происходит на уровне клеток:
++                            </strong>
++                            <p className="text-purple-200/90 leading-relaxed">{m.cellularEffect}</p>
++                          </div>
++                        )}
++
++                        {m.whatYouFeel && (
++                          <div className="p-3 rounded-xl bg-sky-950/15 border border-sky-900/30 space-y-1">
++                            <strong className="text-sky-300 block font-bold">
++                              🧠 Что вы физически ощущаете:
++                            </strong>
++                            <p className="text-sky-200/90 leading-relaxed">{m.whatYouFeel}</p>
++                          </div>
++                        )}
++
++                        {m.practicalTip && (
++                          <div className="p-3 rounded-xl bg-emerald-950/15 border border-emerald-900/30 space-y-1">
++                            <strong className="text-emerald-300 block font-bold">
++                              💡 Практический совет нарколога/пульмонолога:
++                            </strong>
++                            <p className="text-emerald-200/90 leading-relaxed">{m.practicalTip}</p>
++                          </div>
++                        )}
++
++                        <div className="text-[10px] text-slate-500 font-mono text-right">
++                          Источник: {m.scientificReference}
++                        </div>
++                      </div>
++                    )}
+                   </div>
+-                )}
+-              </div>
+-            </div>
+-          );
+-        })}
+-      </div>
++                </div>
++              );
++            })}
++          </div>
+ 
+-      {filteredMilestones.length === 0 && (
+-        <div className="text-center py-12 bg-slate-900 rounded-3xl border border-slate-800 space-y-2">
+-          <Search className="w-8 h-8 text-slate-600 mx-auto" />
+-          <h4 className="text-sm font-bold text-slate-300">Ничего не найдено</h4>
+-          <p className="text-xs text-slate-500">Попробуйте изменить поисковый запрос или фильтры</p>
++          {filteredMilestones.length === 0 && (
++            <div className="text-center py-12 bg-slate-900 rounded-3xl border border-slate-800 space-y-2">
++              <Search className="w-8 h-8 text-slate-600 mx-auto" />
++              <h4 className="text-sm font-bold text-slate-300">Ничего не найдено</h4>
++              <p className="text-xs text-slate-500">Попробуйте изменить поисковый запрос или фильтры</p>
++            </div>
++          )}
+         </div>
+       )}
+     </div>
+diff --git a/src/components/RelapseModal.tsx b/src/components/RelapseModal.tsx
+index b5c6bf7..aaa244a 100644
+--- a/src/components/RelapseModal.tsx
++++ b/src/components/RelapseModal.tsx
+@@ -84,7 +84,7 @@ export const RelapseModal: React.FC<RelapseModalProps> = ({
+                   className={`flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                     cigarettes === num
+                       ? 'bg-amber-500 text-slate-950 border-amber-400'
+-                      : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-750'
++                      : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-700'
+                   }`}
+                 >
+                   {num} шт.
+diff --git a/src/components/SettingsModal.tsx b/src/components/SettingsModal.tsx
+index 1fe5dbb..8542dc8 100644
+--- a/src/components/SettingsModal.tsx
++++ b/src/components/SettingsModal.tsx
+@@ -36,8 +36,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
+   onImportData,
+   onResetData,
+ }) => {
++  const formatToLocalInput = (isoStr: string) => {
++    try {
++      const d = new Date(isoStr);
++      if (isNaN(d.getTime())) return '';
++      const pad = (n: number) => String(n).padStart(2, '0');
++      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
++    } catch {
++      return '';
++    }
++  };
++
+   const [name, setName] = useState(profile.name);
+-  const [quitAt, setQuitAt] = useState(profile.quitAt.slice(0, 16));
++  const [quitAt, setQuitAt] = useState(() => formatToLocalInput(profile.quitAt));
+   const [nicotineType, setNicotineType] = useState<NicotineType>(profile.nicotineType);
+   const [currency, setCurrency] = useState<CurrencyType>(profile.currency);
+   const [packPrice, setPackPrice] = useState(profile.packPrice);
+@@ -216,7 +227,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
+                   className={`py-1.5 px-2 rounded-lg text-[11px] font-medium border text-center truncate transition-colors ${
+                     nicotineType === opt
+                       ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+-                      : 'bg-slate-850 text-slate-400 border-slate-750 hover:text-slate-200'
++                      : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'
+                   }`}
+                 >
+                   {opt}
+@@ -331,14 +342,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
+                 <button
+                   type="button"
+                   onClick={onExportData}
+-                  className="flex-1 py-1.5 px-2.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded-lg text-xs text-slate-300 font-medium flex items-center justify-center gap-1.5 transition-colors"
++                  className="flex-1 py-1.5 px-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs text-slate-300 font-medium flex items-center justify-center gap-1.5 transition-colors"
+                 >
+                   <Download className="w-3.5 h-3.5 text-sky-400" />
+                   <span>Скачать JSON бэкап</span>
+                 </button>
+               )}
+               {onImportData && (
+-                <label className="flex-1 py-1.5 px-2.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded-lg text-xs text-slate-300 font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
++                <label className="flex-1 py-1.5 px-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs text-slate-300 font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
+                   <Upload className="w-3.5 h-3.5 text-amber-400" />
+                   <span>Загрузить бэкап</span>
+                   <input
+diff --git a/src/components/SosModal.tsx b/src/components/SosModal.tsx
+index 2eca157..6edeeab 100644
+--- a/src/components/SosModal.tsx
++++ b/src/components/SosModal.tsx
+@@ -146,13 +146,13 @@ export const SosModal: React.FC<SosModalProps> = ({
+   const getScaleClass = () => {
+     switch (breathPhase) {
+       case 'Вдох':
+-        return 'scale-115 border-emerald-400/80 bg-emerald-500/20 text-emerald-300 shadow-lg shadow-emerald-500/20';
++        return 'scale-[1.15] border-emerald-400/80 bg-emerald-500/20 text-emerald-300 shadow-lg shadow-emerald-500/20';
+       case 'Задержка':
+-        return 'scale-115 border-amber-400/80 bg-amber-500/20 text-amber-300 shadow-lg shadow-amber-500/20';
++        return 'scale-[1.15] border-amber-400/80 bg-amber-500/20 text-amber-300 shadow-lg shadow-amber-500/20';
+       case 'Выдох':
+-        return 'scale-90 border-teal-400/80 bg-teal-500/15 text-teal-300 shadow-md';
++        return 'scale-[0.9] border-teal-400/80 bg-teal-500/15 text-teal-300 shadow-md';
+       case 'Пауза':
+-        return 'scale-90 border-slate-600 bg-slate-800/50 text-slate-400';
++        return 'scale-[0.9] border-slate-600 bg-slate-800/50 text-slate-400';
+     }
+   };
+ 
+diff --git a/src/data/achievements.ts b/src/data/achievements.ts
+new file mode 100644
+index 0000000..e331920
+--- /dev/null
++++ b/src/data/achievements.ts
+@@ -0,0 +1,330 @@
++export interface AppAchievement {
++  id: string;
++  code: string;
++  title: string;
++  category: 'health' | 'mindset' | 'money' | 'mastery';
++  icon: string;
++  timeframe?: string;
++  description: string;
++  requirement: string;
++  medicalNote: string;
++  checkUnlocked: (stats: {
++    totalSeconds: number;
++    days: number;
++    hours: number;
++    moneySaved: number;
++    cravingsResisted: number;
++    relapseCount: number;
++  }) => boolean;
++}
++
++export const APP_ACHIEVEMENTS: AppAchievement[] = [
++  // ЗДОРОВЬЕ И ВОССТАНОВЛЕНИЕ ОРГАНОВ (ВОЗ)
++  {
++    id: 'ach-1',
++    code: 'first_hours',
++    title: 'Чистый кислород',
++    category: 'health',
++    icon: '🫁',
++    timeframe: '8 часов',
++    description: 'Угарный газ (CO) в крови снизился вдвое, клетки насыщаются чистым кислородом.',
++    requirement: '8 часов без сигарет',
++    medicalNote: 'Оксигемоглобин в артериальной крови возвращается к физиологической норме 98-99%.',
++    checkUnlocked: (s) => s.totalSeconds >= 8 * 3600,
++  },
++  {
++    id: 'ach-2',
++    code: 'first_day',
++    title: 'Первый чистый день',
++    category: 'health',
++    icon: '🌱',
++    timeframe: '24 часа',
++    description: 'CO полностью покинул кровь, легкие начали интенсивный процесс самоочищения.',
++    requirement: '24 часа без табака',
++    medicalNote: 'Снижение риска острой коронарной недостаточности и спазма сосудов.',
++    checkUnlocked: (s) => s.days >= 1,
++  },
++  {
++    id: 'ach-3',
++    code: 'two_days',
++    title: 'Возрождение вкуса',
++    category: 'health',
++    icon: '🍓',
++    timeframe: '48 часов',
++    description: 'Организм свободен от свободного никотина, обоняние и вкусовые рецепторы просыпаются.',
++    requirement: '48 часов свободы',
++    medicalNote: 'Нервные окончания на сосочках языка и в обонятельной луковице начинают регенерацию.',
++    checkUnlocked: (s) => s.days >= 2,
++  },
++  {
++    id: 'ach-4',
++    code: 'three_days',
++    title: 'Бронхиальный прорыв',
++    category: 'health',
++    icon: '🌬️',
++    timeframe: '72 часа',
++    description: 'Бронхи расслабляются, пик физической никотиновой ломки успешно преодолен!',
++    requirement: '72 часа без никотина',
++    medicalNote: 'Снижение тонуса гладкой мускулатуры бронхиального дерева, расширение дыхательного просвета.',
++    checkUnlocked: (s) => s.days >= 3,
++  },
++  {
++    id: 'ach-5',
++    code: 'five_days',
++    title: 'Чистый котинин',
++    category: 'health',
++    icon: '🛡️',
++    timeframe: '5 дней',
++    description: 'Метаболиты никотина полностью выведены из печени и почек.',
++    requirement: '5 дней свободы',
++    medicalNote: 'Полная элиминация котинина из плазмы крови и мочи.',
++    checkUnlocked: (s) => s.days >= 5,
++  },
++  {
++    id: 'ach-6',
++    code: 'week_free',
++    title: 'Неделя триумфа',
++    category: 'health',
++    icon: '⚡',
++    timeframe: '7 дней',
++    description: 'Утренний пульс спокоен, кровообращение и глубокий сон заметно восстановились.',
++    requirement: '7 дней чистой жизни',
++    medicalNote: 'Нормализация вариабельности сердечного ритма (HRV) и структуры фаз медленного сна.',
++    checkUnlocked: (s) => s.days >= 7,
++  },
++  {
++    id: 'ach-7',
++    code: 'ten_days',
++    title: 'Свежее дыхание',
++    category: 'health',
++    icon: '✨',
++    timeframe: '10 дней',
++    description: 'Налет на зубах и запах табачного дыма от кожи и одежды полностью исчезли.',
++    requirement: '10 дней свободы',
++    medicalNote: 'Восстановление нормального микробиома ротовой полости и барьерной функции эпидермиса.',
++    checkUnlocked: (s) => s.days >= 10,
++  },
++  {
++    id: 'ach-8',
++    code: 'two_weeks',
++    title: 'Кардио-разгон',
++    category: 'health',
++    icon: '❤️',
++    timeframe: '14 дней',
++    description: 'Функция легких возросла до +30%, шаги и лестницы преодолеваются без одышки.',
++    requirement: '2 недели без табака',
++    medicalNote: 'Рост перфузии периферических тканей и эластичности капиллярного русла.',
++    checkUnlocked: (s) => s.days >= 14,
++  },
++  {
++    id: 'ach-9',
++    code: 'three_weeks',
++    title: 'Нейропластичность',
++    category: 'health',
++    icon: '🧠',
++    timeframe: '21 день',
++    description: 'Сломан старый автоматический рефлекс сигареты при стрессе или отдыхе.',
++    requirement: '21 день свободы',
++    medicalNote: 'Ослабление глутаматергических синаптических связей в прилежащем ядре мозга.',
++    checkUnlocked: (s) => s.days >= 21,
++  },
++  {
++    id: 'ach-10',
++    code: 'month_free',
++    title: 'Бронхиальный щит',
++    category: 'health',
++    icon: '🌿',
++    timeframe: '30 дней',
++    description: 'Реснички мерцательного эпителия бронхов восстановились, ушел хронический кашель.',
++    requirement: '1 месяц без дыма',
++    medicalNote: 'Восстановление мукоцилиарного клиренса и выведение застарелых частиц смол.',
++    checkUnlocked: (s) => s.days >= 30,
++  },
++  {
++    id: 'ach-11',
++    code: 'two_months',
++    title: 'Дофаминовый баланс',
++    category: 'health',
++    icon: '☀️',
++    timeframe: '60 дней',
++    description: 'Ацетилхолиновые рецепторы откалиброваны, радость без искусственных стимуляторов.',
++    requirement: '2 месяца свободы',
++    medicalNote: 'Даунрегуляция никотиновых α4β2 рецепторов до базового уровня некурящего человека.',
++    checkUnlocked: (s) => s.days >= 60,
++  },
++  {
++    id: 'ach-12',
++    code: 'three_months',
++    title: 'Железные легкие',
++    category: 'health',
++    icon: '🏔️',
++    timeframe: '90 дней',
++    description: 'Жизненная емкость легких выросла на 15%, физические тренировки приносят удовольствие.',
++    requirement: '90 дней без табака',
++    medicalNote: 'Увеличение форсированной жизненной емкости легких (ФЖЕЛ) и альвеолярного газообмена.',
++    checkUnlocked: (s) => s.days >= 90,
++  },
++  {
++    id: 'ach-13',
++    code: 'half_year',
++    title: 'Полгода свободы',
++    category: 'health',
++    icon: '💎',
++    timeframe: '180 дней',
++    description: 'Пазухи носа чисты, риск бронхоспазма и сезонных простуд снижен на 90%.',
++    requirement: '6 месяцев свободы',
++    medicalNote: 'Угасание хронического гиперпластического воспаления слизистых респираторного тракта.',
++    checkUnlocked: (s) => s.days >= 180,
++  },
++  {
++    id: 'ach-14',
++    code: 'nine_months',
++    title: 'Чистые артерии',
++    category: 'health',
++    icon: '🩸',
++    timeframe: '270 дней',
++    description: 'Маркер сосудистого воспаления (СРБ) в норме, стенки артерий эластичны.',
++    requirement: '9 месяцев без дыма',
++    medicalNote: 'Снижение С-реактивного белка и фактора некроза опухоли (TNF-α) в сосудистом эндотелии.',
++    checkUnlocked: (s) => s.days >= 270,
++  },
++  {
++    id: 'ach-15',
++    code: 'year_free',
++    title: 'Новое сердце',
++    category: 'health',
++    icon: '🏆',
++    timeframe: '1 год',
++    description: 'Риск ишемической болезни сердца снизился ровно в 2 раза по сравнению с курящим!',
++    requirement: '365 дней победы',
++    medicalNote: 'Регресс ранних атеросклеротических отложений и нормализация коронарного кровотока.',
++    checkUnlocked: (s) => s.days >= 365,
++  },
++  {
++    id: 'ach-16',
++    code: 'two_years',
++    title: 'Стальной рубеж',
++    category: 'health',
++    icon: '👑',
++    timeframe: '2 года',
++    description: 'Риск инфаркта миокарда сравнялся с показателями никогда не куривших людей.',
++    requirement: '2 года свободы',
++    medicalNote: 'Стабилизация фиброзных покрышек сосудистых стенок и минимальный тромбогенный потенциал.',
++    checkUnlocked: (s) => s.days >= 730,
++  },
++  {
++    id: 'ach-17',
++    code: 'five_years',
++    title: 'Золотой стандарт ВОЗ',
++    category: 'health',
++    icon: '🌟',
++    timeframe: '5 лет',
++    description: 'Риск инсульта и сосудистых катастроф мозга снижен до уровня абсолютно некурящего.',
++    requirement: '5 лет чистой жизни',
++    medicalNote: 'Полное восстановление церебральной микроциркуляции и эластичности сонных артерий.',
++    checkUnlocked: (s) => s.days >= 1825,
++  },
++
++  // ОСОЗНАННОСТЬ И ПОБЕДА НАД ТЯГОЙ
++  {
++    id: 'ach-18',
++    code: 'first_craving',
++    title: 'Первая победа',
++    category: 'mindset',
++    icon: '🔥',
++    description: 'Ты доказал, что тяга — это просто 3-минутная волна, и остался верен себе.',
++    requirement: '1 зафиксированная победа над тягой',
++    medicalNote: 'Активация префронтальной коры головного мозга над автоматическим лимбическим импульсом.',
++    checkUnlocked: (s) => s.cravingsResisted >= 1,
++  },
++  {
++    id: 'ach-19',
++    code: 'craving_pro',
++    title: 'Страж спокойствия',
++    category: 'mindset',
++    icon: '🥋',
++    description: '5 преодоленных приступов тяги — осознанный контроль над биохимией зависимости.',
++    requirement: '5 побед над тягой',
++    medicalNote: 'Формирование устойчивой стресс-протективной реакции без никотиновой стимуляции.',
++    checkUnlocked: (s) => s.cravingsResisted >= 5,
++  },
++  {
++    id: 'ach-20',
++    code: 'craving_master',
++    title: 'Мастер тяги',
++    category: 'mindset',
++    icon: '🥊',
++    description: '10 преодоленных приступов — ты диктуешь правила телу, а не привычка тебе.',
++    requirement: '10 побед над импульсом',
++    medicalNote: 'Закрепление осознанности как основного копинг-механизма преодоления стресса.',
++    checkUnlocked: (s) => s.cravingsResisted >= 10,
++  },
++  {
++    id: 'ach-21',
++    code: 'craving_legend',
++    title: 'Непоколебимый стоик',
++    category: 'mindset',
++    icon: '🏛️',
++    description: '25 побед над импульсом — твоя опора сильнее любых провокаций окружения.',
++    requirement: '25 побед над тягой',
++    medicalNote: 'Высокая автономия лобных долей и эмоциональная саморегуляция.',
++    checkUnlocked: (s) => s.cravingsResisted >= 25,
++  },
++  {
++    id: 'ach-22',
++    code: 'zen_master',
++    title: 'Дзен-мастер свободы',
++    category: 'mindset',
++    icon: '🧘',
++    description: '50 побед — абсолютный иммунитет к никотиновым манипуляциям.',
++    requirement: '50 побед над импульсом',
++    medicalNote: 'Полное угасание патологической доминанты Ухтомского в коре мозга.',
++    checkUnlocked: (s) => s.cravingsResisted >= 50,
++  },
++
++  // ФИНАНСЫ И МАСТЕРСТВО
++  {
++    id: 'ach-23',
++    code: 'money_saver_1',
++    title: 'Первая копилка',
++    category: 'money',
++    icon: '💰',
++    description: 'Сэкономлено 10 000 ₸ — деньги в кармане, а не сгорели в табачный пепел.',
++    requirement: 'Сэкономить 10 000 ₸',
++    medicalNote: 'Финансовое поощрение усиливает естественный выброс дофамина от достижения цели.',
++    checkUnlocked: (s) => s.moneySaved >= 10000,
++  },
++  {
++    id: 'ach-24',
++    code: 'money_saver_2',
++    title: 'Финансовый щит',
++    category: 'money',
++    icon: '💎',
++    description: 'Сэкономлено 50 000 ₸ — солидный капитал на реальные цели и здоровье.',
++    requirement: 'Сэкономить 50 000 ₸',
++    medicalNote: 'Осознание финансовой выгоды снижает общий уровень бытовой тревожности.',
++    checkUnlocked: (s) => s.moneySaved >= 50000,
++  },
++  {
++    id: 'ach-25',
++    code: 'money_saver_3',
++    title: 'Инвестор в жизнь',
++    category: 'money',
++    icon: '🏦',
++    description: 'Сэкономлено 100 000 ₸ — реальная независимость от табачных корпораций.',
++    requirement: 'Сэкономить 100 000 ₸',
++    medicalNote: 'Психологический статус свободного и самодостаточного человека.',
++    checkUnlocked: (s) => s.moneySaved >= 100000,
++  },
++  {
++    id: 'ach-26',
++    code: 'clean_month_track',
++    title: 'Безупречный трек',
++    category: 'mastery',
++    icon: '🎯',
++    description: '30 дней подряд со 100% чистотой без единого срыва.',
++    requirement: '30 дней и 0 срывов',
++    medicalNote: 'Максимальный темп клеточного восстановления всех жизненных систем.',
++    checkUnlocked: (s) => s.days >= 30 && s.relapseCount === 0,
++  },
++];
+diff --git a/src/data/recoveryPhases.ts b/src/data/recoveryPhases.ts
+new file mode 100644
+index 0000000..3c89257
+--- /dev/null
++++ b/src/data/recoveryPhases.ts
+@@ -0,0 +1,412 @@
++import { HealthMilestone, PhysiologicalPhase, PhysiologicalIndicator } from '../types';
++import { WHO_HEALTH_MILESTONES } from './auditReport';
++
++export interface PhaseDefinition {
++  id: string;
++  phaseNumber: number;
++  name: string;
++  subtitle: string;
++  durationRange: string;
++  startSec: number;
++  endSec: number;
++  description: string;
++  keyChanges: string[];
++  indicatorTemplates: {
++    id: string;
++    name: string;
++    category: PhysiologicalIndicator['category'];
++    startValue: string;
++    targetValue: string;
++    durationSec: number;
++    description: string;
++    medicalInsight: string;
++    icon: string;
++    calcValue: (progress: number) => string;
++  }[];
++}
++
++export const RECOVERY_PHASES_CONFIG: PhaseDefinition[] = [
++  {
++    id: 'phase-1',
++    phaseNumber: 1,
++    name: 'Острая детоксикация и сатурация O₂',
++    subtitle: 'Устранение гипоксии, элиминация CO и преодоление физического пика',
++    durationRange: '0 – 72 часа (1–3 дня)',
++    startSec: 0,
++    endSec: 72 * 3600,
++    description:
++      'Первичный этап очищения кровотока. Монооксид углерода (угарный газ) замещается кислородом, гемоглобин возвращает способность питать ткани, а никотин полностью покидает кровеносное русло.',
++    keyChanges: [
++      'Снижение частоты пульса и стабилизация давления до физиологической нормы (за 20–120 минут)',
++      'Падение уровня угарного газа в крови до нуля (<1.0% HbCO за 12–24 часа)',
++      'Восстановление сатурации кислорода (SpO₂) до 99–100% (за 8–24 часа)',
++      'Начало регенерации вкусовых и обонятельных рецепторов (за 48 часов)',
++      'Полное выведение никотина и котинина почками и печенью (к 72 часам)',
++    ],
++    indicatorTemplates: [
++      {
++        id: 'ind-spo2',
++        name: 'Сатурация крови кислородом (SpO₂)',
++        category: 'oxygen',
++        startValue: '93.0%',
++        targetValue: '99.5%',
++        durationSec: 24 * 3600,
++        description: 'Степень насыщения артериального гемоглобина молекулярным кислородом.',
++        medicalInsight: 'Ткани головного мозга и миокарда перестают испытывать хроническое кислородное голодание.',
++        icon: '🫁',
++        calcValue: (p) => `${(93.0 + (99.5 - 93.0) * (p / 100)).toFixed(1)}%`,
++      },
++      {
++        id: 'ind-co',
++        name: 'Очищение от монооксида углерода (HbCO)',
++        category: 'co_clearing',
++        startValue: '8.5% HbCO',
++        targetValue: '< 0.8% HbCO',
++        durationSec: 24 * 3600,
++        description: 'Концентрация токсичного карбоксигемоглобина, блокировавшего перенос кислорода.',
++        medicalInsight: 'К 24 часам угарный газ полностью элиминирован через альвеолы легких.',
++        icon: '💨',
++        calcValue: (p) => `${Math.max(0.5, (8.5 - (8.5 - 0.7) * (p / 100))).toFixed(1)}% HbCO`,
++      },
++      {
++        id: 'ind-nicotine-clear',
++        name: 'Выведение свободного никотина',
++        category: 'co_clearing',
++        startValue: '100% токсинов',
++        targetValue: '0% (Чисто)',
++        durationSec: 72 * 3600,
++        description: 'Печеночный клиренс никотина ферментом CYP2A6 до неактивных метаболитов.',
++        medicalInsight: 'Через 72 часа физическая тяга сменяется психологической перестройкой.',
++        icon: '🧪',
++        calcValue: (p) => p >= 100 ? '0% (Очищено)' : `${Math.round(100 - p)}% в крови`,
++      },
++      {
++        id: 'ind-nerve-taste',
++        name: 'Регенерация нервных окончаний вкуса/обоняния',
++        category: 'nerve_regeneration',
++        startValue: '15% чувствительности',
++        targetValue: '100% яркость',
++        durationSec: 48 * 3600,
++        description: 'Восстановление сенсорных клеток вкусовых сосочков (TRC) и обонятельной луковицы.',
++        medicalInsight: 'Блокированные смолами рецепторы сбрасывают слой токсинов и восстанавливают синаптическую передачу.',
++        icon: '🍓',
++        calcValue: (p) => `${Math.min(100, Math.round(15 + 85 * (p / 100)))}%`,
++      },
++    ],
++  },
++  {
++    id: 'phase-2',
++    phaseNumber: 2,
++    name: 'Бронхиальное расширение и нейропластичность',
++    subtitle: 'Снятие спазма бронхиол, стабилизация сна и разрушение никотинового рефлекса',
++    durationRange: '3 – 21 день (1–3 недели)',
++    startSec: 72 * 3600,
++    endSec: 21 * 86400,
++    description:
++      'Период глубокой перестройки нервной системы и дыхательных путей. Гладкая мускулатура бронхов расслабляется, легкие начинают вмещать больше воздуха, а плотность никотиновых рецепторов в мозге снижается.',
++    keyChanges: [
++      'Расслабление бронхиального дерева и увеличение дыхательного объема (4–7 дней)',
++      'Стабилизация уровня сахара в крови и устранение скачков аппетита (5–10 дней)',
++      'Восстановление архитектуры фаз глубокого и REM-сна (7–14 дней)',
++      'Рост физической выносливости скелетных мышц на 30% (14 дней)',
++      'Даунрегуляция никотиновых ацетилхолиновых рецепторов α4β2 (21 день)',
++    ],
++    indicatorTemplates: [
++      {
++        id: 'ind-bronchi-relax',
++        name: 'Проходимость бронхиального дерева',
++        category: 'lung_capacity',
++        startValue: '60% от нормы',
++        targetValue: '95% проводимости',
++        durationSec: 10 * 86400,
++        description: 'Снятие воспалительного вазоконстрикторного тонуса с мелких дыхательных путей.',
++        medicalInsight: 'Бронхиолы расширяются, устраняя сопротивление воздушному потоку при выдохе.',
++        icon: '🌬️',
++        calcValue: (p) => `${Math.min(100, Math.round(60 + 35 * (p / 100)))}%`,
++      },
++      {
++        id: 'ind-sleep-rem',
++        name: 'Качество фазы глубокого и быстрого сна (REM)',
++        category: 'dopamine_reset',
++        startValue: '45% восстановительного сна',
++        targetValue: '95% баланс',
++        durationSec: 14 * 86400,
++        description: 'Нормализация естественной секреции мелатонина и фаз ночного отдыха.',
++        medicalInsight: 'Мозг прекращает просыпаться от микроабстиненции посреди ночи.',
++        icon: '🌙',
++        calcValue: (p) => `${Math.min(100, Math.round(45 + 50 * (p / 100)))}%`,
++      },
++      {
++        id: 'ind-nachr-density',
++        name: 'Даунрегуляция рецепторов nAChR в мозге',
++        category: 'dopamine_reset',
++        startValue: 'Гиперэкспрессия (250%)',
++        targetValue: 'Норма некурящего (100%)',
++        durationSec: 21 * 86400,
++        description: 'Снижение числа патологических никотиновых рецепторов в вентральной области покрышки.',
++        medicalInsight: 'Разрушается биологический крючок привычки. Мысли о сигарете теряют силу.',
++        icon: '🧠',
++        calcValue: (p) => `${Math.round(250 - 150 * (p / 100))}% к норме`,
++      },
++      {
++        id: 'ind-muscular-energy',
++        name: 'Кровоснабжение и выносливость мышц',
++        category: 'cardiovascular',
++        startValue: 'Базовый уровень',
++        targetValue: '+30% прирост силы',
++        durationSec: 14 * 86400,
++        description: 'Плотность оксигенации мышечных волокон и синтез АТФ в митохондриях.',
++        medicalInsight: 'Подъем по лестнице и спортивные нагрузки перестают вызывать закисление и одышку.',
++        icon: '⚡',
++        calcValue: (p) => `+${Math.round(30 * (p / 100))}% выносливости`,
++      },
++    ],
++  },
++  {
++    id: 'phase-3',
++    phaseNumber: 3,
++    name: 'Мукоцилиарный клиренс и рост емкости легких',
++    subtitle: 'Регенерация мерцательного эпителия, рост ФЖЕЛ и дофаминовый баланс',
++    durationRange: '21 – 90 дней (1–3 месяца)',
++    startSec: 21 * 86400,
++    endSec: 90 * 86400,
++    description:
++      'Клеточное очищение респираторной системы. Микроскопические реснички в легких восстанавливают волнообразные движения, выводя застарелые смолы и слизь. Форсированная емкость легких увеличивается до 15–20%.',
++    keyChanges: [
++      'Полная регенерация ресничек мерцательного эпителия легких (30–60 дней)',
++      'Преодоление психологической дофаминовой ямы и стабилизация настроения (45–60 дней)',
++      'Снижение вязкости крови и риска тромбоза глубоких вен (75 дней)',
++      'Рост форсированной жизненной емкости легких (ФЖЕЛ / ОФВ1) на 15–20% (90 дней)',
++      'Улучшение тургора кожи, цвета лица и разглаживание микроморщин (60–90 дней)',
++    ],
++    indicatorTemplates: [
++      {
++        id: 'ind-cilia-regen',
++        name: 'Плотность и подвижность ресничек эпителия',
++        category: 'lung_capacity',
++        startValue: '20% (Парализованы)',
++        targetValue: '100% (Полный клиренс)',
++        durationSec: 60 * 86400,
++        description: 'Эвакуация скопившихся частиц смол и слизи миллионами ресничек эпителия.',
++        medicalInsight: 'Утренний кашель курильщика сменяется абсолютно чистым дыханием.',
++        icon: '🌾',
++        calcValue: (p) => `${Math.min(100, Math.round(20 + 80 * (p / 100)))}% регенерации`,
++      },
++      {
++        id: 'ind-fvc-capacity',
++        name: 'Жизненная емкость легких (ФЖЕЛ / ОФВ1)',
++        category: 'lung_capacity',
++        startValue: 'База курильщика',
++        targetValue: '+15–20% объем',
++        durationSec: 90 * 86400,
++        description: 'Диффузионная способность альвеолярно-капиллярной мембраны (DLCO).',
++        medicalInsight: 'Максимальный объем глубокого вдоха вырастает на 400–600 мл.',
++        icon: '🫁',
++        calcValue: (p) => `+${(15.0 * (p / 100)).toFixed(1)}% объема`,
++      },
++      {
++        id: 'ind-dopamine-homeostasis',
++        name: 'Собственный синтез дофамина (D2/D3 рецепторы)',
++        category: 'dopamine_reset',
++        startValue: 'Яма (50%)',
++        targetValue: '100% баланс',
++        durationSec: 60 * 86400,
++        description: 'Плотность дофаминовых рецепторов в полосатом теле головного мозга.',
++        medicalInsight: 'Возвращается естественная мотивация, интерес к жизни и концентрация без стимуляторов.',
++        icon: '✨',
++        calcValue: (p) => `${Math.min(100, Math.round(50 + 50 * (p / 100)))}% синтеза`,
++      },
++      {
++        id: 'ind-blood-viscosity',
++        name: 'Текучесть крови и уровень фибриногена',
++        category: 'cardiovascular',
++        startValue: 'Повышенная вязкость',
++        targetValue: 'Оптимальная норма',
++        durationSec: 75 * 86400,
++        description: 'Снижение уровня тромбогенного белка фибриногена и адгезии тромбоцитов.',
++        medicalInsight: 'Риск микроинсультов и транзиторных ишемических атак резко падает.',
++        icon: '🩸',
++        calcValue: (p) => p >= 100 ? 'Оптимальная норма' : `${Math.round(p)}% нормализации`,
++      },
++    ],
++  },
++  {
++    id: 'phase-4',
++    phaseNumber: 4,
++    name: 'Кардиоваскулярная и иммунная репарация',
++    subtitle: 'Активация альвеолярных макрофагов, снижение СРБ и защита миокарда на 50%',
++    durationRange: '3 – 12 месяцев (1 год)',
++    startSec: 90 * 86400,
++    endSec: 365 * 86400,
++    description:
++      'Глубокое восстановление иммунной защиты и сосудистой стенки. Воспалительные маркеры (С-реактивный белок) снижаются до безопасных значений, а избыточный риск инфаркта миокарда падает ровно в 2 раза.',
++    keyChanges: [
++      'Полная фагоцитарная активность альвеолярных макрофагов (150 дней)',
++      'Очищение придаточных пазух носа и устранение застойного бронхита (180 дней / полгода)',
++      'Падение высокочувствительного С-реактивного белка (СРБ) и молекул сосудистой адгезии (270 дней)',
++      'Снижение избыточного риска ишемической болезни сердца (ИБС) на 50% (365 дней / 1 год)',
++      'Регресс ранних липидных полосок в интиме коронарных артерий (1 год)',
++    ],
++    indicatorTemplates: [
++      {
++        id: 'ind-macrophage-immunity',
++        name: 'Иммунная активность макрофагов легких',
++        category: 'lung_capacity',
++        startValue: '40% защита',
++        targetValue: '100% иммунитет',
++        durationSec: 150 * 86400,
++        description: 'Способность макрофагов уничтожать патогенные бактерии и вирусы в альвеолах.',
++        medicalInsight: 'Респираторные инфекции перестают перерастать в затяжной бронхит.',
++        icon: '🛡️',
++        calcValue: (p) => `${Math.min(100, Math.round(40 + 60 * (p / 100)))}% защиты`,
++      },
++      {
++        id: 'ind-crp-inflammation',
++        name: 'Снижение сосудистого воспаления (СРБ)',
++        category: 'cardiovascular',
++        startValue: 'Высокий риск (3.8 мг/л)',
++        targetValue: 'Безопасно (< 1.0 мг/л)',
++        durationSec: 270 * 86400,
++        description: 'Уровень высокочувствительного С-реактивного белка (hs-CRP) в сыворотке крови.',
++        medicalInsight: 'Эндотелий артерий надежно защищен от прилипания холестериновых бляшек.',
++        icon: '📉',
++        calcValue: (p) => `${Math.max(0.8, 3.8 - (3.8 - 0.8) * (p / 100)).toFixed(1)} мг/л`,
++      },
++      {
++        id: 'ind-coronary-risk',
++        name: 'Снижение избыточного риска ИБС',
++        category: 'cardiovascular',
++        startValue: '0% снижение (Максимум)',
++        targetValue: '-50% риска инфаркта',
++        durationSec: 365 * 86400,
++        description: 'Вероятность внезапного инфаркта миокарда по шкале SCORE / Framingham.',
++        medicalInsight: 'Сердечная мышца функционирует в условиях оптимального коронарного кровообращения.',
++        icon: '❤️',
++        calcValue: (p) => `-${Math.round(50 * (p / 100))}% риска`,
++      },
++    ],
++  },
++  {
++    id: 'phase-5',
++    phaseNumber: 5,
++    name: 'Онкопротекция, репарация ДНК и долголетие',
++    subtitle: 'Репарация ДНК-аддуктов, снижение риска инсульта и онкологии до нормы',
++    durationRange: '1 – 20 лет',
++    startSec: 365 * 86400,
++    endSec: 20 * 365 * 86400,
++    description:
++      'Долгосрочный горизонт регенерации. Полное устранение мутагенных рисков табачных нитрозаминов, очищение клеток на эпигенетическом уровне и возврат ожидаемой продолжительности жизни к норме никогда не курившего человека.',
++    keyChanges: [
++      'Восстановление эластичности аорты и эндотелия (1.5–2 года)',
++      'Снижение риска рака шейки матки, мочевого пузыря и пищевода на 50% (3–7 лет)',
++      'Риск инсульта снижен до уровня никогда не курившего человека (5 лет)',
++      'Риск рака легких снижен вдвое (10 лет)',
++      'Общая смертность и риск всех причин сравниваются со здоровой популяцией (15–20 лет)',
++    ],
++    indicatorTemplates: [
++      {
++        id: 'ind-stroke-risk',
++        name: 'Нормализация риска инсульта (до уровня некурящих)',
++        category: 'cardiovascular',
++        startValue: 'Повышен в 3 раза',
++        targetValue: 'Уровень некурящего',
++        durationSec: 5 * 365 * 86400,
++        description: 'Ауторегуляция церебрального кровотока и предотвращение кальцификации мозговых артерий.',
++        medicalInsight: 'Через 5 лет риск инсульта полностью сравнивается со здоровым человеком.',
++        icon: '🧠',
++        calcValue: (p) => p >= 100 ? '100% (Норма некурящего)' : `${Math.round(p)}% защиты`,
++      },
++      {
++        id: 'ind-lung-cancer-risk',
++        name: 'Снижение риска рака легких',
++        category: 'oxygen',
++        startValue: 'Высокий риск',
++        targetValue: '-50% риска онкологии',
++        durationSec: 10 * 365 * 86400,
++        description: 'Элиминация предраковых метаплазий бронхиального эпителия и репарация ДНК-аддуктов.',
++        medicalInsight: 'Смертность от рака легких уменьшается вдвое к 10-летнему юбилею свободы.',
++        icon: '🛡️',
++        calcValue: (p) => `-${Math.round(50 * (p / 100))}% риска`,
++      },
++      {
++        id: 'ind-total-longevity',
++        name: 'Индекс возвращенного долголетия',
++        category: 'cardiovascular',
++        startValue: '-10 лет жизни',
++        targetValue: '+10 лет полной жизни',
++        durationSec: 15 * 365 * 86400,
++        description: 'Компенсация потерянных лет жизни и выравнивание кривой дожития.',
++        medicalInsight: 'Вы полностью вернули себе десятилетие здоровой, активной и радостной жизни.',
++        icon: '🏆',
++        calcValue: (p) => `+${(10 * (p / 100)).toFixed(1)} лет жизни`,
++      },
++    ],
++  },
++];
++
++/**
++ * Calculates physiological recovery phases and dynamic indicators based on user total clean seconds.
++ */
++export function calculatePhysiologicalPhases(totalSeconds: number): PhysiologicalPhase[] {
++  return RECOVERY_PHASES_CONFIG.map((phaseDef) => {
++    let status: 'completed' | 'in-progress' | 'upcoming' = 'upcoming';
++    let progressPercent = 0;
++
++    if (totalSeconds >= phaseDef.endSec) {
++      status = 'completed';
++      progressPercent = 100;
++    } else if (totalSeconds > phaseDef.startSec) {
++      status = 'in-progress';
++      const range = phaseDef.endSec - phaseDef.startSec;
++      const elapsed = totalSeconds - phaseDef.startSec;
++      progressPercent = Math.min(99, Math.max(1, Math.round((elapsed / range) * 100)));
++    } else {
++      status = 'upcoming';
++      progressPercent = 0;
++    }
++
++    // Indicators calculation
++    const indicators: PhysiologicalIndicator[] = phaseDef.indicatorTemplates.map((template) => {
++      let indProgress = 0;
++      if (totalSeconds >= template.durationSec) {
++        indProgress = 100;
++      } else {
++        indProgress = Math.min(100, Math.max(0, Math.round((totalSeconds / template.durationSec) * 100)));
++      }
++
++      return {
++        id: template.id,
++        name: template.name,
++        category: template.category,
++        currentValue: template.calcValue(indProgress),
++        targetValue: template.targetValue,
++        progressPercent: indProgress,
++        timeToCompleteSec: template.durationSec,
++        description: template.description,
++        medicalInsight: template.medicalInsight,
++        icon: template.icon,
++      };
++    });
++
++    // Associated WHO milestones for this phase
++    const milestones = WHO_HEALTH_MILESTONES.filter((m) => {
++      return m.secondsRequired > phaseDef.startSec && m.secondsRequired <= phaseDef.endSec;
++    });
++
++    return {
++      id: phaseDef.id,
++      phaseNumber: phaseDef.phaseNumber,
++      name: phaseDef.name,
++      subtitle: phaseDef.subtitle,
++      durationRange: phaseDef.durationRange,
++      startSec: phaseDef.startSec,
++      endSec: phaseDef.endSec,
++      status,
++      progressPercent,
++      description: phaseDef.description,
++      keyChanges: phaseDef.keyChanges,
++      indicators,
++      milestones,
++    };
++  });
++}
+diff --git a/src/types.ts b/src/types.ts
+index f46e134..dc13b72 100644
+--- a/src/types.ts
++++ b/src/types.ts
+@@ -75,6 +75,36 @@ export interface HealthMilestone {
+   practicalTip?: string;
+   scientificReference: string;
+   iconType?: string;
++  phaseId?: string;
++}
++
++export interface PhysiologicalIndicator {
++  id: string;
++  name: string;
++  category: 'oxygen' | 'co_clearing' | 'nerve_regeneration' | 'lung_capacity' | 'dopamine_reset' | 'cardiovascular';
++  currentValue: string;
++  targetValue: string;
++  progressPercent: number; // 0 - 100
++  timeToCompleteSec: number;
++  description: string;
++  medicalInsight: string;
++  icon: string;
++}
++
++export interface PhysiologicalPhase {
++  id: string;
++  phaseNumber: number;
++  name: string;
++  subtitle: string;
++  durationRange: string;
++  startSec: number;
++  endSec: number;
++  status: 'completed' | 'in-progress' | 'upcoming';
++  progressPercent: number; // 0 - 100
++  description: string;
++  keyChanges: string[];
++  indicators: PhysiologicalIndicator[];
++  milestones: HealthMilestone[];
+ }
+ 
+ export interface AuditBug {
