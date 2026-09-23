@@ -224,28 +224,61 @@
   }
 
   /* -------------------------------------------------------------
-     WHO RECOVERY TIMELINE (DYNAMIC COMPUTED & EXPANDED)
+     CHART & ANALYTICS STATE
+  ------------------------------------------------------------- */
+  let currentChartMode = 'cumulative'; // 'cumulative' | 'daily' | 'cravings'
+  let currentChartHorizon = 'goal'; // '30d' | '90d' | '180d' | '1y' | 'goal'
+
+  function updateAnalyticsKpis() {
+    if (!stats) return;
+    const currencyConfig = CURRENCY_RATES[currentCurrency] || CURRENCY_RATES.KZT;
+    const saved = stats.saved_kzt || 0;
+    const goal = stats.user?.financial_goal_kzt || 0;
+    const packPrice = stats.user?.pack_price_kzt || 900;
+    const unitsPerDay = stats.user?.units_per_day || 20;
+    const dailyExpenseKzt = (packPrice / 20) * unitsPerDay;
+
+    if ($("analyticsSavedVal")) $("analyticsSavedVal").textContent = `${formatMoney(saved)} ${currencyConfig.sign}`;
+    if ($("analyticsGoalVal")) $("analyticsGoalVal").textContent = goal > 0 ? `${formatMoney(goal)} ${currencyConfig.sign}` : "Не задана";
+    if ($("analyticsDailyVal")) $("analyticsDailyVal").textContent = `${formatMoney(dailyExpenseKzt)} ${currencyConfig.sign}/д`;
+
+    if ($("analyticsRemainingVal")) {
+      if (goal <= 0) {
+        $("analyticsRemainingVal").textContent = "—";
+      } else if (saved >= goal) {
+        $("analyticsRemainingVal").textContent = "Достигнута! 🎉";
+      } else {
+        const remainingKzt = goal - saved;
+        const daysLeft = dailyExpenseKzt > 0 ? Math.ceil(remainingKzt / dailyExpenseKzt) : 0;
+        $("analyticsRemainingVal").textContent = `${daysLeft} дн.`;
+      }
+    }
+  }
+
+  /* -------------------------------------------------------------
+     WHO RECOVERY TIMELINE (GRANULAR BIOMARKERS & PROGRESS BARS)
   ------------------------------------------------------------- */
   const WHO_STAGES = [
-    { id: "20m", targetSec: 20 * 60, title: "20 минут: Пульс и давление", desc: "Частота сердечных сокращений и артериальное давление возвращаются к норме. Кровообращение в конечностях заметно улучшается." },
-    { id: "8h", targetSec: 8 * 3600, title: "8 часов: Кислород в крови", desc: "Уровень токсичного угарного газа (CO) снижается вдвое. Концентрация свободного кислорода в артериальной крови достигает оптимума." },
-    { id: "12h", targetSec: 12 * 3600, title: "12 часов: Детоксикация CO", desc: "Угарный газ полностью вытеснен кислородом. Гемоглобин транспортирует максимум O₂ к клеткам сердца и головного мозга." },
-    { id: "24h", targetSec: 24 * 3600, title: "24 часа: Дренаж легких", desc: "Риск внезапного инфаркта начинает неуклонно снижаться. Легкие запускают процесс выведения мокроты и остатков продуктов горения." },
-    { id: "48h", targetSec: 48 * 3600, title: "48 часов: Вкус и обоняние", desc: "Организм полностью свободен от никотина. Нервные окончания регенерируют, вкусы любимых блюд и ароматы становятся яркими и тонкими." },
-    { id: "72h", targetSec: 72 * 3600, title: "72 часа: Легкость дыхания", desc: "Бронхиальные трубки расслабляются, вдох становится свободным. Пик физиологической никотиновой ломки успешно пройден!" },
-    { id: "5d", targetSec: 5 * 86400, title: "5 дней: Вывод котинина", desc: "Печень и почки полностью очищены от метаболита никотина — котинина. Физическая зависимость уступила место психологической победе." },
-    { id: "7d", targetSec: 7 * 86400, title: "7 дней: Неделя триумфа", desc: "Восстанавливается здоровая архитектура медленного сна. Утренний пульс стабилен, уходит навязчивая тахикардия." },
-    { id: "10d", targetSec: 10 * 86400, title: "10 дней: Свежее дыхание", desc: "Исчезает специфический табачный налет на зубах и запах от кожи. Улучшается микрофлора ротовой полости." },
-    { id: "14d", targetSec: 14 * 86400, title: "2 недели: Энергия и выносливость", desc: "Кровообращение во всех органах возросло на 30%. Подъем по лестнице и быстрый шаг больше не вызывают одышки." },
-    { id: "21d", targetSec: 21 * 86400, title: "21 день: Нейропластичность", desc: "Разрушен старый рефлекс «стресс — сигарета». Мозг учится вырабатывать эндорфины и дофамин естественным путем." },
-    { id: "30d", targetSec: 30 * 86400, title: "1 месяц: Регенерация бронхов", desc: "Реснички мерцательного эпителия бронхов восстановились и очищают легкие. Исчезает хронический утренний кашель курильщика." },
-    { id: "60d", targetSec: 60 * 86400, title: "2 месяца: Дофаминовый баланс", desc: "Плотность никотиновых ацетилхолиновых рецепторов нормализовалась. Естественные события приносят глубокое удовольствие." },
-    { id: "90d", targetSec: 90 * 86400, title: "3 месяца: Железные легкие", desc: "Форсированная жизненная емкость легких (ФЖЕЛ) увеличивается до +15%. Спорт и кардионагрузки даются легко и в кайф." },
-    { id: "180d", targetSec: 180 * 86400, title: "6 месяцев: Чистые пазухи носа", desc: "Хроническое воспаление в носоглотке и бронхах полностью угасло. Сезонные простуды проходят быстро и без осложнений." },
-    { id: "270d", targetSec: 270 * 86400, title: "9 месяцев: Защита сосудов (СРБ)", desc: "Маркер сосудистого воспаления (СРБ) в крови снизился до нормы некурящего человека. Артерии защищены от склероза." },
-    { id: "365d", targetSec: 365 * 86400, title: "1 год: Новое сердце", desc: "Избыточный риск развития ишемической болезни сердца снижен ровно на 50% по сравнению с курящим человеком!" },
-    { id: "730d", targetSec: 730 * 86400, title: "2 года: Стальной барьер", desc: "Риск инфаркта миокарда упал до уровня среднестатистического никогда не курившего человека." },
-    { id: "1825d", targetSec: 1825 * 86400, title: "5 лет: Золотой стандарт ВОЗ", desc: "Риск ишемического инсульта и сосудистых катастроф мозга снизился до показателей абсолютно некурящего человека!" }
+    { id: "20m", targetSec: 20 * 60, title: "20 минут: Пульс и давление", desc: "Частота сердечных сокращений и артериальное давление возвращаются к норме. Кровообращение в конечностях заметно улучшается.", icon: "❤️" },
+    { id: "2h", targetSec: 2 * 3600, title: "2 часа: Снятие периферического спазма", desc: "Кончики пальцев рук и ног согреваются, восстанавливается микроциркуляция капилляров.", icon: "🩺" },
+    { id: "8h", targetSec: 8 * 3600, title: "8 часов: Кислород в крови (+100%)", desc: "Уровень токсичного угарного газа (CO) снижается вдвое. Концентрация свободного кислорода в артериальной крови достигает оптимума.", icon: "🫁" },
+    { id: "12h", targetSec: 12 * 3600, title: "12 часов: Детоксикация CO (Норма)", desc: "Угарный газ полностью вытеснен кислородом. Гемоглобин транспортирует максимум O₂ к клеткам сердца и мозга.", icon: "🌬️" },
+    { id: "24h", targetSec: 24 * 3600, title: "24 часа: Дренаж легких & Сердце", desc: "Риск внезапного инфаркта начинает снижаться. Легкие запускают процесс выведения мокроты и остатков продуктов горения.", icon: "⚡" },
+    { id: "48h", targetSec: 48 * 3600, title: "48 часов: Регенерация нервов & Вкус", desc: "Организм полностью свободен от никотина. Нервные окончания регенерируют, вкус любимых блюд и ароматы становятся яркими.", icon: "🍓" },
+    { id: "72h", targetSec: 72 * 3600, title: "72 часа: Расслабление бронхов", desc: "Бронхиальные трубки расслабляются, вдох становится свободным. Пик физиологической никотиновой ломки успешно пройден!", icon: "🏔️" },
+    { id: "5d", targetSec: 5 * 86400, title: "5 дней: Вывод котинина из органов", desc: "Печень и почки полностью очищены от метаболита никотина — котинина. Физическая зависимость уступила место свободе.", icon: "🛡️" },
+    { id: "7d", targetSec: 7 * 86400, title: "7 дней: Неделя триумфа & Сон", desc: "Восстанавливается здоровая архитектура медленного сна (REM). Утренний пульс стабилен, уходит навязчивая тахикардия.", icon: "🌙" },
+    { id: "10d", targetSec: 10 * 86400, title: "10 дней: Свежее дыхание & Десны", desc: "Исчезает специфический табачный налет на зубах и запах от кожи. Улучшается микрофлора и кровоснабжение десен.", icon: "✨" },
+    { id: "14d", targetSec: 14 * 86400, title: "2 недели: Кардио-разгон (+30%)", desc: "Кровообращение во всех органах возросло на 30%. Подъем по лестнице и быстрый шаг больше не вызывают одышки.", icon: "🔥" },
+    { id: "21d", targetSec: 21 * 86400, title: "21 день: Нейропластичность", desc: "Разрушен старый рефлекс «стресс — сигарета». Мозг вырабатывает эндорфины и дофамин естественным путем.", icon: "🧠" },
+    { id: "30d", targetSec: 30 * 86400, title: "1 месяц: Регенерация ресничек бронхов", desc: "Реснички мерцательного эпителия бронхов восстановились и очищают легкие. Исчезает хронический утренний кашель курильщика.", icon: "🌿" },
+    { id: "60d", targetSec: 60 * 86400, title: "2 месяца: Дофаминовый баланс", desc: "Плотность никотиновых ацетилхолиновых рецепторов нормализовалась. Естественные события приносят глубокое удовольствие.", icon: "☀️" },
+    { id: "90d", targetSec: 90 * 86400, title: "3 месяца: Емкость легких (ФЖЕЛ +15%)", desc: "Форсированная жизненная емкость легких увеличивается до +15%. Спорт и кардионагрузки даются легко и в кайф.", icon: "💎" },
+    { id: "180d", targetSec: 180 * 86400, title: "6 месяцев: Чистые пазухи носа", desc: "Хроническое воспаление в носоглотке и бронхах полностью угасло. Сезонные простуды проходят быстро и без осложнений.", icon: "🛡️" },
+    { id: "270d", targetSec: 270 * 86400, title: "9 месяцев: Защита сосудов (СРБ в норме)", desc: "Маркер сосудистого воспаления (СРБ) в крови снизился до нормы некурящего человека. Артерии защищены от склероза.", icon: "🩸" },
+    { id: "365d", targetSec: 365 * 86400, title: "1 год: Новое сердце (-50% риск ИБС)", desc: "Избыточный риск развития ишемической болезни сердца снижен ровно на 50% по сравнению с курящим человеком!", icon: "🏆" },
+    { id: "730d", targetSec: 730 * 86400, title: "2 года: Паритет по инфаркту", desc: "Риск инфаркта миокарда упал до уровня среднестатистического никогда не курившего человека.", icon: "👑" },
+    { id: "1825d", targetSec: 1825 * 86400, title: "5 лет: Золотой стандарт ВОЗ", desc: "Риск ишемического инсульта и сосудистых катастроф мозга снизился до показателей абсолютно некурящего человека!", icon: "🌟" }
   ];
 
   function renderHealthTimeline(currentSec) {
@@ -257,15 +290,18 @@
       const pct = isDone ? 100 : Math.min(99, Math.round((currentSec / stage.targetSec) * 100));
       const statusClass = isDone ? "completed" : pct > 0 ? "in-progress" : "locked";
       const badgeHtml = isDone
-        ? `<span class="health-badge badge-done">Выполнено ✓</span>`
+        ? `<span class="health-badge badge-done">Выполнено 100% ✓</span>`
         : pct > 0
         ? `<span class="health-badge badge-progress">${pct}% в процессе</span>`
-        : `<span class="health-badge badge-locked">Предстоит</span>`;
+        : `<span class="health-badge badge-locked">Предстоит (0%)</span>`;
 
       return `
         <article class="health-item ${statusClass}">
           <div class="health-item-header">
-            <strong class="health-title">${stage.title}</strong>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:18px;">${stage.icon}</span>
+              <strong class="health-title">${stage.title}</strong>
+            </div>
             ${badgeHtml}
           </div>
           <p class="health-desc">${stage.desc}</p>
@@ -278,110 +314,310 @@
   }
 
   /* -------------------------------------------------------------
-     ACHIEVEMENTS SYSTEM (EXPANDED HEALTH & MASTERY)
+     3D FLIP BADGE SYSTEM (UNIQUE BADGES & INTERACTIVE 3D ANIMATION)
   ------------------------------------------------------------- */
-  const ACHIEVEMENT_META = {
-    // Здоровье (ВОЗ & Медицинские вехи)
-    first_hours: { title: "Чистый кислород", description: "8 часов без дыма — угарный газ (CO) в крови снизился вдвое", icon: "🫁", category: "health" },
-    first_day: { title: "Первый чистый день", description: "24 часа без табака — CO полностью покинул кровь", icon: "🌱", category: "health" },
-    two_days: { title: "Возрождение вкуса", description: "48 часов — организм чист от никотина, обоняние и вкус оживают", icon: "🍓", category: "health" },
-    three_days: { title: "Бронхиальный прорыв", description: "72 часа — бронхи расслабляются, пик физической ломки позади!", icon: "🌬️", category: "health" },
-    five_days: { title: "Чистый котинин", description: "5 дней — метаболиты никотина выведены из печени и почек", icon: "🛡️", category: "health" },
-    week_free: { title: "Неделя триумфа", description: "7 дней — утренний пульс спокоен, кровообращение восстановилось", icon: "⚡", category: "health" },
-    ten_days: { title: "Свежее дыхание", description: "10 дней — налет на зубах и запах дыма полностью ушли", icon: "✨", category: "health" },
-    two_weeks: { title: "Кардио-разгон", description: "14 дней — функция легких выросла на 30%, шаги даются легко", icon: "❤️", category: "health" },
-    three_weeks: { title: "Нейропластичность", description: "21 день — сломан старый рефлекс «стресс — сигарета»", icon: "🧠", category: "health" },
-    month_free: { title: "Бронхиальный щит", description: "30 дней — реснички бронхов очищают легкие, ушел кашель", icon: "🌿", category: "health" },
-    two_months: { title: "Дофаминовый баланс", description: "60 дней — ацетилхолиновые рецепторы откалиброваны", icon: "☀️", category: "health" },
-    three_months: { title: "Железные легкие", description: "90 дней — жизненная емкость легких выросла на 15%", icon: "🏔️", category: "health" },
-    half_year: { title: "Полгода свободы", description: "180 дней — пазухи носа чисты, риск бронхоспазма снижен на 90%", icon: "💎", category: "health" },
-    nine_months: { title: "Чистые артерии", description: "270 дней — маркер сосудистого воспаления (СРБ) в норме", icon: "🩸", category: "health" },
-    year_free: { title: "Новое сердце", description: "365 дней — риск ишемической болезни сердца снизился в 2 раза!", icon: "🏆", category: "health" },
-    two_years: { title: "Стальной рубеж", description: "2 года — риск инфаркта миокарда сравнялся с некурящими", icon: "👑", category: "health" },
-    five_years: { title: "Золотой стандарт ВОЗ", description: "5 лет чистоты — риск инсульта как у абсолютно некурящего человека", icon: "🌟", category: "health" },
+  const BADGES_DEFINITIONS = [
+    {
+      id: "badge_first_win",
+      code: "first_craving",
+      title: "First Victory",
+      name: "Первая победа",
+      icon: "🔥",
+      xp: 100,
+      category: "mindset",
+      rarity: "common",
+      reqText: "Преодолеть 1 приступ тяги",
+      perk: "Осознание, что тяга — это лишь 3-минутная волна",
+      check: (s) => (s?.cravings_resisted || 0) >= 1,
+      calcProgress: (s) => Math.min(100, Math.round(((s?.cravings_resisted || 0) / 1) * 100)),
+    },
+    {
+      id: "badge_oxygen_master",
+      code: "first_day",
+      title: "Oxygen Master",
+      name: "Кислородный мастер",
+      icon: "🫁",
+      xp: 150,
+      category: "health",
+      rarity: "common",
+      reqText: "24 часа без табака (CO = 0)",
+      perk: "Угарный газ покинул кровь, клетки дышат на 100%",
+      check: (s) => (s?.days_free || 0) >= 1,
+      calcProgress: (s) => Math.min(100, Math.round(((s?.days_free || 0) / 1) * 100)),
+    },
+    {
+      id: "badge_7d_clean",
+      code: "week_free",
+      title: "7 Days Clean",
+      name: "7 дней чистоты",
+      icon: "⚡",
+      xp: 250,
+      category: "streak",
+      rarity: "rare",
+      reqText: "7 дней подряд без срывов",
+      perk: "Стабилизация сна, спокойный пульс и преодоление физической ломки",
+      check: (s) => (s?.days_free || 0) >= 7,
+      calcProgress: (s) => Math.min(100, Math.round(((s?.days_free || 0) / 7) * 100)),
+    },
+    {
+      id: "badge_money_100",
+      code: "money_saver_2",
+      title: "Money Milestone $100",
+      name: "Рубеж $100 (50 000 ₸)",
+      icon: "💰",
+      xp: 300,
+      category: "money",
+      rarity: "epic",
+      reqText: "Сберечь 50 000 ₸ (~$100)",
+      perk: "Реальный личный капитал в кармане, а не в табачном пепле",
+      check: (s) => (s?.saved_kzt || 0) >= 50000,
+      calcProgress: (s) => Math.min(100, Math.round(((s?.saved_kzt || 0) / 50000) * 100)),
+    },
+    {
+      id: "badge_endurance_streak",
+      code: "two_weeks",
+      title: "Endurance Streak",
+      name: "Стрик выносливости",
+      icon: "🥋",
+      xp: 400,
+      category: "streak",
+      rarity: "epic",
+      reqText: "14 дней свободы и 5+ побед над тягой",
+      perk: "Рост выносливости на 30% и формирование железного самоконтроля",
+      check: (s) => (s?.days_free || 0) >= 14 && (s?.cravings_resisted || 0) >= 5,
+      calcProgress: (s) => {
+        const dPct = Math.min(50, ((s?.days_free || 0) / 14) * 50);
+        const cPct = Math.min(50, ((s?.cravings_resisted || 0) / 5) * 50);
+        return Math.round(dPct + cPct);
+      },
+    },
+    {
+      id: "badge_stoic_guardian",
+      code: "craving_master",
+      title: "Stoic Guardian",
+      name: "Страж спокойствия",
+      icon: "🏛️",
+      xp: 350,
+      category: "mindset",
+      rarity: "rare",
+      reqText: "10 осознанно преодоленных приступов тяги",
+      perk: "Иммунитет к провокациям и стоическое владение импульсами",
+      check: (s) => (s?.cravings_resisted || 0) >= 10,
+      calcProgress: (s) => Math.min(100, Math.round(((s?.cravings_resisted || 0) / 10) * 100)),
+    },
+    {
+      id: "badge_iron_lungs",
+      code: "month_free",
+      title: "Iron Lungs",
+      name: "Железные легкие",
+      icon: "🏔️",
+      xp: 500,
+      category: "health",
+      rarity: "legendary",
+      reqText: "30 дней чистых легких без табака",
+      perk: "Полная регенерация ресничек бронхов и исчезновение кашля",
+      check: (s) => (s?.days_free || 0) >= 30,
+      calcProgress: (s) => Math.min(100, Math.round(((s?.days_free || 0) / 30) * 100)),
+    },
+    {
+      id: "badge_investor_life",
+      code: "money_saver_3",
+      title: "Life Investor",
+      name: "Инвестор в жизнь",
+      icon: "🏦",
+      xp: 600,
+      category: "money",
+      rarity: "legendary",
+      reqText: "Сберечь 100 000 ₸ (~$200)",
+      perk: "Финансовая автономия и ощутимый вклад в главную цель",
+      check: (s) => (s?.saved_kzt || 0) >= 100000,
+      calcProgress: (s) => Math.min(100, Math.round(((s?.saved_kzt || 0) / 100000) * 100)),
+    },
+    {
+      id: "badge_brain_reset",
+      code: "two_months",
+      title: "Dopamine Reset",
+      name: "Нейро-перезагрузка",
+      icon: "🧠",
+      xp: 750,
+      category: "health",
+      rarity: "legendary",
+      reqText: "60 дней чистоты (баланс рецепторов)",
+      perk: "Откалиброваны α4β2 рецепторы, возвращение естественной радости",
+      check: (s) => (s?.days_free || 0) >= 60,
+      calcProgress: (s) => Math.min(100, Math.round(((s?.days_free || 0) / 60) * 100)),
+    },
+    {
+      id: "badge_century_club",
+      code: "year_free",
+      title: "Century Club",
+      name: "Клуб 100 дней",
+      icon: "👑",
+      xp: 1000,
+      category: "streak",
+      rarity: "mythic",
+      reqText: "100 дней абсолютной свободы",
+      perk: "Статус легенды сообщества и несокрушимый трек независимости",
+      check: (s) => (s?.days_free || 0) >= 100,
+      calcProgress: (s) => Math.min(100, Math.round(((s?.days_free || 0) / 100) * 100)),
+    },
+    {
+      id: "badge_gold_standard",
+      code: "five_years",
+      title: "Gold Standard",
+      name: "Золотой стандарт ВОЗ",
+      icon: "🌟",
+      xp: 2000,
+      category: "health",
+      rarity: "mythic",
+      reqText: "365 дней победы над курением",
+      perk: "Риск сердечно-сосудистых катастроф снижен наполовину!",
+      check: (s) => (s?.days_free || 0) >= 365,
+      calcProgress: (s) => Math.min(100, Math.round(((s?.days_free || 0) / 365) * 100)),
+    },
+    {
+      id: "badge_zero_relapse",
+      code: "clean_month_track",
+      title: "Zero Relapse Master",
+      name: "Абсолютная чистота",
+      icon: "🎯",
+      xp: 500,
+      category: "streak",
+      rarity: "legendary",
+      reqText: "100% чистый трек без единого срыва",
+      perk: "Безупречная дисциплина и доказанная сила воли",
+      check: (s) => (s?.days_free || 0) >= 14 && (s?.clean_percent || 100) >= 99,
+      calcProgress: (s) => Math.min(100, Math.round(((s?.days_free || 0) / 14) * 100)),
+    }
+  ];
 
-    // Осознанность и преодоление тяги
-    first_craving: { title: "Первая победа", description: "Ты доказал, что тяга — это просто 3-минутная волна", icon: "🔥", category: "mindset" },
-    craving_pro: { title: "Страж спокойствия", description: "5 преодоленных приступов тяги — осознанный контроль над импульсом", icon: "🥋", category: "mindset" },
-    craving_master: { title: "Мастер тяги", description: "10 побед над импульсом — уверенный контроль биохимии", icon: "🥊", category: "mindset" },
-    craving_legend: { title: "Непоколебимый стоик", description: "25 побед над импульсом — твоя опора сильнее любого триггера", icon: "🏛️", category: "mindset" },
-    zen_master: { title: "Дзен-мастер свободы", description: "50 побед — абсолютный иммунитет к никотиновым провокациям", icon: "🧘", category: "mindset" },
+  let activeBadgeFilter = "all";
 
-    // Финансы и мастерство
-    money_saver_1: { title: "Первая копилка", description: "Сэкономлено 10 000 ₸ — деньги в кармане, а не в пепле", icon: "💰", category: "money" },
-    money_saver_2: { title: "Финансовый щит", description: "Сэкономлено 50 000 ₸ — реальный капитал на цели и здоровье", icon: "💎", category: "money" },
-    money_saver_3: { title: "Инвестор в жизнь", description: "Сэкономлено 100 000 ₸ — независимость от табачных гигантов", icon: "🏦", category: "money" },
-    clean_month_track: { title: "Безупречный трек", description: "30 дней подряд со 100% чистотой без единого срыва", icon: "🎯", category: "mastery" },
-  };
-
-  let activeAchievementFilter = "all";
-
-  function renderAchievements(items) {
+  function renderAchievements(serverItems) {
     const el = $("achievements");
     if (!el) return;
 
-    const earnedCodes = new Set((items || []).map((item) => item.code));
-    const allEntries = Object.entries(ACHIEVEMENT_META);
-    const totalCount = allEntries.length;
-    const earnedCount = allEntries.filter(([code]) => earnedCodes.has(code)).length;
+    // Check unlocks
+    const unlockedBadges = BADGES_DEFINITIONS.map((badge) => {
+      const isUnlocked = badge.check(stats);
+      const progress = badge.calcProgress(stats);
+      return { ...badge, isUnlocked, progress };
+    });
 
-    if ($("achievementCount")) {
-      $("achievementCount").textContent = `${earnedCount} / ${totalCount}`;
-    }
+    const totalCount = unlockedBadges.length;
+    const earnedCount = unlockedBadges.filter(b => b.isUnlocked).length;
+    const totalXp = unlockedBadges.filter(b => b.isUnlocked).reduce((sum, b) => sum + b.xp, 0);
 
-    const filteredEntries = allEntries.filter(([code, meta]) => {
-      if (activeAchievementFilter === "unlocked") return earnedCodes.has(code);
-      if (activeAchievementFilter === "locked") return !earnedCodes.has(code);
-      if (activeAchievementFilter === "health") return meta.category === "health";
-      if (activeAchievementFilter === "mindset") return meta.category === "mindset";
-      if (activeAchievementFilter === "money") return meta.category === "money" || meta.category === "mastery";
+    // Update Achievement Counter & XP Ribbon
+    if ($("achievementCount")) $("achievementCount").textContent = `${earnedCount} / ${totalCount}`;
+    if ($("xpScoreVal")) $("xpScoreVal").textContent = `${totalXp} XP`;
+
+    let rankTitle = "Неофит свободы";
+    let rankPercent = Math.min(100, Math.round((totalXp / 3000) * 100));
+    if (totalXp >= 2500) rankTitle = "👑 Легендарный Стоик";
+    else if (totalXp >= 1500) rankTitle = "💎 Мастер Независимости";
+    else if (totalXp >= 800) rankTitle = "⚡ Страж Чистого Дыхания";
+    else if (totalXp >= 300) rankTitle = "🌱 Практик Свободы";
+
+    if ($("xpLevelTitle")) $("xpLevelTitle").textContent = `Ранг: ${rankTitle}`;
+    if ($("xpBarFill")) $("xpBarFill").style.width = `${Math.max(8, rankPercent)}%`;
+
+    const filtered = unlockedBadges.filter((b) => {
+      if (activeBadgeFilter === "unlocked") return b.isUnlocked;
+      if (activeBadgeFilter === "locked") return !b.isUnlocked;
+      if (activeBadgeFilter === "streak") return b.category === "streak";
+      if (activeBadgeFilter === "health") return b.category === "health";
+      if (activeBadgeFilter === "money") return b.category === "money";
+      if (activeBadgeFilter === "mindset") return b.category === "mindset";
       return true;
     });
 
     el.innerHTML = `
-      <div class="ach-filters-wrap" style="grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
-        <button class="ach-filter-btn ${activeAchievementFilter === 'all' ? 'active' : ''}" data-filter="all">Все (${totalCount})</button>
-        <button class="ach-filter-btn ${activeAchievementFilter === 'unlocked' ? 'active' : ''}" data-filter="unlocked">Получено (${earnedCount})</button>
-        <button class="ach-filter-btn ${activeAchievementFilter === 'health' ? 'active' : ''}" data-filter="health">🫁 Здоровье</button>
-        <button class="ach-filter-btn ${activeAchievementFilter === 'mindset' ? 'active' : ''}" data-filter="mindset">🧠 Осознанность</button>
-        <button class="ach-filter-btn ${activeAchievementFilter === 'money' ? 'active' : ''}" data-filter="money">💰 Финансы</button>
+      <div class="ach-filters-wrap" style="grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;">
+        <button class="ach-filter-btn ${activeBadgeFilter === 'all' ? 'active' : ''}" data-filter="all">Все (${totalCount})</button>
+        <button class="ach-filter-btn ${activeBadgeFilter === 'unlocked' ? 'active' : ''}" data-filter="unlocked">Получено (${earnedCount})</button>
+        <button class="ach-filter-btn ${activeBadgeFilter === 'streak' ? 'active' : ''}" data-filter="streak">⚡ Стрики</button>
+        <button class="ach-filter-btn ${activeBadgeFilter === 'health' ? 'active' : ''}" data-filter="health">🫁 Здоровье</button>
+        <button class="ach-filter-btn ${activeBadgeFilter === 'money' ? 'active' : ''}" data-filter="money">💰 Финансы</button>
       </div>
-      ${
-        filteredEntries.map(([code, meta]) => {
-          const isUnlocked = earnedCodes.has(code);
-          const icon = meta.icon || "🏅";
-          const title = meta.title || code;
-          const desc = meta.description || "";
-          const statusBadge = isUnlocked
-            ? `<span class="ach-status-badge ach-done">Открыто ✓</span>`
-            : `<span class="ach-status-badge ach-locked">🔒 Предстоит</span>`;
+
+      <div class="badges-grid-layout">
+        ${filtered.map((b) => {
+          const rarityColors = {
+            common: "border-slate-700 text-slate-300",
+            rare: "border-sky-500/50 text-sky-400",
+            epic: "border-purple-500/50 text-purple-400",
+            legendary: "border-amber-500/60 text-amber-400",
+            mythic: "border-rose-500/60 text-rose-400",
+          };
+          const rarityClass = rarityColors[b.rarity] || "border-slate-700 text-slate-300";
 
           return `
-            <article class="achievement-item ${isUnlocked ? 'unlocked' : 'locked'}">
-              <span class="ach-icon">${icon}</span>
-              <div class="ach-body">
-                <div class="ach-item-header">
-                  <strong>${title}</strong>
-                  ${statusBadge}
+            <div class="badge-flip-container ${b.isUnlocked ? 'badge-unlocked' : 'badge-locked'}" data-badge-id="${b.id}">
+              <div class="badge-flip-inner">
+                <!-- FRONT -->
+                <div class="badge-face badge-face-front ${b.rarity}">
+                  <div class="badge-face-top">
+                    <span class="badge-xp-pill">+${b.xp} XP</span>
+                    <span class="badge-status-dot ${b.isUnlocked ? 'dot-unlocked' : 'dot-locked'}"></span>
+                  </div>
+                  <div class="badge-icon-wrap">
+                    <span class="badge-emoji">${b.icon}</span>
+                  </div>
+                  <strong class="badge-title">${b.name}</strong>
+                  <span class="badge-subtitle">${b.title}</span>
+                  <div class="badge-progress-mini">
+                    <div class="badge-progress-mini-bar" style="width: ${b.progress}%;"></div>
+                  </div>
+                  <span class="badge-flip-hint">Нажми для деталей ↻</span>
                 </div>
-                <p>${desc}</p>
+
+                <!-- BACK -->
+                <div class="badge-face badge-face-back">
+                  <div class="badge-back-header">
+                    <strong>${b.name}</strong>
+                    <span class="badge-rarity-tag ${b.rarity}">${b.rarity.toUpperCase()}</span>
+                  </div>
+                  <div class="badge-back-section">
+                    <span class="badge-back-lbl">Условие:</span>
+                    <p>${b.reqText}</p>
+                  </div>
+                  <div class="badge-back-section">
+                    <span class="badge-back-lbl">Эффект / Награда:</span>
+                    <p class="badge-perk-text">${b.perk}</p>
+                  </div>
+                  <div class="badge-back-footer">
+                    <span>${b.isUnlocked ? '✓ Открыто!' : `Прогресс: ${b.progress}%`}</span>
+                    <strong>+${b.xp} XP</strong>
+                  </div>
+                </div>
               </div>
-            </article>
+            </div>
           `;
-        }).join("")
-      }
+        }).join("")}
+      </div>
     `;
 
+    // Bind Filter clicks
     el.querySelectorAll(".ach-filter-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
-        activeAchievementFilter = btn.dataset.filter || "all";
-        renderAchievements(items);
+        haptic("light");
+        activeBadgeFilter = btn.dataset.filter || "all";
+        renderAchievements(serverItems);
+      });
+    });
+
+    // Bind 3D Flip Card clicks
+    el.querySelectorAll(".badge-flip-container").forEach((card) => {
+      card.addEventListener("click", () => {
+        haptic("medium");
+        card.classList.toggle("flipped");
       });
     });
   }
 
   /* -------------------------------------------------------------
-     CHART
+     INTERACTIVE CHART (BAR VS LINE TOGGLE WITH RECHARTS/CHART.JS)
   ------------------------------------------------------------- */
   function renderChart(points) {
     const canvas = $("cravingChart");
@@ -390,44 +626,210 @@
       console.error("Chart.js not loaded — skipping chart render");
       return;
     }
+    updateAnalyticsKpis();
     const ctx = canvas.getContext("2d");
     if (chart) chart.destroy();
 
-    const labels = points.map((p) => p.date ? p.date.slice(5) : "");
-    const resisted = points.map((p) => p.resisted || 0);
-    const relapses = points.map((p) => p.relapses || 0);
+    const currencyConfig = CURRENCY_RATES[currentCurrency] || CURRENCY_RATES.KZT;
+    const packPrice = stats?.user?.pack_price_kzt || 900;
+    const unitsPerDay = stats?.user?.units_per_day || 20;
+    const dailyExpenseKzt = (packPrice / 20) * unitsPerDay;
+    const currentDays = Math.max(0, stats?.days_free || 0);
+    const goalKzt = stats?.user?.financial_goal_kzt || 0;
+    const daysToReachGoal = goalKzt > 0 && dailyExpenseKzt > 0 ? Math.ceil(goalKzt / dailyExpenseKzt) : 60;
 
-    chart = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: labels.length ? labels : ["Сегодня"],
-        datasets: [
-          {
-            label: "Преодолено",
-            data: resisted.length ? resisted : [1],
-            backgroundColor: "#10b981",
-            borderRadius: 6,
-          },
-          {
-            label: "Срывы",
-            data: relapses.length ? relapses : [0],
-            backgroundColor: "#f97316",
-            borderRadius: 6,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { labels: { color: "#8fa1b5", font: { family: "Manrope", size: 11 } } },
+    if (currentChartMode === 'cumulative') {
+      // 📈 CUMULATIVE LINE CHART: Money Saved Trajectory vs Goal
+      let totalDays = 60;
+      if (currentChartHorizon === '30d') totalDays = Math.max(30, currentDays + 7);
+      else if (currentChartHorizon === '90d') totalDays = Math.max(90, currentDays + 14);
+      else if (currentChartHorizon === '180d') totalDays = Math.max(180, currentDays + 30);
+      else if (currentChartHorizon === '1y') totalDays = Math.max(365, currentDays + 30);
+      else if (currentChartHorizon === 'goal') totalDays = Math.max(Math.ceil(daysToReachGoal * 1.15), currentDays + 14, 30);
+
+      const step = Math.max(1, Math.round(totalDays / 18));
+      const labels = [];
+      const actualData = [];
+      const projectedData = [];
+      const goalLineData = [];
+
+      for (let d = 0; d <= totalDays; d += step) {
+        labels.push(d === currentDays ? `Сегодня` : `Д.${d}`);
+        const projVal = Math.round(d * dailyExpenseKzt * currencyConfig.rate);
+        projectedData.push(projVal);
+
+        if (d <= currentDays) {
+          actualData.push(d === currentDays ? Math.round((stats?.saved_kzt || 0) * currencyConfig.rate) : projVal);
+        } else {
+          actualData.push(null);
+        }
+
+        if (goalKzt > 0) {
+          goalLineData.push(Math.round(goalKzt * currencyConfig.rate));
+        }
+      }
+
+      const datasets = [
+        {
+          label: "Фактически сэкономлено",
+          data: actualData,
+          borderColor: "#10b981",
+          backgroundColor: "rgba(16, 185, 129, 0.15)",
+          borderWidth: 3,
+          pointBackgroundColor: "#10b981",
+          pointBorderColor: "#ffffff",
+          pointRadius: 4,
+          tension: 0.3,
+          fill: true,
         },
-        scales: {
-          x: { ticks: { color: "#8fa1b5" }, grid: { display: false } },
-          y: { ticks: { color: "#8fa1b5", stepSize: 1 }, grid: { color: "rgba(255,255,255,0.06)" } },
+        {
+          label: "Прогнозная траектория",
+          data: projectedData,
+          borderColor: "#38bdf8",
+          borderDash: [5, 5],
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.3,
+          fill: false,
+        }
+      ];
+
+      if (goalKzt > 0) {
+        datasets.push({
+          label: `Цель (${formatMoney(goalKzt)} ${currencyConfig.sign})`,
+          data: goalLineData,
+          borderColor: "#f59e0b",
+          borderDash: [6, 4],
+          borderWidth: 2,
+          pointRadius: 0,
+          fill: false,
+        });
+      }
+
+      chart = new Chart(ctx, {
+        type: "line",
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: "index", intersect: false },
+          plugins: {
+            legend: {
+              labels: { color: "#94a3b8", font: { family: "Manrope", size: 11, weight: "bold" } },
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `${ctx.dataset.label}: ${new Intl.NumberFormat("ru-RU").format(ctx.raw || 0)} ${currencyConfig.sign}`
+              }
+            }
+          },
+          scales: {
+            x: { ticks: { color: "#8fa1b5" }, grid: { display: false } },
+            y: {
+              ticks: {
+                color: "#8fa1b5",
+                callback: (val) => `${val >= 1000 ? Math.round(val / 1000) + 'k' : val} ${currencyConfig.sign}`
+              },
+              grid: { color: "rgba(255,255,255,0.06)" }
+            },
+          },
         },
-      },
-    });
+      });
+
+    } else if (currentChartMode === 'daily') {
+      // 📊 DAILY SAVINGS BAR CHART
+      const daysCount = currentChartHorizon === '30d' ? 30 : currentChartHorizon === '90d' ? 30 : 20;
+      const startDay = Math.max(1, currentDays >= daysCount ? currentDays - Math.floor(daysCount / 2) : 1);
+      const endDay = startDay + daysCount - 1;
+
+      const labels = [];
+      const values = [];
+      const bgColors = [];
+
+      for (let d = startDay; d <= endDay; d++) {
+        const isToday = d === currentDays + 1 || (currentDays === 0 && d === 1);
+        const isPast = d < currentDays + 1;
+        labels.push(isToday ? "Сегодня" : `Д.${d}`);
+        values.push(Math.round(dailyExpenseKzt * currencyConfig.rate));
+
+        if (isToday) bgColors.push("#f59e0b"); // Gold for today
+        else if (isPast) bgColors.push("#10b981"); // Green for past
+        else bgColors.push("#0284c7"); // Blue for future
+      }
+
+      chart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: `Экономия за день (${formatMoney(dailyExpenseKzt)} ${currencyConfig.sign})`,
+              data: values,
+              backgroundColor: bgColors,
+              borderRadius: 6,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: "#94a3b8", font: { family: "Manrope", size: 11, weight: "bold" } } },
+            tooltip: {
+              callbacks: {
+                afterLabel: () => `Не выкурено: ~${unitsPerDay} шт.`
+              }
+            }
+          },
+          scales: {
+            x: { ticks: { color: "#8fa1b5" }, grid: { display: false } },
+            y: {
+              ticks: { color: "#8fa1b5" },
+              grid: { color: "rgba(255,255,255,0.06)" }
+            }
+          }
+        }
+      });
+
+    } else {
+      // 🛡️ CRAVINGS & RELAPSES BY DAY
+      const pts = points || stats?.cravings_by_day || [];
+      const labels = pts.map((p) => p.date ? p.date.slice(5) : "");
+      const resisted = pts.map((p) => p.resisted || 0);
+      const relapses = pts.map((p) => p.relapses || 0);
+
+      chart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: labels.length ? labels : ["Сегодня"],
+          datasets: [
+            {
+              label: "Преодолено тяг",
+              data: resisted.length ? resisted : [stats?.cravings_resisted || 1],
+              backgroundColor: "#10b981",
+              borderRadius: 6,
+            },
+            {
+              label: "Срывы",
+              data: relapses.length ? relapses : [0],
+              backgroundColor: "#f97316",
+              borderRadius: 6,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: "#8fa1b5", font: { family: "Manrope", size: 11 } } },
+          },
+          scales: {
+            x: { ticks: { color: "#8fa1b5" }, grid: { display: false } },
+            y: { ticks: { color: "#8fa1b5", stepSize: 1 }, grid: { color: "rgba(255,255,255,0.06)" } },
+          },
+        },
+      });
+    }
   }
 
   /* -------------------------------------------------------------
@@ -1034,7 +1436,7 @@
   });
 
   /* -------------------------------------------------------------
-     TAB NAVIGATION
+     TAB NAVIGATION & CHART CONTROLS
   ------------------------------------------------------------- */
   document.querySelectorAll(".tab").forEach((tab) =>
     tab.addEventListener("click", () => {
@@ -1044,14 +1446,36 @@
       const target = $(tab.dataset.tab);
       if (target) target.classList.add("active");
       if (tab.dataset.tab === "analytics") {
-        if (stats && stats.cravings_by_day) {
-          renderChart(stats.cravings_by_day);
-        } else {
-          load();
-        }
+        renderChart(stats?.cravings_by_day || []);
       }
     })
   );
+
+  // Chart Mode Switcher (Cumulative vs Daily vs Cravings)
+  document.querySelectorAll(".chart-mode-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      haptic("light");
+      document.querySelectorAll(".chart-mode-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentChartMode = btn.dataset.mode || "cumulative";
+      const horizonWrap = $("horizonControls");
+      if (horizonWrap) {
+        horizonWrap.style.display = currentChartMode === "cravings" ? "none" : "flex";
+      }
+      renderChart(stats?.cravings_by_day || []);
+    });
+  });
+
+  // Time Horizon Switcher (30d, 90d, 180d, 1y, goal)
+  document.querySelectorAll(".horizon-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      haptic("light");
+      document.querySelectorAll(".horizon-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentChartHorizon = btn.dataset.horizon || "goal";
+      renderChart(stats?.cravings_by_day || []);
+    });
+  });
 
   /* -------------------------------------------------------------
      STORY CARD EXPORT

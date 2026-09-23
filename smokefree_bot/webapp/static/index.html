@@ -236,19 +236,34 @@
     <section class="tab-panel" id="health">
       <div class="section-heading">
         <h2>Путь восстановления</h2>
+        <span class="health-live-tag"><span class="pulse-dot"></span> LIVE ВОЗ</span>
       </div>
-      <p class="panel-lead">Фазы восстановления организма по данным ВОЗ — обновляются в реальном времени.</p>
+      <p class="panel-lead">Детализированные физиологические фазы регенерации организма по стандартам ВОЗ и кардиологии.</p>
 
       <div class="health-timeline" id="healthTimeline">
-        <!-- rendered by JS -->
+        <!-- rendered by JS with granular recovery phases and progress bars -->
       </div>
 
-      <div class="section-heading">
-        <h2>Достижения</h2>
-        <span class="count-badge" id="achievementCount">0</span>
+      <!-- 3D BADGES GALLERY -->
+      <div class="section-heading" style="margin-top: 24px;">
+        <div>
+          <h2>Зал достижений</h2>
+          <small class="text-muted" style="font-size: 11px; color: var(--muted); display: block;">Нажми на значок для 3D-переворота</small>
+        </div>
+        <span class="count-badge" id="achievementCount">0 / 12</span>
       </div>
-      <div class="achievement-list" id="achievements">
-        <!-- rendered by JS -->
+
+      <!-- XP Ribbon -->
+      <div class="xp-ribbon" id="xpRibbon">
+        <div class="xp-info">
+          <span class="xp-level-title" id="xpLevelTitle">Ранг: Неофит свободы</span>
+          <span class="xp-score-val" id="xpScoreVal">0 XP</span>
+        </div>
+        <div class="xp-bar-bg"><div class="xp-bar-fill" id="xpBarFill" style="width: 10%;"></div></div>
+      </div>
+
+      <div class="badge-gallery-grid" id="achievements">
+        <!-- rendered by JS as 3D flip cards -->
       </div>
     </section>
 
@@ -288,19 +303,66 @@
     <!-- ============================================================ -->
     <section class="tab-panel" id="analytics">
       <div class="section-heading">
-        <h2>Аналитика</h2>
+        <h2>Финансовая аналитика</h2>
+      </div>
+      <p class="panel-lead">Интерактивная визуализация сбережений и траектории к финансовой цели.</p>
+
+      <!-- Chart Controls -->
+      <div class="analytics-controls-wrap">
+        <!-- Chart Mode Toggle -->
+        <div class="chart-mode-segmented">
+          <button class="chart-mode-btn active" id="btnModeCumulative" data-mode="cumulative">
+            📈 Линия (Итог)
+          </button>
+          <button class="chart-mode-btn" id="btnModeDaily" data-mode="daily">
+            📊 Столбцы (По дням)
+          </button>
+          <button class="chart-mode-btn" id="btnModeCravings" data-mode="cravings">
+            🛡️ Тяга
+          </button>
+        </div>
+
+        <!-- Time Horizon Selector -->
+        <div class="horizon-segmented" id="horizonControls">
+          <button class="horizon-btn" data-horizon="30d">30 дн</button>
+          <button class="horizon-btn" data-horizon="90d">90 дн</button>
+          <button class="horizon-btn" data-horizon="180d">180 дн</button>
+          <button class="horizon-btn" data-horizon="1y">1 год</button>
+          <button class="horizon-btn active" data-horizon="goal">🎯 К цели</button>
+        </div>
       </div>
 
+      <!-- Financial Micro KPI -->
+      <div class="analytics-kpi-grid">
+        <div class="analytics-kpi-card">
+          <span class="kpi-label">Сэкономлено</span>
+          <strong class="kpi-val text-emerald" id="analyticsSavedVal">0 ₸</strong>
+        </div>
+        <div class="analytics-kpi-card">
+          <span class="kpi-label">Финансовая цель</span>
+          <strong class="kpi-val text-amber" id="analyticsGoalVal">0 ₸</strong>
+        </div>
+        <div class="analytics-kpi-card">
+          <span class="kpi-label">Дневная норма</span>
+          <strong class="kpi-val text-slate" id="analyticsDailyVal">0 ₸/д</strong>
+        </div>
+        <div class="analytics-kpi-card">
+          <span class="kpi-label">Осталось к цели</span>
+          <strong class="kpi-val text-sky" id="analyticsRemainingVal">—</strong>
+        </div>
+      </div>
+
+      <!-- Main Chart Card -->
       <div class="chart-card">
-        <canvas id="cravingChart" height="220"></canvas>
+        <canvas id="cravingChart" height="240"></canvas>
       </div>
 
-      <div class="clean-track-card">
+      <div class="clean-track-card" style="margin-top: 14px;">
         <div>
           <span>Чистота трека</span>
-          <strong id="cleanPercentDuplicateSpacer"></strong>
+          <strong id="cleanPercentDuplicateSpacer">100%</strong>
         </div>
-        <div class="bar"><span id="cleanBar" style="width:0%"></span></div>
+        <div class="bar"><span id="cleanBar" style="width:100%"></span></div>
         <small>Доля дней без срывов с момента старта</small>
       </div>
     </section>
