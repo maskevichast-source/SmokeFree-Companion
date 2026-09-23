@@ -224,17 +224,28 @@
   }
 
   /* -------------------------------------------------------------
-     WHO RECOVERY TIMELINE (DYNAMIC COMPUTED)
+     WHO RECOVERY TIMELINE (DYNAMIC COMPUTED & EXPANDED)
   ------------------------------------------------------------- */
   const WHO_STAGES = [
-    { id: "20m", targetSec: 20 * 60, title: "20 минут: Пульс и давление", desc: "Частота сердечных сокращений и артериальное давление возвращаются к норме. Кровообращение в конечностях улучшается." },
-    { id: "8h", targetSec: 8 * 3600, title: "8 часов: Кислород в крови", desc: "Уровень угарного газа (CO) снижается вдвое. Концентрация кислорода в артериальной крови достигает оптимальных значений." },
-    { id: "24h", targetSec: 24 * 3600, title: "24 часа: Очищение легких", desc: "Риск инфаркта начинает снижаться. Легкие начинают избавляться от остатков слизи и продуктов горения табака." },
-    { id: "48h", targetSec: 48 * 3600, title: "48 часов: Вкус и обоняние", desc: "Организм полностью освободился от никотина. Нервные окончания начинают восстанавливаться, вкусы и запахи становятся ярче." },
-    { id: "72h", targetSec: 72 * 3600, title: "72 часа: Легкость дыхания", desc: "Бронхиальные трубки расслабляются, дыхание становится глубже. Пик физиологической никотиновой ломки пройден!" },
-    { id: "14d", targetSec: 14 * 86400, title: "2 недели: Энергия и выносливость", desc: "Кровообращение во всем теле существенно улучшилось. Функционирование легких увеличивается на 30%." },
-    { id: "30d", targetSec: 30 * 86400, title: "1 месяц: Регенерация бронхов", desc: "Уходит одышка и кашель курильщика. Реснички бронхиального эпителия восстанавливают способность очищать дыхательные пути." },
-    { id: "365d", targetSec: 365 * 86400, title: "1 год: Здоровое сердце", desc: "Риск развития ишемической болезни сердца снижается на 50% по сравнению с продолжающим курить человеком." },
+    { id: "20m", targetSec: 20 * 60, title: "20 минут: Пульс и давление", desc: "Частота сердечных сокращений и артериальное давление возвращаются к норме. Кровообращение в конечностях заметно улучшается." },
+    { id: "8h", targetSec: 8 * 3600, title: "8 часов: Кислород в крови", desc: "Уровень токсичного угарного газа (CO) снижается вдвое. Концентрация свободного кислорода в артериальной крови достигает оптимума." },
+    { id: "12h", targetSec: 12 * 3600, title: "12 часов: Детоксикация CO", desc: "Угарный газ полностью вытеснен кислородом. Гемоглобин транспортирует максимум O₂ к клеткам сердца и головного мозга." },
+    { id: "24h", targetSec: 24 * 3600, title: "24 часа: Дренаж легких", desc: "Риск внезапного инфаркта начинает неуклонно снижаться. Легкие запускают процесс выведения мокроты и остатков продуктов горения." },
+    { id: "48h", targetSec: 48 * 3600, title: "48 часов: Вкус и обоняние", desc: "Организм полностью свободен от никотина. Нервные окончания регенерируют, вкусы любимых блюд и ароматы становятся яркими и тонкими." },
+    { id: "72h", targetSec: 72 * 3600, title: "72 часа: Легкость дыхания", desc: "Бронхиальные трубки расслабляются, вдох становится свободным. Пик физиологической никотиновой ломки успешно пройден!" },
+    { id: "5d", targetSec: 5 * 86400, title: "5 дней: Вывод котинина", desc: "Печень и почки полностью очищены от метаболита никотина — котинина. Физическая зависимость уступила место психологической победе." },
+    { id: "7d", targetSec: 7 * 86400, title: "7 дней: Неделя триумфа", desc: "Восстанавливается здоровая архитектура медленного сна. Утренний пульс стабилен, уходит навязчивая тахикардия." },
+    { id: "10d", targetSec: 10 * 86400, title: "10 дней: Свежее дыхание", desc: "Исчезает специфический табачный налет на зубах и запах от кожи. Улучшается микрофлора ротовой полости." },
+    { id: "14d", targetSec: 14 * 86400, title: "2 недели: Энергия и выносливость", desc: "Кровообращение во всех органах возросло на 30%. Подъем по лестнице и быстрый шаг больше не вызывают одышки." },
+    { id: "21d", targetSec: 21 * 86400, title: "21 день: Нейропластичность", desc: "Разрушен старый рефлекс «стресс — сигарета». Мозг учится вырабатывать эндорфины и дофамин естественным путем." },
+    { id: "30d", targetSec: 30 * 86400, title: "1 месяц: Регенерация бронхов", desc: "Реснички мерцательного эпителия бронхов восстановились и очищают легкие. Исчезает хронический утренний кашель курильщика." },
+    { id: "60d", targetSec: 60 * 86400, title: "2 месяца: Дофаминовый баланс", desc: "Плотность никотиновых ацетилхолиновых рецепторов нормализовалась. Естественные события приносят глубокое удовольствие." },
+    { id: "90d", targetSec: 90 * 86400, title: "3 месяца: Железные легкие", desc: "Форсированная жизненная емкость легких (ФЖЕЛ) увеличивается до +15%. Спорт и кардионагрузки даются легко и в кайф." },
+    { id: "180d", targetSec: 180 * 86400, title: "6 месяцев: Чистые пазухи носа", desc: "Хроническое воспаление в носоглотке и бронхах полностью угасло. Сезонные простуды проходят быстро и без осложнений." },
+    { id: "270d", targetSec: 270 * 86400, title: "9 месяцев: Защита сосудов (СРБ)", desc: "Маркер сосудистого воспаления (СРБ) в крови снизился до нормы некурящего человека. Артерии защищены от склероза." },
+    { id: "365d", targetSec: 365 * 86400, title: "1 год: Новое сердце", desc: "Избыточный риск развития ишемической болезни сердца снижен ровно на 50% по сравнению с курящим человеком!" },
+    { id: "730d", targetSec: 730 * 86400, title: "2 года: Стальной барьер", desc: "Риск инфаркта миокарда упал до уровня среднестатистического никогда не курившего человека." },
+    { id: "1825d", targetSec: 1825 * 86400, title: "5 лет: Золотой стандарт ВОЗ", desc: "Риск ишемического инсульта и сосудистых катастроф мозга снизился до показателей абсолютно некурящего человека!" }
   ];
 
   function renderHealthTimeline(currentSec) {
@@ -267,37 +278,106 @@
   }
 
   /* -------------------------------------------------------------
-     ACHIEVEMENTS
+     ACHIEVEMENTS SYSTEM (EXPANDED HEALTH & MASTERY)
   ------------------------------------------------------------- */
   const ACHIEVEMENT_META = {
-    first_day: { title: "Первый чистый день", description: "24 часа без табака — организм очищается от CO", icon: "🌱" },
-    week_free: { title: "Неделя свободы", description: "7 дней без сигарет — пик физической тяги позади", icon: "✦" },
-    month_free: { title: "Месяц нового ритма", description: "30 дней без дыма — дыхание восстановлено", icon: "◆" },
-    craving_master: { title: "Мастер тяги", description: "10 побед над приступами тяги", icon: "◉" },
+    // Здоровье (ВОЗ & Медицинские вехи)
+    first_hours: { title: "Чистый кислород", description: "8 часов без дыма — угарный газ (CO) в крови снизился вдвое", icon: "🫁", category: "health" },
+    first_day: { title: "Первый чистый день", description: "24 часа без табака — CO полностью покинул кровь", icon: "🌱", category: "health" },
+    two_days: { title: "Возрождение вкуса", description: "48 часов — организм чист от никотина, обоняние и вкус оживают", icon: "🍓", category: "health" },
+    three_days: { title: "Бронхиальный прорыв", description: "72 часа — бронхи расслабляются, пик физической ломки позади!", icon: "🌬️", category: "health" },
+    five_days: { title: "Чистый котинин", description: "5 дней — метаболиты никотина выведены из печени и почек", icon: "🛡️", category: "health" },
+    week_free: { title: "Неделя триумфа", description: "7 дней — утренний пульс спокоен, кровообращение восстановилось", icon: "⚡", category: "health" },
+    ten_days: { title: "Свежее дыхание", description: "10 дней — налет на зубах и запах дыма полностью ушли", icon: "✨", category: "health" },
+    two_weeks: { title: "Кардио-разгон", description: "14 дней — функция легких выросла на 30%, шаги даются легко", icon: "❤️", category: "health" },
+    three_weeks: { title: "Нейропластичность", description: "21 день — сломан старый рефлекс «стресс — сигарета»", icon: "🧠", category: "health" },
+    month_free: { title: "Бронхиальный щит", description: "30 дней — реснички бронхов очищают легкие, ушел кашель", icon: "🌿", category: "health" },
+    two_months: { title: "Дофаминовый баланс", description: "60 дней — ацетилхолиновые рецепторы откалиброваны", icon: "☀️", category: "health" },
+    three_months: { title: "Железные легкие", description: "90 дней — жизненная емкость легких выросла на 15%", icon: "🏔️", category: "health" },
+    half_year: { title: "Полгода свободы", description: "180 дней — пазухи носа чисты, риск бронхоспазма снижен на 90%", icon: "💎", category: "health" },
+    nine_months: { title: "Чистые артерии", description: "270 дней — маркер сосудистого воспаления (СРБ) в норме", icon: "🩸", category: "health" },
+    year_free: { title: "Новое сердце", description: "365 дней — риск ишемической болезни сердца снизился в 2 раза!", icon: "🏆", category: "health" },
+    two_years: { title: "Стальной рубеж", description: "2 года — риск инфаркта миокарда сравнялся с некурящими", icon: "👑", category: "health" },
+    five_years: { title: "Золотой стандарт ВОЗ", description: "5 лет чистоты — риск инсульта как у абсолютно некурящего человека", icon: "🌟", category: "health" },
+
+    // Осознанность и преодоление тяги
+    first_craving: { title: "Первая победа", description: "Ты доказал, что тяга — это просто 3-минутная волна", icon: "🔥", category: "mindset" },
+    craving_pro: { title: "Страж спокойствия", description: "5 преодоленных приступов тяги — осознанный контроль над импульсом", icon: "🥋", category: "mindset" },
+    craving_master: { title: "Мастер тяги", description: "10 побед над импульсом — уверенный контроль биохимии", icon: "🥊", category: "mindset" },
+    craving_legend: { title: "Непоколебимый стоик", description: "25 побед над импульсом — твоя опора сильнее любого триггера", icon: "🏛️", category: "mindset" },
+    zen_master: { title: "Дзен-мастер свободы", description: "50 побед — абсолютный иммунитет к никотиновым провокациям", icon: "🧘", category: "mindset" },
+
+    // Финансы и мастерство
+    money_saver_1: { title: "Первая копилка", description: "Сэкономлено 10 000 ₸ — деньги в кармане, а не в пепле", icon: "💰", category: "money" },
+    money_saver_2: { title: "Финансовый щит", description: "Сэкономлено 50 000 ₸ — реальный капитал на цели и здоровье", icon: "💎", category: "money" },
+    money_saver_3: { title: "Инвестор в жизнь", description: "Сэкономлено 100 000 ₸ — независимость от табачных гигантов", icon: "🏦", category: "money" },
+    clean_month_track: { title: "Безупречный трек", description: "30 дней подряд со 100% чистотой без единого срыва", icon: "🎯", category: "mastery" },
   };
+
+  let activeAchievementFilter = "all";
 
   function renderAchievements(items) {
     const el = $("achievements");
     if (!el) return;
-    if ($("achievementCount")) $("achievementCount").textContent = items.length;
 
-    el.innerHTML = items.length
-      ? items.map((item) => {
-        const meta = ACHIEVEMENT_META[item.code] || {};
-        const title = item.title || meta.title || item.code || "Награда";
-        const desc = item.description || meta.description || "Награда получена!";
-        const icon = item.icon || meta.icon || "🏅";
-        return `
-        <article class="achievement-item unlocked">
-          <span class="ach-icon">${icon}</span>
-          <div>
-            <strong>${title}</strong>
-            <p>${desc}</p>
-          </div>
-        </article>
-      `;
-      }).join("")
-      : `<div class="info-note"><p>Первая награда откроется уже через 24 часа чистой свободы!</p></div>`;
+    const earnedCodes = new Set((items || []).map((item) => item.code));
+    const allEntries = Object.entries(ACHIEVEMENT_META);
+    const totalCount = allEntries.length;
+    const earnedCount = allEntries.filter(([code]) => earnedCodes.has(code)).length;
+
+    if ($("achievementCount")) {
+      $("achievementCount").textContent = `${earnedCount} / ${totalCount}`;
+    }
+
+    const filteredEntries = allEntries.filter(([code, meta]) => {
+      if (activeAchievementFilter === "unlocked") return earnedCodes.has(code);
+      if (activeAchievementFilter === "locked") return !earnedCodes.has(code);
+      if (activeAchievementFilter === "health") return meta.category === "health";
+      if (activeAchievementFilter === "mindset") return meta.category === "mindset";
+      if (activeAchievementFilter === "money") return meta.category === "money" || meta.category === "mastery";
+      return true;
+    });
+
+    el.innerHTML = `
+      <div class="ach-filters-wrap" style="grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
+        <button class="ach-filter-btn ${activeAchievementFilter === 'all' ? 'active' : ''}" data-filter="all">Все (${totalCount})</button>
+        <button class="ach-filter-btn ${activeAchievementFilter === 'unlocked' ? 'active' : ''}" data-filter="unlocked">Получено (${earnedCount})</button>
+        <button class="ach-filter-btn ${activeAchievementFilter === 'health' ? 'active' : ''}" data-filter="health">🫁 Здоровье</button>
+        <button class="ach-filter-btn ${activeAchievementFilter === 'mindset' ? 'active' : ''}" data-filter="mindset">🧠 Осознанность</button>
+        <button class="ach-filter-btn ${activeAchievementFilter === 'money' ? 'active' : ''}" data-filter="money">💰 Финансы</button>
+      </div>
+      ${
+        filteredEntries.map(([code, meta]) => {
+          const isUnlocked = earnedCodes.has(code);
+          const icon = meta.icon || "🏅";
+          const title = meta.title || code;
+          const desc = meta.description || "";
+          const statusBadge = isUnlocked
+            ? `<span class="ach-status-badge ach-done">Открыто ✓</span>`
+            : `<span class="ach-status-badge ach-locked">🔒 Предстоит</span>`;
+
+          return `
+            <article class="achievement-item ${isUnlocked ? 'unlocked' : 'locked'}">
+              <span class="ach-icon">${icon}</span>
+              <div class="ach-body">
+                <div class="ach-item-header">
+                  <strong>${title}</strong>
+                  ${statusBadge}
+                </div>
+                <p>${desc}</p>
+              </div>
+            </article>
+          `;
+        }).join("")
+      }
+    `;
+
+    el.querySelectorAll(".ach-filter-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        activeAchievementFilter = btn.dataset.filter || "all";
+        renderAchievements(items);
+      });
+    });
   }
 
   /* -------------------------------------------------------------
@@ -1106,23 +1186,24 @@
         const cached = localStorage.getItem("smokefree_cached_stats");
         if (cached) {
           const cachedObj = JSON.parse(cached);
-          if (cachedObj && cachedObj.quit_at) {
-            await api("/api/user/sync", {
+          const cachedQuitAt = cachedObj.quit_at || cachedObj.user?.quit_at;
+          if (cachedObj && cachedQuitAt) {
+            const syncRes = await api("/api/user/sync", {
               method: "POST",
               body: JSON.stringify({
-                user_id: userId,
-                name: cachedObj.first_name || "Друг",
-                quit_at: cachedObj.quit_at,
-                nicotine_type: cachedObj.nicotine_type || "Сигареты",
-                pack_price_kzt: cachedObj.pack_price_kzt || 900,
-                units_per_day: cachedObj.units_per_day || 20,
-                financial_goal_kzt: cachedObj.financial_goal_kzt || 0,
+                user_id: Number(userId),
+                name: cachedObj.user?.name || cachedObj.user?.first_name || cachedObj.name || cachedObj.first_name || "Друг",
+                quit_at: cachedQuitAt,
+                nicotine_type: cachedObj.user?.nicotine_type || cachedObj.nicotine_type || "Сигареты",
+                pack_price_kzt: cachedObj.user?.pack_price_kzt || cachedObj.pack_price_kzt || 900,
+                units_per_day: cachedObj.user?.units_per_day || cachedObj.units_per_day || 20,
+                financial_goal_kzt: cachedObj.user?.financial_goal_kzt || cachedObj.financial_goal_kzt || 0,
               })
             });
-            const restored = await api(`/api/stats/${userId}`);
+            const restored = syncRes?.stats || (await api(`/api/stats/${userId}`));
             renderStats(restored, true);
             await loadTriggers();
-            toast("Прогресс успешно восстановлен!");
+            toast("Прогресс успешно синхронизирован!");
             return;
           }
         }
@@ -1140,35 +1221,36 @@
       return;
     }
 
-    // Step 2 — auto-heal: server DB was wiped on redeploy or has a reset/
-    // missing quit_at, but we have a newer value cached locally. This does
-    // its own network calls and can fail on its own without that meaning
-    // we're offline — `data` from Step 1 is always a valid fallback.
+    // Step 2 — auto-heal: server DB was wiped on redeploy or has an uninitialized
+    // quit_at, but we have a valid value cached locally.
     try {
       const cached = localStorage.getItem("smokefree_cached_stats");
       if (cached && data) {
         const cachedObj = JSON.parse(cached);
-        const cachedQuitAt = cachedObj.quit_at || (cachedObj.user && cachedObj.user.quit_at);
-        const serverQuitAt = data.user?.quit_at;
+        const cachedQuitAt = cachedObj.quit_at || cachedObj.user?.quit_at;
+        const serverQuitAt = data.user?.quit_at || data.quit_at;
 
         const isServerQuitMissing = !serverQuitAt && !data.user?.quit_date;
-        const isServerQuitReset = cachedQuitAt && serverQuitAt && (new Date(cachedQuitAt).getTime() < new Date(serverQuitAt).getTime() - 600000);
 
-        if (cachedQuitAt && (isServerQuitMissing || isServerQuitReset)) {
-          await api("/api/user/sync", {
+        if (cachedQuitAt && isServerQuitMissing) {
+          const syncRes = await api("/api/user/sync", {
             method: "POST",
             body: JSON.stringify({
               user_id: Number(userId),
-              name: cachedObj.first_name || cachedObj.user?.name || "Друг",
+              name: cachedObj.user?.name || cachedObj.user?.first_name || cachedObj.name || cachedObj.first_name || "Друг",
               quit_at: cachedQuitAt,
-              nicotine_type: cachedObj.nicotine_type || cachedObj.user?.nicotine_type || "Сигареты",
-              pack_price_kzt: cachedObj.pack_price_kzt || cachedObj.user?.pack_price_kzt || 900,
-              units_per_day: cachedObj.units_per_day || cachedObj.user?.units_per_day || 20,
-              financial_goal_kzt: cachedObj.financial_goal_kzt || cachedObj.user?.financial_goal_kzt || 0,
+              nicotine_type: cachedObj.user?.nicotine_type || cachedObj.nicotine_type || "Сигареты",
+              pack_price_kzt: cachedObj.user?.pack_price_kzt || cachedObj.pack_price_kzt || 900,
+              units_per_day: cachedObj.user?.units_per_day || cachedObj.units_per_day || 20,
+              financial_goal_kzt: cachedObj.user?.financial_goal_kzt || cachedObj.financial_goal_kzt || 0,
             })
           });
-          data = await api(`/api/stats/${userId}`);
-          toast("Прогресс успешно восстановлен!");
+          if (syncRes?.stats) {
+            data = syncRes.stats;
+          } else {
+            data = await api(`/api/stats/${userId}`);
+          }
+          toast("Прогресс синхронизирован с сервером!");
         }
       }
     } catch (syncErr) {

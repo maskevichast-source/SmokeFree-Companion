@@ -53,5 +53,5 @@ venv/
 .venv/
 
 # sqlite data dir
-data/
+/data/
 *.db-journal

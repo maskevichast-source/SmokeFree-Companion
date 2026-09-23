@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   ShieldAlert,
   Check,
@@ -17,6 +17,7 @@ import {
   HelpCircle,
   Flame,
   CheckCircle2,
+  Award,
 } from 'lucide-react';
 import {
   UserProfile,
@@ -27,6 +28,7 @@ import {
   ChatMessage,
 } from '../types';
 import { WHO_HEALTH_MILESTONES } from '../data/auditReport';
+import { APP_ACHIEVEMENTS } from '../data/achievements';
 
 interface CompanionViewProps {
   profile: UserProfile;
@@ -63,9 +65,28 @@ export const CompanionView: React.FC<CompanionViewProps> = ({
   onDeleteTrigger,
   isMobilePreview,
 }) => {
-  const [subTab, setSubTab] = useState<'health' | 'radar' | 'coach' | 'diary'>('health');
+  const [subTab, setSubTab] = useState<'health' | 'achievements' | 'radar' | 'coach' | 'diary'>('health');
+  const [achievementFilter, setAchievementFilter] = useState<'all' | 'unlocked' | 'health' | 'mindset' | 'money'>('all');
   const [newTriggerTime, setNewTriggerTime] = useState('18:30');
   const [newTriggerLabel, setNewTriggerLabel] = useState('');
+
+  // Achievements calculation
+  const cravingsResistedCount = stats.cravingsResistedCount || cravings.filter((c) => c.outcome === 'resisted').length;
+  const enrichedAchievements = useMemo(() => {
+    return APP_ACHIEVEMENTS.map((ach) => ({
+      ...ach,
+      unlocked: ach.checkUnlocked({
+        totalSeconds: stats.totalSeconds,
+        days: stats.days,
+        hours: stats.hours,
+        moneySaved: stats.moneySaved,
+        cravingsResisted: cravingsResistedCount,
+        relapseCount: relapses.length,
+      }),
+    }));
+  }, [stats.totalSeconds, stats.days, stats.hours, stats.moneySaved, cravingsResistedCount, relapses.length]);
+
+  const unlockedAchCount = enrichedAchievements.filter((a) => a.unlocked).length;
 
   // AI Coach state
   const [inputMessage, setInputMessage] = useState('');
@@ -442,6 +463,21 @@ export const CompanionView: React.FC<CompanionViewProps> = ({
           </button>
 
           <button
+            onClick={() => setSubTab('achievements')}
+            className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+              subTab === 'achievements'
+                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Award className="w-3.5 h-3.5 text-amber-400" />
+            <span>Награды</span>
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500/20 text-amber-300 font-mono font-bold">
+              {unlockedAchCount}/{APP_ACHIEVEMENTS.length}
+            </span>
+          </button>
+
+          <button
             onClick={() => setSubTab('radar')}
             className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
               subTab === 'radar'
@@ -561,7 +597,154 @@ export const CompanionView: React.FC<CompanionViewProps> = ({
         </div>
       )}
 
-      {/* Subtab 2: Trigger Radar */}
+      {/* Subtab: Expanded Health & Mastery Achievements */}
+      {subTab === 'achievements' && (
+        <div className="space-y-4">
+          {/* Header Summary */}
+          <div className="p-4 bg-gradient-to-r from-amber-500/10 via-slate-900 to-slate-900 border border-amber-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <Award className="w-5 h-5 text-amber-400" />
+                <h3 className="text-sm font-bold text-slate-100">Медицинские и ментальные достижения</h3>
+              </div>
+              <p className="text-xs text-slate-400 mt-1">
+                26 подтвержденных ВОЗ этапов регенерации органов, преодоления дофаминовой тяги и финансовой свободы.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 sm:self-center shrink-0">
+              <span className="text-xs text-slate-400">Прогресс:</span>
+              <span className="text-sm font-mono font-black text-amber-400 bg-amber-500/20 px-3 py-1 rounded-xl border border-amber-500/30">
+                {unlockedAchCount} / {APP_ACHIEVEMENTS.length}
+              </span>
+            </div>
+          </div>
+
+          {/* Filter Bar */}
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setAchievementFilter('all')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                achievementFilter === 'all'
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                  : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'
+              }`}
+            >
+              Все ({APP_ACHIEVEMENTS.length})
+            </button>
+            <button
+              onClick={() => setAchievementFilter('unlocked')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                achievementFilter === 'unlocked'
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                  : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'
+              }`}
+            >
+              ✓ Получено ({unlockedAchCount})
+            </button>
+            <button
+              onClick={() => setAchievementFilter('health')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                achievementFilter === 'health'
+                  ? 'bg-sky-500/20 text-sky-300 border border-sky-500/40'
+                  : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'
+              }`}
+            >
+              🫁 Здоровье (ВОЗ)
+            </button>
+            <button
+              onClick={() => setAchievementFilter('mindset')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                achievementFilter === 'mindset'
+                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                  : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'
+              }`}
+            >
+              🧠 Осознанность
+            </button>
+            <button
+              onClick={() => setAchievementFilter('money')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                achievementFilter === 'money'
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                  : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'
+              }`}
+            >
+              💰 Финансы & Трек
+            </button>
+          </div>
+
+          {/* Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {enrichedAchievements
+              .filter((ach) => {
+                if (achievementFilter === 'unlocked') return ach.unlocked;
+                if (achievementFilter === 'health') return ach.category === 'health';
+                if (achievementFilter === 'mindset') return ach.category === 'mindset';
+                if (achievementFilter === 'money') return ach.category === 'money' || ach.category === 'mastery';
+                return true;
+              })
+              .map((ach) => {
+                return (
+                  <div
+                    key={ach.id}
+                    className={`p-4 rounded-2xl border transition-all ${
+                      ach.unlocked
+                        ? 'bg-gradient-to-br from-amber-500/10 via-slate-900 to-slate-950 border-amber-500/40 shadow-lg shadow-amber-500/5'
+                        : 'bg-slate-900/60 border-slate-800/80 opacity-70'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className="text-3xl shrink-0 p-2 rounded-2xl bg-slate-950/80 border border-slate-800/80">
+                        {ach.icon}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h4 className="text-xs font-bold text-slate-100 flex items-center gap-1.5">
+                              {ach.title}
+                              {ach.timeframe && (
+                                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">
+                                  {ach.timeframe}
+                                </span>
+                              )}
+                            </h4>
+                            <span className="text-[10px] text-slate-400">
+                              Требуется: {ach.requirement}
+                            </span>
+                          </div>
+                          {ach.unlocked ? (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
+                              Открыто ✓
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 shrink-0">
+                              🔒 В пути
+                            </span>
+                          )}
+                        </div>
+
+                        <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+                          {ach.description}
+                        </p>
+
+                        <div className="mt-2.5 pt-2 border-t border-slate-800/60 flex items-center justify-between text-[10px] text-slate-400">
+                          <span className="italic line-clamp-1">{ach.medicalNote}</span>
+                          <span className="uppercase tracking-wider font-semibold text-slate-400 shrink-0 ml-2">
+                            {ach.category === 'health'
+                              ? 'Медицина'
+                              : ach.category === 'mindset'
+                              ? 'Психология'
+                              : 'Финансы'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+      )}
       {subTab === 'radar' && (
         <div className="space-y-4">
           <div className="p-4 bg-slate-900/80 border border-slate-800 rounded-2xl flex items-start gap-3">
