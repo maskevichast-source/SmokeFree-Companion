@@ -1,5 +1,16 @@
 import React, { useState, useMemo } from 'react';
 import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ReferenceLine,
+} from 'recharts';
+import {
   TrendingUp,
   DollarSign,
   Heart,
@@ -19,6 +30,8 @@ import {
   Sliders,
   ChevronRight,
   Target,
+  ArrowUpRight,
+  Info,
 } from 'lucide-react';
 import { UserProfile, FreedomStats, CravingRecord, TriggerItem, RelapseRecord, UnitTestItem } from '../types';
 import { WHO_HEALTH_MILESTONES } from '../data/auditReport';
@@ -169,6 +182,82 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
   const daysToGoal = profile.financialGoal > stats.moneySaved && stats.dailyExpense > 0
     ? Math.ceil((profile.financialGoal - stats.moneySaved) / stats.dailyExpense)
     : 0;
+
+  // Chart timeframe state for cumulative savings vs goal
+  const [chartHorizon, setChartHorizon] = useState<'30d' | '90d' | '180d' | '1y' | 'goal'>('goal');
+
+  // Projected Goal Target Date
+  const goalTargetDate = useMemo(() => {
+    if (profile.financialGoal <= 0 || stats.dailyExpense <= 0) return null;
+    const daysNeeded = Math.ceil(profile.financialGoal / stats.dailyExpense);
+    const quitDate = new Date(profile.quitAt || Date.now());
+    const target = new Date(quitDate.getTime() + daysNeeded * 86400000);
+    return target.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+  }, [profile.financialGoal, stats.dailyExpense, profile.quitAt]);
+
+  // Cumulative savings timeline dataset for Recharts
+  const savingsTimelineData = useMemo(() => {
+    const daily = stats.dailyExpense > 0 ? stats.dailyExpense : 1000;
+    const currentDays = Math.max(0, stats.fractionalDays);
+    const goal = profile.financialGoal || 0;
+    const daysToReachGoal = goal > 0 ? Math.ceil(goal / daily) : 60;
+
+    let targetTotalDays = 60;
+    if (chartHorizon === '30d') targetTotalDays = Math.max(30, Math.ceil(currentDays) + 7);
+    else if (chartHorizon === '90d') targetTotalDays = Math.max(90, Math.ceil(currentDays) + 14);
+    else if (chartHorizon === '180d') targetTotalDays = Math.max(180, Math.ceil(currentDays) + 30);
+    else if (chartHorizon === '1y') targetTotalDays = Math.max(365, Math.ceil(currentDays) + 30);
+    else if (chartHorizon === 'goal') {
+      targetTotalDays = Math.max(Math.ceil(daysToReachGoal * 1.15), Math.ceil(currentDays) + 14, 30);
+    }
+
+    // Step calculation to ensure optimal resolution (approx 16-24 data points)
+    const step = Math.max(1, Math.round(targetTotalDays / 20));
+    const dayPoints = new Set<number>();
+    dayPoints.add(0);
+    for (let d = step; d < targetTotalDays; d += step) {
+      dayPoints.add(d);
+    }
+
+    const roundedToday = Math.round(currentDays);
+    dayPoints.add(roundedToday);
+    if (daysToReachGoal > 0 && daysToReachGoal <= targetTotalDays) {
+      dayPoints.add(daysToReachGoal);
+    }
+    dayPoints.add(targetTotalDays);
+
+    const sortedDays = Array.from(dayPoints).sort((a, b) => a - b);
+    const quitDate = new Date(profile.quitAt || Date.now());
+
+    return sortedDays.map((d) => {
+      const pointDate = new Date(quitDate.getTime() + d * 86400000);
+      const dateLabel = pointDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+      const isPastOrToday = d <= roundedToday;
+      const isToday = d === roundedToday;
+      const isGoalDay = daysToReachGoal > 0 && d === daysToReachGoal;
+
+      // Actual savings only available for past and today
+      const actualSaved = isPastOrToday
+        ? isToday
+          ? Math.round(stats.moneySaved)
+          : Math.round(d * daily)
+        : null;
+
+      const projectedSaved = Math.round(d * daily);
+
+      return {
+        day: d,
+        label: isToday ? `Сегодня (д. ${d})` : isGoalDay ? `Цель (д. ${d})` : `${dateLabel} (д. ${d})`,
+        shortLabel: isToday ? 'Сегодня' : `${d}д`,
+        dateFormatted: dateLabel,
+        actualSaved,
+        projectedSaved,
+        financialGoal: goal > 0 ? goal : undefined,
+        isToday,
+        isGoalDay,
+      };
+    });
+  }, [stats.dailyExpense, stats.fractionalDays, stats.moneySaved, profile.financialGoal, profile.quitAt, chartHorizon]);
 
   // Run all Unit Tests in browser
   const handleRunAllTests = () => {
@@ -366,6 +455,278 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
               <div className="text-[11px] text-amber-400">
                 {stats.cravingsResistedCount} преодоленных тяг &bull; {relapses.length} срывов
               </div>
+            </div>
+          </div>
+
+          {/* Cumulative Money Saved vs Financial Goal Line Chart (Recharts) */}
+          <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-5">
+            {/* Header & Controls */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+                    <DollarSign className="w-3.5 h-3.5" />
+                    Накопления vs Цель
+                  </span>
+                  <span className="text-xs text-slate-400 font-medium">Recharts Динамика</span>
+                </div>
+                <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-emerald-400" />
+                  <span>График кумулятивной экономии и цель</span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Траектория накопленных средств от дня отказа до пересечения финансовой цели
+                </p>
+              </div>
+
+              {/* Time Horizon Selector Buttons */}
+              <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 self-start sm:self-auto text-xs">
+                <button
+                  onClick={() => setChartHorizon('30d')}
+                  className={`px-2.5 py-1.5 rounded-lg transition-all font-medium ${
+                    chartHorizon === '30d'
+                      ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  30 дн
+                </button>
+                <button
+                  onClick={() => setChartHorizon('90d')}
+                  className={`px-2.5 py-1.5 rounded-lg transition-all font-medium ${
+                    chartHorizon === '90d'
+                      ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  90 дн
+                </button>
+                <button
+                  onClick={() => setChartHorizon('180d')}
+                  className={`px-2.5 py-1.5 rounded-lg transition-all font-medium ${
+                    chartHorizon === '180d'
+                      ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  180 дн
+                </button>
+                <button
+                  onClick={() => setChartHorizon('1y')}
+                  className={`px-2.5 py-1.5 rounded-lg transition-all font-medium ${
+                    chartHorizon === '1y'
+                      ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  1 год
+                </button>
+                <button
+                  onClick={() => setChartHorizon('goal')}
+                  className={`px-2.5 py-1.5 rounded-lg transition-all font-medium flex items-center gap-1 ${
+                    chartHorizon === 'goal'
+                      ? 'bg-amber-400 text-slate-950 font-bold shadow-sm'
+                      : 'text-amber-400/80 hover:text-amber-300'
+                  }`}
+                >
+                  <Target className="w-3 h-3" />
+                  <span>К цели</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Micro KPI Ribbon */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800/80">
+              <div className="space-y-0.5">
+                <span className="text-[11px] text-slate-400">Накоплено сейчас</span>
+                <div className="text-base font-black text-emerald-400 font-mono">
+                  {Math.round(stats.moneySaved).toLocaleString()} {profile.currencySymbol}
+                </div>
+              </div>
+              <div className="space-y-0.5">
+                <span className="text-[11px] text-slate-400">Цель: {profile.financialGoalLabel || 'Покупка'}</span>
+                <div className="text-base font-black text-amber-400 font-mono">
+                  {profile.financialGoal > 0 ? `${profile.financialGoal.toLocaleString()} ${profile.currencySymbol}` : 'Не задана'}
+                </div>
+              </div>
+              <div className="space-y-0.5">
+                <span className="text-[11px] text-slate-400">Прогресс к цели</span>
+                <div className="text-base font-black text-slate-200 font-mono">
+                  {goalProgress}%
+                </div>
+              </div>
+              <div className="space-y-0.5">
+                <span className="text-[11px] text-slate-400">Осталось до цели</span>
+                <div className="text-base font-black text-sky-400 font-mono">
+                  {daysToGoal > 0 ? `${daysToGoal} дн.` : 'Достигнута! 🎉'}
+                </div>
+              </div>
+            </div>
+
+            {/* Recharts Canvas */}
+            <div className="w-full h-80 pt-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={savingsTimelineData}
+                  margin={{ top: 15, right: 30, left: 10, bottom: 5 }}
+                >
+                  <CartesianGrid stroke="#1e293b" strokeDasharray="3 3" vertical={false} />
+                  <XAxis
+                    dataKey="shortLabel"
+                    stroke="#64748b"
+                    tick={{ fill: '#94a3b8', fontSize: 11 }}
+                    tickLine={false}
+                    axisLine={{ stroke: '#334155' }}
+                  />
+                  <YAxis
+                    stroke="#64748b"
+                    tick={{ fill: '#94a3b8', fontSize: 11 }}
+                    tickLine={false}
+                    axisLine={{ stroke: '#334155' }}
+                    tickFormatter={(val: number) => {
+                      if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
+                      if (val >= 1000) return `${Math.round(val / 1000)}k`;
+                      return `${val}`;
+                    }}
+                  />
+                  <Tooltip
+                    content={({ active, payload }: any) => {
+                      if (!active || !payload || !payload.length) return null;
+                      const pt = payload[0]?.payload;
+                      if (!pt) return null;
+
+                      return (
+                        <div className="p-3.5 rounded-2xl bg-slate-950/95 border border-slate-700 shadow-2xl backdrop-blur-md text-xs space-y-2 min-w-[210px]">
+                          <div className="flex items-center justify-between border-b border-slate-800 pb-1.5">
+                            <span className="font-bold text-slate-100">{pt.label}</span>
+                            {pt.isToday && (
+                              <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-400 font-bold">
+                                Сегодня
+                              </span>
+                            )}
+                            {pt.isGoalDay && (
+                              <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-amber-500/20 text-amber-400 font-bold">
+                                День цели
+                              </span>
+                            )}
+                          </div>
+
+                          {pt.actualSaved !== null && pt.actualSaved !== undefined && (
+                            <div className="flex items-center justify-between text-emerald-400 font-mono">
+                              <span className="flex items-center gap-1.5 text-slate-300 font-sans">
+                                <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />
+                                Фактически:
+                              </span>
+                              <span className="font-bold">
+                                {pt.actualSaved.toLocaleString()} {profile.currencySymbol}
+                              </span>
+                            </div>
+                          )}
+
+                          <div className="flex items-center justify-between text-sky-400 font-mono">
+                            <span className="flex items-center gap-1.5 text-slate-300 font-sans">
+                              <span className="w-2 h-2 rounded-full bg-sky-400 inline-block" />
+                              Траектория:
+                            </span>
+                            <span className="font-bold">
+                              {pt.projectedSaved.toLocaleString()} {profile.currencySymbol}
+                            </span>
+                          </div>
+
+                          {profile.financialGoal > 0 && (
+                            <div className="pt-1.5 border-t border-slate-800 space-y-1">
+                              <div className="flex items-center justify-between text-amber-400 font-mono">
+                                <span className="flex items-center gap-1.5 text-slate-300 font-sans">
+                                  <Target className="w-3 h-3 text-amber-400" />
+                                  Цель:
+                                </span>
+                                <span className="font-bold">
+                                  {profile.financialGoal.toLocaleString()} {profile.currencySymbol}
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-[11px] text-slate-400">
+                                <span>Прогресс:</span>
+                                <span className="text-slate-200 font-mono font-medium">
+                                  {Math.min(100, Math.round((pt.projectedSaved / profile.financialGoal) * 100))}%
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }}
+                  />
+                  <Legend
+                    wrapperStyle={{ paddingTop: '10px', fontSize: '12px' }}
+                    formatter={(val) => <span className="text-slate-300 text-xs">{val}</span>}
+                  />
+
+                  {/* Financial Goal Reference Line */}
+                  {profile.financialGoal > 0 && (
+                    <ReferenceLine
+                      y={profile.financialGoal}
+                      stroke="#f59e0b"
+                      strokeDasharray="6 4"
+                      strokeWidth={2}
+                      label={{
+                        value: `Цель: ${profile.financialGoal.toLocaleString()} ${profile.currencySymbol}`,
+                        fill: '#fbbf24',
+                        position: 'insideTopRight',
+                        fontSize: 11,
+                        fontWeight: 700,
+                      }}
+                    />
+                  )}
+
+                  {/* Lines for actual and projected trajectory */}
+                  <Line
+                    type="monotone"
+                    dataKey="actualSaved"
+                    name="Фактически сэкономлено"
+                    stroke="#10b981"
+                    strokeWidth={3}
+                    dot={{ r: 3, fill: '#10b981', stroke: '#064e3b', strokeWidth: 1.5 }}
+                    activeDot={{ r: 6, fill: '#34d399', stroke: '#ffffff', strokeWidth: 2 }}
+                    connectNulls={false}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="projectedSaved"
+                    name="Траектория / Прогноз"
+                    stroke="#38bdf8"
+                    strokeWidth={2}
+                    strokeDasharray="4 4"
+                    dot={false}
+                    activeDot={{ r: 5, fill: '#38bdf8' }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Context Insight Banner */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3.5 rounded-2xl bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800 text-xs text-slate-400">
+              <div className="flex items-center gap-2 text-slate-300">
+                <Info className="w-4 h-4 text-sky-400 shrink-0" />
+                <span>
+                  Каждый день свободы сберегает{' '}
+                  <strong className="text-emerald-400 font-mono">
+                    {Math.round(stats.dailyExpense).toLocaleString()} {profile.currencySymbol}
+                  </strong>
+                  . За 30 дней это{' '}
+                  <strong className="text-emerald-400 font-mono">
+                    ~{Math.round(stats.dailyExpense * 30).toLocaleString()} {profile.currencySymbol}
+                  </strong>
+                  .
+                </span>
+              </div>
+              {goalTargetDate && daysToGoal > 0 && (
+                <div className="text-amber-300 flex items-center gap-1.5 shrink-0">
+                  <Target className="w-3.5 h-3.5 text-amber-400" />
+                  <span>
+                    Ориентир закрытия цели: <strong className="font-semibold text-amber-200">{goalTargetDate}</strong>
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 

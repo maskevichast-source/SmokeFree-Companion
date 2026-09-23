@@ -2,7 +2,7 @@
   "profile": {
     "id": "user-default-1",
     "name": "Азамат",
-    "quitAt": "2026-09-15T22:28:04.563Z",
+    "quitAt": "2026-09-19T19:20:20.870Z",
     "nicotineType": "Сигареты",
     "currency": "KZT",
     "currencySymbol": "₸",
@@ -49,14 +49,14 @@
       "intensity": 8,
       "trigger": "Кофе с коллегами",
       "outcome": "resisted",
-      "timestamp": "2026-09-19T06:28:04.574Z"
+      "timestamp": "2026-09-23T03:20:20.889Z"
     },
     {
       "id": "c-2",
       "intensity": 7,
       "trigger": "Пробка на мосту",
       "outcome": "resisted",
-      "timestamp": "2026-09-18T10:28:04.574Z"
+      "timestamp": "2026-09-22T07:20:20.889Z"
     }
   ],
   "relapses": [],
@@ -65,9 +65,9 @@
       "id": "msg-welcome",
       "sender": "coach",
       "text": "Привет! Я твой КПТ-наставник по свободе от никотина. Каждая преодоленная тяга делает нейронные связи зависимости слабее. В чем тебе нужна поддержка прямо сейчас?",
-      "timestamp": "2026-09-19T10:55:31.646Z",
+      "timestamp": "2026-09-23T07:20:20.870Z",
       "persona": "cbt"
     }
   ],
-  "updatedAt": "2026-09-19T11:16:19.393Z"
+  "updatedAt": "2026-09-23T07:48:29.645Z"
 }
