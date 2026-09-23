@@ -18,6 +18,9 @@ import {
   Flame,
   CheckCircle2,
   Award,
+  Brain,
+  Activity,
+  Smile,
 } from 'lucide-react';
 import {
   UserProfile,
@@ -25,10 +28,15 @@ import {
   TriggerItem,
   CravingRecord,
   RelapseRecord,
+  MoodRecord,
   ChatMessage,
 } from '../types';
 import { WHO_HEALTH_MILESTONES } from '../data/auditReport';
 import { APP_ACHIEVEMENTS } from '../data/achievements';
+import { DailyQuestsCard } from './DailyQuestsCard';
+import { CbtReframingView } from './CbtReframingView';
+import { AchievementFlipCard } from './AchievementFlipCard';
+import { MoodLoggerCard } from './MoodLoggerCard';
 
 interface CompanionViewProps {
   profile: UserProfile;
@@ -36,6 +44,8 @@ interface CompanionViewProps {
   triggers: TriggerItem[];
   cravings: CravingRecord[];
   relapses: RelapseRecord[];
+  moods?: MoodRecord[];
+  onLogMood?: (score: number, note?: string, tags?: string[]) => void;
   chatMessages: ChatMessage[];
   setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
   onOpenSos: () => void;
@@ -54,6 +64,8 @@ export const CompanionView: React.FC<CompanionViewProps> = ({
   triggers,
   cravings,
   relapses,
+  moods = [],
+  onLogMood,
   chatMessages,
   setChatMessages,
   onOpenSos,
@@ -65,8 +77,9 @@ export const CompanionView: React.FC<CompanionViewProps> = ({
   onDeleteTrigger,
   isMobilePreview,
 }) => {
-  const [subTab, setSubTab] = useState<'health' | 'achievements' | 'radar' | 'coach' | 'diary'>('health');
-  const [achievementFilter, setAchievementFilter] = useState<'all' | 'unlocked' | 'health' | 'mindset' | 'money'>('all');
+  const [subTab, setSubTab] = useState<'health' | 'cbt' | 'mood' | 'achievements' | 'radar' | 'coach' | 'diary'>('health');
+  const [healthCategoryFilter, setHealthCategoryFilter] = useState<'all' | 'Сердечно-сосудистая' | 'Дыхательная' | 'Нейробиология' | 'Внешность и метаболизм' | 'Долголетие и онкозащита'>('all');
+  const [achievementFilter, setAchievementFilter] = useState<'all' | 'unlocked' | 'health' | 'mindset' | 'money' | 'quests' | 'cbt' | 'mastery'>('all');
   const [newTriggerTime, setNewTriggerTime] = useState('18:30');
   const [newTriggerLabel, setNewTriggerLabel] = useState('');
 
@@ -82,9 +95,11 @@ export const CompanionView: React.FC<CompanionViewProps> = ({
         moneySaved: stats.moneySaved,
         cravingsResisted: cravingsResistedCount,
         relapseCount: relapses.length,
+        cigarettesAvoided: stats.cigarettesAvoided,
+        minutesLifeReturned: stats.minutesLifeReturned,
       }),
     }));
-  }, [stats.totalSeconds, stats.days, stats.hours, stats.moneySaved, cravingsResistedCount, relapses.length]);
+  }, [stats.totalSeconds, stats.days, stats.hours, stats.moneySaved, cravingsResistedCount, relapses.length, stats.cigarettesAvoided, stats.minutesLifeReturned]);
 
   const unlockedAchCount = enrichedAchievements.filter((a) => a.unlocked).length;
 
@@ -387,6 +402,11 @@ export const CompanionView: React.FC<CompanionViewProps> = ({
         </div>
       </section>
 
+      {/* DAILY MICRO-QUESTS SECTION */}
+      <section className="mb-6">
+        <DailyQuestsCard daysFree={stats.days + stats.hours / 24} />
+      </section>
+
       {/* Metrics Row: Money Saved, Life Minutes, Cigarettes avoided */}
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
         <div className="bg-slate-900 border border-slate-800/80 rounded-2xl p-4 flex items-start justify-between">
@@ -447,6 +467,16 @@ export const CompanionView: React.FC<CompanionViewProps> = ({
         </div>
       </section>
 
+      {/* Mood Tracker Card & Daily Check-in */}
+      <div className="mb-6">
+        <MoodLoggerCard
+          daysClean={stats.fractionalDays}
+          cigarettesAvoided={stats.cigarettesAvoided}
+          moods={moods}
+          onLogMood={onLogMood || (() => {})}
+        />
+      </div>
+
       {/* Secondary Feature Navigation */}
       <div className="flex items-center justify-between border-b border-slate-800 mb-4 pb-2">
         <div className="flex items-center gap-2 overflow-x-auto text-xs font-semibold">
@@ -460,6 +490,35 @@ export const CompanionView: React.FC<CompanionViewProps> = ({
           >
             <HeartPulse className="w-3.5 h-3.5" />
             <span>Здоровье (ВОЗ)</span>
+          </button>
+
+          <button
+            onClick={() => setSubTab('cbt')}
+            className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+              subTab === 'cbt'
+                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Brain className="w-3.5 h-3.5 text-purple-400" />
+            <span>КПТ-Тренажер</span>
+          </button>
+
+          <button
+            onClick={() => setSubTab('mood')}
+            className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+              subTab === 'mood'
+                ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Smile className="w-3.5 h-3.5 text-rose-400" />
+            <span>Настроение</span>
+            {moods.length > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-800 text-slate-300 font-mono">
+                {moods.length}
+              </span>
+            )}
           </button>
 
           <button
@@ -529,71 +588,156 @@ export const CompanionView: React.FC<CompanionViewProps> = ({
 
       {/* Subtab 1: WHO Health Milestones */}
       {subTab === 'health' && (
-        <div className="space-y-3">
-          <div className="p-3 bg-slate-900/60 border border-slate-800 rounded-xl text-xs text-slate-400 flex items-center justify-between">
-            <span>Таймлайн восстановления организма по медицинским стандартам ВОЗ:</span>
-            <span className="text-emerald-400 font-semibold">
-              {WHO_HEALTH_MILESTONES.filter((m) => stats.totalSeconds >= m.secondsRequired).length} из{' '}
-              {WHO_HEALTH_MILESTONES.length} этапов пройдено
-            </span>
+        <div className="space-y-4">
+          <div className="p-4 bg-gradient-to-r from-emerald-950/40 via-slate-900 to-slate-900 border border-emerald-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-emerald-400" />
+                <h3 className="text-sm font-bold text-slate-100">Медицинский таймлайн регенерации (ВОЗ)</h3>
+              </div>
+              <p className="text-xs text-slate-400 mt-1">
+                45 научно обоснованных этапов клеточного восстановления органов от 20 минут до 25 лет чистой жизни.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 sm:self-center shrink-0">
+              <span className="text-xs text-slate-400">Пройдено:</span>
+              <span className="text-sm font-mono font-black text-emerald-400 bg-emerald-500/20 px-3 py-1 rounded-xl border border-emerald-500/30">
+                {WHO_HEALTH_MILESTONES.filter((m) => stats.totalSeconds >= m.secondsRequired).length} / {WHO_HEALTH_MILESTONES.length}
+              </span>
+            </div>
+          </div>
+
+          {/* Health Category Filter Pills */}
+          <div className="flex flex-wrap items-center gap-2">
+            {[
+              { key: 'all', label: `Все (${WHO_HEALTH_MILESTONES.length})` },
+              { key: 'Сердечно-сосудистая', label: '🫀 Сердце & Сосуды' },
+              { key: 'Дыхательная', label: '🫁 Легкие & Бронхи' },
+              { key: 'Нейробиология', label: '🧠 Мозг & Дофамин' },
+              { key: 'Внешность и метаболизм', label: '✨ Дерма & Обмен веществ' },
+              { key: 'Долголетие и онкозащита', label: '🧬 Онкозащита & Гены' },
+            ].map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setHealthCategoryFilter(f.key as any)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  healthCategoryFilter === f.key
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                    : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {WHO_HEALTH_MILESTONES.map((item) => {
-              const isAchieved = stats.totalSeconds >= item.secondsRequired;
-              const progressPct = Math.min(100, Math.round((stats.totalSeconds / item.secondsRequired) * 100));
+            {WHO_HEALTH_MILESTONES
+              .filter((item) => {
+                if (healthCategoryFilter === 'all') return true;
+                return item.category === healthCategoryFilter;
+              })
+              .map((item) => {
+                const isAchieved = stats.totalSeconds >= item.secondsRequired;
+                const progressPct = Math.min(100, Math.round((stats.totalSeconds / item.secondsRequired) * 100));
 
-              return (
-                <div
-                  key={item.id}
-                  className={`p-4 rounded-2xl border transition-all ${
-                    isAchieved
-                      ? 'bg-emerald-950/20 border-emerald-500/40 text-slate-200'
-                      : 'bg-slate-900/70 border-slate-800/80 text-slate-400'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2">
-                      {isAchieved ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                      ) : (
-                        <div className="w-4 h-4 rounded-full border-2 border-slate-700 shrink-0"></div>
-                      )}
-                      <div>
-                        <h4 className="text-xs font-bold text-slate-100">{item.title}</h4>
-                        <span className="text-[10px] text-slate-400 uppercase tracking-wider">{item.category}</span>
+                return (
+                  <div
+                    key={item.id}
+                    className={`p-4 rounded-2xl border transition-all ${
+                      isAchieved
+                        ? 'bg-gradient-to-br from-emerald-950/30 via-slate-900 to-slate-950 border-emerald-500/40 text-slate-200 shadow-md shadow-emerald-500/5'
+                        : 'bg-slate-900/70 border-slate-800/80 text-slate-400'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        {isAchieved ? (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                        ) : (
+                          <div className="w-4 h-4 rounded-full border-2 border-slate-700 shrink-0"></div>
+                        )}
+                        <div>
+                          <h4 className="text-xs font-bold text-slate-100">{item.title}</h4>
+                          <span className="text-[10px] text-emerald-400/80 font-medium uppercase tracking-wider">{item.category}</span>
+                        </div>
                       </div>
+                      <span
+                        className={`text-[11px] font-mono px-2 py-0.5 rounded-full font-semibold ${
+                          isAchieved
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                            : 'bg-slate-800 text-slate-400'
+                        }`}
+                      >
+                        {item.timeframe}
+                      </span>
                     </div>
-                    <span
-                      className={`text-[11px] font-mono px-2 py-0.5 rounded-full font-semibold ${
-                        isAchieved
-                          ? 'bg-emerald-500/20 text-emerald-300'
-                          : 'bg-slate-800 text-slate-400'
-                      }`}
-                    >
-                      {item.timeframe}
-                    </span>
-                  </div>
 
-                  <p className="text-xs text-slate-300 mb-2 leading-relaxed">{item.description}</p>
+                    <p className="text-xs text-slate-300 mb-2 leading-relaxed">{item.description}</p>
 
-                  <div className="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
-                    <div
-                      className={`h-full transition-all duration-1000 ${
-                        isAchieved ? 'bg-emerald-400' : 'bg-slate-700'
-                      }`}
-                      style={{ width: `${progressPct}%` }}
-                    ></div>
-                  </div>
+                    {item.cellularEffect && (
+                      <div className="mb-2 p-2 rounded-xl bg-slate-950/60 border border-slate-800/60 text-[11px] text-slate-300">
+                        <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block mb-0.5">Клеточный механизм:</span>
+                        {item.cellularEffect}
+                      </div>
+                    )}
 
-                  <div className="flex items-center justify-between text-[10px] text-slate-500 mt-2">
-                    <span>{item.scientificReference}</span>
-                    <span className="font-mono">{isAchieved ? '100%' : `${progressPct}%`}</span>
+                    {item.whatYouFeel && (
+                      <div className="mb-2 text-[11px] text-slate-400 italic">
+                        💬 <span className="text-slate-300">Ощущения:</span> {item.whatYouFeel}
+                      </div>
+                    )}
+
+                    <div className="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden mt-3">
+                      <div
+                        className={`h-full transition-all duration-1000 ${
+                          isAchieved ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : 'bg-slate-700'
+                        }`}
+                        style={{ width: `${progressPct}%` }}
+                      ></div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[10px] text-slate-500 mt-2">
+                      <span className="line-clamp-1">{item.scientificReference}</span>
+                      <span className="font-mono font-bold text-slate-400">{isAchieved ? '100% ✓' : `${progressPct}%`}</span>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
+        </div>
+      )}
+
+      {/* Subtab: CBT Mindset Reframing Trainer */}
+      {subTab === 'cbt' && <CbtReframingView />}
+
+      {/* Subtab: Mood Logging & Emotional Correlation */}
+      {subTab === 'mood' && (
+        <div className="space-y-4">
+          <div className="p-4 bg-gradient-to-r from-rose-950/40 via-slate-900 to-slate-900 border border-rose-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <Smile className="w-5 h-5 text-rose-400" />
+                <h3 className="text-sm font-bold text-slate-100">Эмоциональный трекер и дневник состояния</h3>
+              </div>
+              <p className="text-xs text-slate-400 mt-1">
+                Фиксируйте настроение по шкале 1–5. По мере очищения рецепторов от никотина эмоциональный фон стабильно выравнивается.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400">Всего записей:</span>
+              <span className="font-mono font-bold px-2.5 py-1 rounded-lg bg-slate-800 text-rose-300 border border-slate-700">
+                {moods.length}
+              </span>
+            </div>
+          </div>
+
+          <MoodLoggerCard
+            daysClean={stats.fractionalDays}
+            cigarettesAvoided={stats.cigarettesAvoided}
+            moods={moods}
+            onLogMood={onLogMood || (() => {})}
+          />
         </div>
       )}
 
@@ -601,147 +745,68 @@ export const CompanionView: React.FC<CompanionViewProps> = ({
       {subTab === 'achievements' && (
         <div className="space-y-4">
           {/* Header Summary */}
-          <div className="p-4 bg-gradient-to-r from-amber-500/10 via-slate-900 to-slate-900 border border-amber-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="p-4 bg-gradient-to-r from-amber-500/15 via-slate-900 to-slate-900 border border-amber-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
                 <Award className="w-5 h-5 text-amber-400" />
-                <h3 className="text-sm font-bold text-slate-100">Медицинские и ментальные достижения</h3>
+                <h3 className="text-sm font-bold text-slate-100">Зал Достижений и Трофеев</h3>
               </div>
               <p className="text-xs text-slate-400 mt-1">
-                26 подтвержденных ВОЗ этапов регенерации органов, преодоления дофаминовой тяги и финансовой свободы.
+                {APP_ACHIEVEMENTS.length} легендарных рубежей: хроно-стрики, отражение тяги, финансовый капитал, квесты и КПТ-мастерство.
               </p>
             </div>
-            <div className="flex items-center gap-2 sm:self-center shrink-0">
-              <span className="text-xs text-slate-400">Прогресс:</span>
-              <span className="text-sm font-mono font-black text-amber-400 bg-amber-500/20 px-3 py-1 rounded-xl border border-amber-500/30">
-                {unlockedAchCount} / {APP_ACHIEVEMENTS.length}
-              </span>
+            <div className="flex items-center gap-3 sm:self-center shrink-0">
+              <div className="text-right">
+                <span className="text-xs text-slate-400 block">Разблокировано:</span>
+                <span className="text-sm font-mono font-black text-amber-400 bg-amber-500/20 px-3 py-1 rounded-xl border border-amber-500/30 inline-block mt-0.5">
+                  {unlockedAchCount} / {APP_ACHIEVEMENTS.length}
+                </span>
+              </div>
             </div>
           </div>
 
           {/* Filter Bar */}
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              onClick={() => setAchievementFilter('all')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                achievementFilter === 'all'
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                  : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'
-              }`}
-            >
-              Все ({APP_ACHIEVEMENTS.length})
-            </button>
-            <button
-              onClick={() => setAchievementFilter('unlocked')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                achievementFilter === 'unlocked'
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                  : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'
-              }`}
-            >
-              ✓ Получено ({unlockedAchCount})
-            </button>
-            <button
-              onClick={() => setAchievementFilter('health')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                achievementFilter === 'health'
-                  ? 'bg-sky-500/20 text-sky-300 border border-sky-500/40'
-                  : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'
-              }`}
-            >
-              🫁 Здоровье (ВОЗ)
-            </button>
-            <button
-              onClick={() => setAchievementFilter('mindset')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                achievementFilter === 'mindset'
-                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
-                  : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'
-              }`}
-            >
-              🧠 Осознанность
-            </button>
-            <button
-              onClick={() => setAchievementFilter('money')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                achievementFilter === 'money'
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                  : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'
-              }`}
-            >
-              💰 Финансы & Трек
-            </button>
+            {[
+              { key: 'all', label: `Все (${APP_ACHIEVEMENTS.length})` },
+              { key: 'unlocked', label: `✓ Получено (${unlockedAchCount})` },
+              { key: 'health', label: '🫁 Здоровье & Стрики' },
+              { key: 'mindset', label: '🛡️ Защита от тяги' },
+              { key: 'money', label: '💰 Финансы & Капитал' },
+              { key: 'quests', label: '🎯 Микро-квесты' },
+              { key: 'cbt', label: '🧠 КПТ-мышление' },
+              { key: 'mastery', label: '👑 Мастерство' },
+            ].map((btn) => (
+              <button
+                key={btn.key}
+                onClick={() => setAchievementFilter(btn.key as any)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  achievementFilter === btn.key
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold'
+                    : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'
+                }`}
+              >
+                {btn.label}
+              </button>
+            ))}
           </div>
 
-          {/* Cards Grid */}
+          {/* Cards Grid with 3D Flip & Particle Explosions */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {enrichedAchievements
               .filter((ach) => {
                 if (achievementFilter === 'unlocked') return ach.unlocked;
                 if (achievementFilter === 'health') return ach.category === 'health';
                 if (achievementFilter === 'mindset') return ach.category === 'mindset';
-                if (achievementFilter === 'money') return ach.category === 'money' || ach.category === 'mastery';
+                if (achievementFilter === 'money') return ach.category === 'money';
+                if (achievementFilter === 'quests') return ach.category === 'quests';
+                if (achievementFilter === 'cbt') return ach.category === 'cbt';
+                if (achievementFilter === 'mastery') return ach.category === 'mastery';
                 return true;
               })
-              .map((ach) => {
-                return (
-                  <div
-                    key={ach.id}
-                    className={`p-4 rounded-2xl border transition-all ${
-                      ach.unlocked
-                        ? 'bg-gradient-to-br from-amber-500/10 via-slate-900 to-slate-950 border-amber-500/40 shadow-lg shadow-amber-500/5'
-                        : 'bg-slate-900/60 border-slate-800/80 opacity-70'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="text-3xl shrink-0 p-2 rounded-2xl bg-slate-950/80 border border-slate-800/80">
-                        {ach.icon}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <h4 className="text-xs font-bold text-slate-100 flex items-center gap-1.5">
-                              {ach.title}
-                              {ach.timeframe && (
-                                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">
-                                  {ach.timeframe}
-                                </span>
-                              )}
-                            </h4>
-                            <span className="text-[10px] text-slate-400">
-                              Требуется: {ach.requirement}
-                            </span>
-                          </div>
-                          {ach.unlocked ? (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
-                              Открыто ✓
-                            </span>
-                          ) : (
-                            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 shrink-0">
-                              🔒 В пути
-                            </span>
-                          )}
-                        </div>
-
-                        <p className="text-xs text-slate-300 mt-2 leading-relaxed">
-                          {ach.description}
-                        </p>
-
-                        <div className="mt-2.5 pt-2 border-t border-slate-800/60 flex items-center justify-between text-[10px] text-slate-400">
-                          <span className="italic line-clamp-1">{ach.medicalNote}</span>
-                          <span className="uppercase tracking-wider font-semibold text-slate-400 shrink-0 ml-2">
-                            {ach.category === 'health'
-                              ? 'Медицина'
-                              : ach.category === 'mindset'
-                              ? 'Психология'
-                              : 'Финансы'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              .map((ach) => (
+                <AchievementFlipCard key={ach.id} achievement={ach} />
+              ))}
           </div>
         </div>
       )}

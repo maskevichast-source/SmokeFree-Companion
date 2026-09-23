@@ -221,6 +221,8 @@
     startLiveHud();
     renderAchievements(data.achievements || []);
     renderChart(data.cravings_by_day || []);
+    renderDailyQuests();
+    renderCbtReframing();
   }
 
   /* -------------------------------------------------------------
@@ -1090,6 +1092,367 @@
     }, 2500);
 
     toast(`${title} — ${desc}`);
+  }
+
+  /* -------------------------------------------------------------
+     DAILY MICRO-QUESTS (STREAKS & XP REWARDS)
+  ------------------------------------------------------------- */
+  const DAILY_QUEST_POOL = [
+    {
+      id: "q_water",
+      title: "Гидратация чистых легких",
+      cat: "Биохимия",
+      desc: "Выпить стакан чистой воды при первом позыве к никотину",
+      xp: 25,
+      icon: "💧",
+    },
+    {
+      id: "q_breath",
+      title: "Дыхательный щит 4-7-8",
+      cat: "Нейропрактика",
+      desc: "Выполнить 2-минутную сессию осознанного дыхания (вдох 4с, задержка 7с, выдох 8с)",
+      xp: 40,
+      icon: "🧘",
+    },
+    {
+      id: "q_reason",
+      title: "Декларация свободы",
+      cat: "Осознанность",
+      desc: "Сформулировать и проговорить вслух главную причину своего выбора",
+      xp: 30,
+      icon: "✨",
+    },
+    {
+      id: "q_radar",
+      title: "Аудит триггер-радара",
+      cat: "Безопасность",
+      desc: "Проверить опасные часы в радаре и подготовить план отвлечения",
+      xp: 35,
+      icon: "🛡️",
+    },
+    {
+      id: "q_finance",
+      title: "Фиксация сбережений",
+      cat: "Финансы",
+      desc: "Открыть раздел Аналитика и проверить прогресс к недельному рубежу",
+      xp: 25,
+      icon: "💰",
+    },
+    {
+      id: "q_cbt",
+      title: "КПТ-разбор 1 ловушки",
+      cat: "КПТ",
+      desc: "Разобрать 1 никотиновую иллюзию в тренажере мышления",
+      xp: 45,
+      icon: "🧠",
+    },
+  ];
+
+  function getTodayQuestsList() {
+    const today = new Date().toISOString().slice(0, 10);
+    let hash = 0;
+    for (let i = 0; i < today.length; i++) {
+      hash = (hash << 5) - hash + today.charCodeAt(i);
+      hash |= 0;
+    }
+    const absHash = Math.abs(hash);
+    const pool = [...DAILY_QUEST_POOL];
+    const res = [];
+    for (let i = 0; i < 3; i++) {
+      const idx = (absHash + i * 2) % pool.length;
+      res.push(pool.splice(idx, 1)[0]);
+    }
+    return res;
+  }
+
+  function renderDailyQuests() {
+    const listEl = $("questsList");
+    if (!listEl) return;
+
+    const today = new Date().toISOString().slice(0, 10);
+    let completedIds = [];
+    try {
+      const saved = localStorage.getItem(`smokefree_quests_${today}`);
+      if (saved) completedIds = JSON.parse(saved);
+    } catch {}
+
+    let streak = 1;
+    try {
+      const savedStreak = localStorage.getItem("smokefree_quest_streak");
+      if (savedStreak) streak = parseInt(savedStreak, 10);
+      else if (stats) streak = Math.max(1, Math.min(7, Math.floor(stats.fractional_days || stats.days || 1)));
+    } catch {}
+
+    const quests = getTodayQuestsList();
+    const completedCount = quests.filter((q) => completedIds.includes(q.id)).length;
+    const progressPct = Math.round((completedCount / quests.length) * 100);
+
+    if ($("questStreakPill")) $("questStreakPill").textContent = `Стрик ${streak} дн. 🔥`;
+    if ($("questsCompletedVal")) $("questsCompletedVal").textContent = `${completedCount} / ${quests.length}`;
+    if ($("questsProgressFill")) $("questsProgressFill").style.width = `${progressPct}%`;
+
+    const allDoneBanner = $("questAllDoneBanner");
+    if (allDoneBanner) {
+      allDoneBanner.style.display = completedCount === quests.length ? "flex" : "none";
+    }
+
+    listEl.innerHTML = quests.map((q) => {
+      const isDone = completedIds.includes(q.id);
+      return `
+        <div class="quest-row ${isDone ? 'completed' : ''}" data-quest-id="${q.id}">
+          <div class="quest-row-left">
+            <button class="quest-checkbox ${isDone ? 'checked' : ''}" type="button">
+              ${isDone ? '✓' : ''}
+            </button>
+            <div>
+              <div class="quest-title-line">
+                <span class="quest-icon">${q.icon}</span>
+                <strong class="quest-name ${isDone ? 'done-text' : ''}">${q.title}</strong>
+                <span class="quest-cat-badge">${q.cat}</span>
+              </div>
+              <p class="quest-desc">${q.desc}</p>
+            </div>
+          </div>
+          <span class="quest-xp-pill ${isDone ? 'xp-done' : ''}">+${q.xp} XP</span>
+        </div>
+      `;
+    }).join("");
+
+    listEl.querySelectorAll(".quest-row").forEach((row) => {
+      row.addEventListener("click", () => {
+        const qId = row.dataset.questId;
+        if (completedIds.includes(qId)) return;
+
+        haptic("medium");
+        playWebAudioChime("milestone");
+
+        completedIds.push(qId);
+        try {
+          localStorage.setItem(`smokefree_quests_${today}`, JSON.stringify(completedIds));
+        } catch {}
+
+        if (completedIds.length === quests.length) {
+          streak += 1;
+          try {
+            localStorage.setItem("smokefree_quest_streak", streak.toString());
+          } catch {}
+          triggerCelebrationEffect("🏆 ДЕНЬ ИДЕАЛЬНОЙ ЧИСТОТЫ!", `Все квесты закрыты! Стрик: ${streak} дн.`, "+50 XP");
+        } else {
+          toast(`✓ Квест выполнен! +XP зачислено`);
+        }
+
+        renderDailyQuests();
+      });
+    });
+  }
+
+  /* -------------------------------------------------------------
+     CBT THOUGHT REFRAMING TRAINER (COGNITIVE RESTRUCTURING)
+  ------------------------------------------------------------- */
+  const CBT_EXERCISES = [
+    {
+      id: "cbt_one",
+      cat: "craving_excuse",
+      catLabel: "Ловушка 1 затяжки",
+      icon: "⚡",
+      trapTitle: "«Всего одна затяжка / сигаретка ничего не изменит»",
+      illusion: "«Я уже долго держусь, одна затяжка не вернет зависимость, я просто расслаблюсь разок».",
+      neuroReality: "Одна затяжка активирует до 50% никотиновых рецепторов в мозге и мгновенно перезапускает цепь дофаминового голода. Одной сигареты не существует — это покупка следующего блока.",
+      cbtReframe: "«Выбирая одну сигарету, я покупаю многолетний цикл зависимости. Я выбираю свободу сейчас».",
+      affirmation: "«Я отказываюсь от цепочки из 10 000 сигарет, а не от одной».",
+      action60s: "Сделай 5 глубоких вдохов по технике 4-7-8 и выпей стакан ледяной воды мелкими глотками.",
+      xp: 40,
+    },
+    {
+      id: "cbt_stress",
+      cat: "stress_relief",
+      catLabel: "Иллюзия антистресса",
+      icon: "🧘",
+      trapTitle: "«У меня дикий стресс — сигарета меня успокоит»",
+      illusion: "«Нервы на пределе, только никотин поможет снять напряжение и собраться с мыслями».",
+      neuroReality: "Никотин повышает пульс на 20 ударов и стимулирует выброс кортизола. Он не снимает жизненный стресс, а лишь временно заглушает собственную ломку, усиливая тревожность тела.",
+      cbtReframe: "«Сигарета не решает проблему, она лишь создает новую. Стресс пройдет быстрее в чистом теле».",
+      affirmation: "«Спокойствие внутри меня, а не в ядовитом дыме».",
+      action60s: "Сожми кулаки на 5 секунд с максимальной силой и резко разожми (релаксация Джекобсона). Повтори 3 раза.",
+      xp: 50,
+    },
+    {
+      id: "cbt_delay",
+      cat: "craving_excuse",
+      catLabel: "Скука и пауза",
+      icon: "🎯",
+      trapTitle: "«Мне скучно, некуда деть руки и время»",
+      illusion: "«Пауза в работе, делать нечего, пойду покурю чтобы занять время».",
+      neuroReality: "Привычка глушить скуку никотином блокирует способность мозга к естественному творчеству и отдыху. Никотин делает человека занятым бессмысленным самоотравлением.",
+      cbtReframe: "«У меня есть масса здоровых способов провести 5 минут: вода, дыхание, разминка, общение».",
+      affirmation: "«Я управляю своим временем, а не сигарета».",
+      action60s: "Сделай 10 глубоких приседаний или запиши 3 цели на сегодняшний вечер.",
+      xp: 35,
+    },
+    {
+      id: "cbt_social",
+      cat: "social_pressure",
+      catLabel: "Социальный страх",
+      icon: "👥",
+      trapTitle: "«Без перекуров я выпаду из компании и общения»",
+      illusion: "«Все неформальные связи в курилке. Я стану белой вороной».",
+      neuroReality: "Никто не дружит ради дыма. Некурящие вызывают скрытое уважение у тех, кто все еще зависим. Ты можешь общаться с людьми где угодно, не вдыхая яд.",
+      cbtReframe: "«Я привлекаю людей своей энергией и уверенностью, а не запахом табака».",
+      affirmation: "«Я лидер своей жизни, а не заложник чужой зависимости».",
+      action60s: "Напиши теплое сообщение близкому человеку или коллеге с искренним комплиментом.",
+      xp: 45,
+    },
+    {
+      id: "cbt_health",
+      cat: "identity_fear",
+      catLabel: "Здоровье и сомнения",
+      icon: "🫁",
+      trapTitle: "«Я курил столько лет, легкие уже не восстановить»",
+      illusion: "«Какой смысл мучиться, если организму уже нанесен непоправимый ущерб?»",
+      neuroReality: "Данные ВОЗ: регенерация ресничек легких начинается через 48 часов, риск инфаркта падает на 50% через год, а риск онкологии снижается вдвое через 5–10 лет.",
+      cbtReframe: "«Тело непрерывно исцеляется. Каждый чистый день возвращает мне силы и годы активной жизни».",
+      affirmation: "«Мое тело исцеляется с каждой секундой чистой жизни».",
+      action60s: "Сделай глубокий вдох полной грудью и почувствуй, как чистый воздух наполняет легкие.",
+      xp: 50,
+    },
+    {
+      id: "cbt_procrastinate",
+      cat: "craving_excuse",
+      catLabel: "Откладывание",
+      icon: "⏳",
+      trapTitle: "«Брошу со следующего понедельника / после отпуска»",
+      illusion: "«Сейчас неподходящее время. Вот сдам отчет — и тогда брошу легко».",
+      neuroReality: "Идеального момента не существует. Зависимость всегда найдет новый повод. Мозг манипулирует прокрастинацией, чтобы получить дозу сейчас.",
+      cbtReframe: "«Лучший момент для свободы — текущая секунда. Справляясь сейчас, я строю несокрушимую нейроброню».",
+      affirmation: "«Моя свобода не ждет понедельника. Я свободен сегодня».",
+      action60s: "Выпрями спину, сделай глубокий выдох и скажи себе: «Я сильнее любой тяги».",
+      xp: 45,
+    },
+  ];
+
+  let currentCbtFilter = "all";
+  let activeExpandedCbtId = null;
+
+  function renderCbtReframing() {
+    const grid = $("cbtCardsGrid");
+    if (!grid) return;
+
+    let masteredIds = [];
+    try {
+      const saved = localStorage.getItem("smokefree_cbt_mastered");
+      if (saved) masteredIds = JSON.parse(saved);
+    } catch {}
+
+    if ($("cbtMasteredCount")) {
+      $("cbtMasteredCount").textContent = `${masteredIds.length} / ${CBT_EXERCISES.length}`;
+    }
+
+    const filtered = CBT_EXERCISES.filter((ex) => {
+      if (currentCbtFilter === "all") return true;
+      return ex.cat === currentCbtFilter;
+    });
+
+    grid.innerHTML = filtered.map((ex) => {
+      const isMastered = masteredIds.includes(ex.id);
+      const isExpanded = activeExpandedCbtId === ex.id;
+
+      return `
+        <div class="cbt-card ${isMastered ? 'mastered' : ''} ${isExpanded ? 'expanded' : ''}" data-cbt-id="${ex.id}">
+          <div class="cbt-card-top">
+            <div class="cbt-card-title-wrap">
+              <span class="cbt-icon">${ex.icon}</span>
+              <div>
+                <span class="cbt-cat-tag">${ex.catLabel}</span>
+                <strong class="cbt-trap-title">${ex.trapTitle}</strong>
+              </div>
+            </div>
+            ${isMastered
+              ? `<span class="cbt-mastered-pill">✓ Освоено</span>`
+              : `<span class="cbt-xp-pill">+${ex.xp} XP</span>`
+            }
+          </div>
+
+          <div class="cbt-illusion-box">
+            <span>💡 <em>${ex.illusion}</em></span>
+          </div>
+
+          <div class="cbt-expand-hint">
+            <span>${isExpanded ? 'Свернуть разбор ▲' : 'Развернуть КПТ-разбор ▼'}</span>
+          </div>
+
+          ${isExpanded ? `
+            <div class="cbt-expanded-content">
+              <div class="cbt-section">
+                <span class="cbt-sec-lbl text-sky">1. Биохимическая правда (Neuro-Truth):</span>
+                <p class="cbt-sec-body">${ex.neuroReality}</p>
+              </div>
+
+              <div class="cbt-section">
+                <span class="cbt-sec-lbl text-emerald">2. КПТ-переосмысление:</span>
+                <p class="cbt-sec-body cbt-reframe-body">${ex.cbtReframe}</p>
+              </div>
+
+              <div class="cbt-section">
+                <span class="cbt-sec-lbl text-amber">3. Фраза-щит (Повтори):</span>
+                <div class="cbt-affirmation-box">
+                  <strong>«${ex.affirmation}»</strong>
+                </div>
+              </div>
+
+              <div class="cbt-section">
+                <span class="cbt-sec-lbl text-purple">4. Действие на 60 секунд:</span>
+                <p class="cbt-sec-body">${ex.action60s}</p>
+              </div>
+
+              <button class="cbt-master-btn ${isMastered ? 'btn-mastered' : ''}" data-action="master-cbt" data-id="${ex.id}">
+                ${isMastered ? '✓ Ловушка освоена' : `Я осознал ловушку (+${ex.xp} XP)`}
+              </button>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }).join("");
+
+    // Click handlers for expand/collapse and mastery
+    grid.querySelectorAll(".cbt-card").forEach((card) => {
+      card.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-action='master-cbt']");
+        if (btn) {
+          e.stopPropagation();
+          const id = btn.dataset.id;
+          if (!masteredIds.includes(id)) {
+            masteredIds.push(id);
+            try {
+              localStorage.setItem("smokefree_cbt_mastered", JSON.stringify(masteredIds));
+            } catch {}
+            haptic("success");
+            playWebAudioChime("milestone");
+            toast("🧠 Ловушка мышления успешно обезврежена! +XP зачислено");
+            renderCbtReframing();
+          }
+          return;
+        }
+
+        const id = card.dataset.cbtId;
+        activeExpandedCbtId = activeExpandedCbtId === id ? null : id;
+        haptic("light");
+        renderCbtReframing();
+      });
+    });
+
+    // Category filter buttons
+    const filterContainer = $("cbtFilters");
+    if (filterContainer) {
+      filterContainer.querySelectorAll(".cbt-filter-btn").forEach((btn) => {
+        btn.onclick = () => {
+          filterContainer.querySelectorAll(".cbt-filter-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          currentCbtFilter = btn.dataset.cbtCat || "all";
+          haptic("light");
+          renderCbtReframing();
+        };
+      });
+    }
   }
 
   /* -------------------------------------------------------------

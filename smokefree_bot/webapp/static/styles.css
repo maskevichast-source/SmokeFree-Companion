@@ -2548,3 +2548,429 @@ h1 {
     transform: translateY(105vh) rotate(720deg) scale(0.6);
   }
 }
+
+/* -------------------------------------------------------------
+   DAILY MICRO-QUESTS
+------------------------------------------------------------- */
+.daily-quests-card {
+  background: linear-gradient(145deg, rgba(22, 34, 50, 0.9), rgba(15, 23, 42, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.quests-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.quests-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quests-icon-flame {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.quests-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.quests-title-row strong {
+  font-size: 14px;
+  color: #f8fafc;
+  font-weight: 800;
+}
+
+.quest-streak-pill {
+  font-size: 10px;
+  font-weight: 800;
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.quests-subtitle {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 1px 0 0;
+}
+
+.quests-count-wrap {
+  text-align: right;
+}
+
+.quests-count-val {
+  font-size: 13px;
+  font-weight: 800;
+  color: #34d399;
+  font-family: monospace;
+  display: block;
+}
+
+.quests-count-wrap small {
+  font-size: 9px;
+  color: #64748b;
+}
+
+.quests-progress-bar-bg {
+  width: 100%;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.quests-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b, #10b981);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.quests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quest-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quest-row:active {
+  transform: scale(0.98);
+}
+
+.quest-row.completed {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.quest-row-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.quest-checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 1.5px solid #475569;
+  background: transparent;
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+  shrink-0;
+}
+
+.quest-checkbox.checked {
+  background: #10b981;
+  border-color: #10b981;
+  color: #0f172a;
+}
+
+.quest-title-line {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.quest-icon {
+  font-size: 13px;
+}
+
+.quest-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.quest-name.done-text {
+  text-decoration: line-through;
+  color: #64748b;
+}
+
+.quest-cat-badge {
+  font-size: 8px;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+.quest-desc {
+  font-size: 10px;
+  color: #94a3b8;
+  margin: 1px 0 0;
+  line-height: 1.2;
+}
+
+.quest-xp-pill {
+  font-size: 10px;
+  font-weight: 800;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 3px 6px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.quest-xp-pill.xp-done {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.quest-all-done-banner {
+  margin-top: 8px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(16, 185, 129, 0.18));
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quest-all-done-banner span {
+  font-size: 18px;
+}
+
+.quest-all-done-banner strong {
+  font-size: 11px;
+  color: #fbbf24;
+  display: block;
+}
+
+.quest-all-done-banner small {
+  font-size: 10px;
+  color: #e2e8f0;
+}
+
+/* -------------------------------------------------------------
+   CBT THOUGHT REFRAMING TRAINER
+------------------------------------------------------------- */
+.cbt-trainer-container {
+  margin-top: 10px;
+}
+
+.cbt-filter-pills {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.cbt-filter-btn {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 10px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cbt-filter-btn.active {
+  background: #a855f7;
+  color: #0f172a;
+  border-color: #a855f7;
+  font-weight: 800;
+}
+
+.cbt-cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cbt-card {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 12px;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.cbt-card.mastered {
+  border-color: rgba(168, 85, 247, 0.35);
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.06), rgba(15, 23, 42, 0.9));
+}
+
+.cbt-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.cbt-card-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cbt-icon {
+  font-size: 20px;
+}
+
+.cbt-cat-tag {
+  font-size: 9px;
+  font-weight: 800;
+  color: #c084fc;
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cbt-trap-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #f8fafc;
+  display: block;
+}
+
+.cbt-mastered-pill {
+  font-size: 9px;
+  font-weight: 800;
+  color: #c084fc;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  padding: 2px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.cbt-xp-pill {
+  font-size: 10px;
+  font-weight: 800;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 6px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.cbt-illusion-box {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin: 6px 0;
+  font-size: 11px;
+  color: #fda4af;
+  line-height: 1.3;
+}
+
+.cbt-expand-hint {
+  font-size: 10px;
+  color: #64748b;
+  text-align: right;
+  margin-top: 4px;
+}
+
+.cbt-expanded-content {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cbt-section {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cbt-sec-lbl {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.cbt-sec-body {
+  font-size: 11px;
+  color: #cbd5e1;
+  line-height: 1.35;
+  background: rgba(15, 23, 42, 0.8);
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.cbt-reframe-body {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.06);
+  color: #f1f5f9;
+  font-weight: 600;
+}
+
+.cbt-affirmation-box {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 10px;
+  padding: 8px 10px;
+  text-align: center;
+  font-size: 11px;
+  color: #fef08a;
+  font-style: italic;
+}
+
+.cbt-master-btn {
+  margin-top: 4px;
+  background: linear-gradient(135deg, #a855f7, #6366f1);
+  color: #ffffff;
+  border: none;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  width: 100%;
+  box-shadow: 0 4px 14px rgba(168, 85, 247, 0.3);
+  transition: all 0.2s;
+}
+
+.cbt-master-btn.btn-mastered {
+  background: rgba(168, 85, 247, 0.2);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  box-shadow: none;
+}
+

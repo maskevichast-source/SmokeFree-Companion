@@ -16,6 +16,7 @@ import {
   TriggerItem,
   CravingRecord,
   RelapseRecord,
+  MoodRecord,
   ChatMessage,
   FullAppState,
 } from './types';
@@ -50,6 +51,53 @@ const DEFAULT_CHAT: ChatMessage[] = [
     text: 'Привет! Я твой КПТ-наставник по свободе от никотина. Каждая преодоленная тяга делает нейронные связи зависимости слабее. В чем тебе нужна поддержка прямо сейчас?',
     timestamp: new Date().toISOString(),
     persona: 'cbt',
+  },
+];
+
+const DEFAULT_MOODS: MoodRecord[] = [
+  {
+    id: 'm-1',
+    score: 2,
+    emoji: '😕',
+    label: 'Нестабильно',
+    note: 'Первый день отказа: сильная раздражительность и тяга после обеда',
+    tags: ['💼 Рабочий стресс', '🥊 Отразил тягу'],
+    daysClean: 0.8,
+    cigarettesAvoided: 12,
+    timestamp: new Date(Date.now() - 3 * 86400 * 1000).toISOString(),
+  },
+  {
+    id: 'm-2',
+    score: 2,
+    emoji: '😕',
+    label: 'Нестабильно',
+    note: 'Второй день: утренняя тяга, но помогло глубокое дыхание',
+    tags: ['☕ Кофе без дыма', '🥊 Отразил тягу'],
+    daysClean: 1.8,
+    cigarettesAvoided: 27,
+    timestamp: new Date(Date.now() - 2 * 86400 * 1000).toISOString(),
+  },
+  {
+    id: 'm-3',
+    score: 3,
+    emoji: '😐',
+    label: 'Нормально',
+    note: 'Третий день: физическая ломка спала, вернулся нормальный сон',
+    tags: ['😴 Глубокий сон', '💪 Гордость'],
+    daysClean: 2.8,
+    cigarettesAvoided: 42,
+    timestamp: new Date(Date.now() - 1 * 86400 * 1000).toISOString(),
+  },
+  {
+    id: 'm-4',
+    score: 4,
+    emoji: '🙂',
+    label: 'Хорошо',
+    note: 'Четвертый день: вкус еды стал ярче, голова ясная и уверенность растет!',
+    tags: ['🫁 Легкое дыхание', '⚡ Прилив энергии', '💪 Гордость'],
+    daysClean: 3.5,
+    cigarettesAvoided: 53,
+    timestamp: new Date(Date.now() - 4 * 3600 * 1000).toISOString(),
   },
 ];
 
@@ -131,6 +179,16 @@ export default function App() {
     }
   });
 
+  // Mood Records
+  const [moods, setMoods] = useState<MoodRecord[]>(() => {
+    try {
+      const saved = localStorage.getItem('smokefree_moods');
+      return saved ? JSON.parse(saved) : DEFAULT_MOODS;
+    } catch {
+      return DEFAULT_MOODS;
+    }
+  });
+
   // Toast feedback
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -172,6 +230,7 @@ export default function App() {
             if (remoteState.triggers) setTriggers(remoteState.triggers);
             if (remoteState.cravings) setCravings(remoteState.cravings);
             if (remoteState.relapses) setRelapses(remoteState.relapses);
+            if (remoteState.moods) setMoods(remoteState.moods);
             if (remoteState.chatMessages) setChatMessages(remoteState.chatMessages);
             setIsBackendSynced(true);
           } else {
@@ -181,6 +240,7 @@ export default function App() {
               triggers,
               cravings,
               relapses,
+              moods,
               chatMessages,
               updatedAt: new Date().toISOString(),
             };
@@ -193,6 +253,7 @@ export default function App() {
             triggers,
             cravings,
             relapses,
+            moods,
             chatMessages,
             updatedAt: new Date().toISOString(),
           };
@@ -214,6 +275,7 @@ export default function App() {
       localStorage.setItem('smokefree_triggers', JSON.stringify(triggers));
       localStorage.setItem('smokefree_cravings', JSON.stringify(cravings));
       localStorage.setItem('smokefree_relapses', JSON.stringify(relapses));
+      localStorage.setItem('smokefree_moods', JSON.stringify(moods));
       localStorage.setItem('smokefree_chat', JSON.stringify(chatMessages));
 
       const fullState: FullAppState = {
@@ -221,6 +283,7 @@ export default function App() {
         triggers,
         cravings,
         relapses,
+        moods,
         chatMessages,
         updatedAt: nowIso,
       };
@@ -228,7 +291,7 @@ export default function App() {
     } catch (e) {
       console.error(e);
     }
-  }, [profile, triggers, cravings, relapses, chatMessages, syncStateToBackend]);
+  }, [profile, triggers, cravings, relapses, moods, chatMessages, syncStateToBackend]);
 
   // Current time state that ticks every second
   const [currentTime, setCurrentTime] = useState(Date.now());
@@ -310,6 +373,30 @@ export default function App() {
   };
 
   // Action handlers
+  const handleLogMood = (score: number, note?: string, tags?: string[]) => {
+    const emojiMap: Record<number, { emoji: string; label: string }> = {
+      1: { emoji: '😫', label: 'Тяжело' },
+      2: { emoji: '😕', label: 'Нестабильно' },
+      3: { emoji: '😐', label: 'Нормально' },
+      4: { emoji: '🙂', label: 'Хорошо' },
+      5: { emoji: '🌟', label: 'Превосходно' },
+    };
+    const meta = emojiMap[score] || emojiMap[3];
+    const newMood: MoodRecord = {
+      id: `m-${Date.now()}`,
+      score,
+      emoji: meta.emoji,
+      label: meta.label,
+      note,
+      tags,
+      daysClean: stats.fractionalDays,
+      cigarettesAvoided: stats.cigarettesAvoided,
+      timestamp: new Date().toISOString(),
+    };
+    setMoods((prev) => [newMood, ...prev]);
+    showToast(`✨ Настроение (${meta.emoji} ${score}/5) записано в эмоциональный радар!`);
+  };
+
   const handleLogResisted = () => {
     const newCraving: CravingRecord = {
       id: `c-${Date.now()}`,
@@ -355,6 +442,7 @@ export default function App() {
         triggers,
         cravings,
         relapses,
+        moods,
         chatMessages,
         updatedAt: new Date().toISOString(),
       };
@@ -379,6 +467,7 @@ export default function App() {
       if (Array.isArray(parsed.triggers)) setTriggers(parsed.triggers);
       if (Array.isArray(parsed.cravings)) setCravings(parsed.cravings);
       if (Array.isArray(parsed.relapses)) setRelapses(parsed.relapses);
+      if (Array.isArray(parsed.moods)) setMoods(parsed.moods);
       if (Array.isArray(parsed.chatMessages)) setChatMessages(parsed.chatMessages);
       showToast('Данные успешно восстановлены из резервной копии!');
     } catch (e) {
@@ -407,6 +496,7 @@ export default function App() {
       setTriggers(DEFAULT_TRIGGERS);
       setCravings([]);
       setRelapses([]);
+      setMoods(DEFAULT_MOODS);
       setChatMessages([]);
       localStorage.clear();
       showToast('Трекер сброшен. Начинаем чистый путь!');
@@ -435,6 +525,8 @@ export default function App() {
             triggers={triggers}
             cravings={cravings}
             relapses={relapses}
+            moods={moods}
+            onLogMood={handleLogMood}
             chatMessages={chatMessages}
             setChatMessages={setChatMessages}
             onOpenSos={() => setIsSosOpen(true)}
@@ -459,6 +551,8 @@ export default function App() {
             cravings={cravings}
             triggers={triggers}
             relapses={relapses}
+            moods={moods}
+            onLogMood={handleLogMood}
             onSimulateDays={handleSimulateDays}
           />
         )}

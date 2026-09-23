@@ -62,6 +62,18 @@ export interface RelapseRecord {
   timestamp: string;
 }
 
+export interface MoodRecord {
+  id: string;
+  score: number; // 1 to 5 scale
+  label: string;
+  emoji: string;
+  note?: string;
+  tags?: string[];
+  daysClean: number;
+  cigarettesAvoided: number;
+  timestamp: string; // ISO string
+}
+
 export interface HealthMilestone {
   id: string;
   title: string;
@@ -179,6 +191,7 @@ export interface FullAppState {
   triggers: TriggerItem[];
   cravings: CravingRecord[];
   relapses: RelapseRecord[];
+  moods?: MoodRecord[];
   chatMessages: ChatMessage[];
   updatedAt: string;
 }

@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="/styles.css?v=2.7.0" rel="stylesheet" />
+  <link href="/styles.css?v=2.8.0" rel="stylesheet" />
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
@@ -185,6 +185,42 @@
         <div class="goal-footer">
           <span id="goalSavedLabel">0 ₸ накоплено</span>
           <span id="goalTargetLabel">Цель: 0 ₸</span>
+        </div>
+      </div>
+
+      <!-- DAILY MICRO-QUESTS -->
+      <div class="daily-quests-card" id="dailyQuestsCard">
+        <div class="quests-header">
+          <div class="quests-title-wrap">
+            <span class="quests-icon-flame">🔥</span>
+            <div>
+              <div class="quests-title-row">
+                <strong>Дневные микро-квесты</strong>
+                <span class="quest-streak-pill" id="questStreakPill">Стрик 1 дн. 🔥</span>
+              </div>
+              <p class="quests-subtitle">3 задачи для защиты чистого трека на сегодня</p>
+            </div>
+          </div>
+          <div class="quests-count-wrap">
+            <strong class="quests-count-val" id="questsCompletedVal">0 / 3</strong>
+            <small>закрыто</small>
+          </div>
+        </div>
+
+        <div class="quests-progress-bar-bg">
+          <div class="quests-progress-bar-fill" id="questsProgressFill" style="width: 0%;"></div>
+        </div>
+
+        <div class="quests-list" id="questsList">
+          <!-- Rendered by app.js -->
+        </div>
+
+        <div class="quest-all-done-banner" id="questAllDoneBanner" style="display: none;">
+          <span>🏆</span>
+          <div>
+            <strong>ДЕНЬ ИДЕАЛЬНОЙ ЧИСТОТЫ!</strong>
+            <small>Все микро-задачи дня выполнены. +50 XP Бонус!</small>
+          </div>
         </div>
       </div>
 
@@ -426,6 +462,31 @@
         <input type="text" id="coachInput" placeholder="Напиши, что чувствуешь…" autocomplete="off" />
         <button type="submit" class="coach-send-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2.5L10.8 13.2"/><path d="M21.5 2.5l-6.8 19-4-9-9-4z"/></svg></button>
       </form>
+
+      <!-- CBT THOUGHT REFRAMING TRAINER -->
+      <div class="cbt-trainer-container" id="cbtTrainerContainer">
+        <div class="section-heading" style="margin-top: 24px; margin-bottom: 6px;">
+          <div>
+            <h2>🧠 КПТ-тренажер мышления</h2>
+            <small class="text-muted" style="font-size: 11px; color: var(--muted); display: block;">
+              Обезвреживание никотиновых самообманов и иллюзий
+            </small>
+          </div>
+          <span class="count-badge" id="cbtMasteredCount">0 / 6</span>
+        </div>
+
+        <div class="cbt-filter-pills" id="cbtFilters">
+          <button class="cbt-filter-btn active" data-cbt-cat="all">Все (6)</button>
+          <button class="cbt-filter-btn" data-cbt-cat="craving_excuse">⚡ 1 затяжка</button>
+          <button class="cbt-filter-btn" data-cbt-cat="stress_relief">🧘 Стресс</button>
+          <button class="cbt-filter-btn" data-cbt-cat="social_pressure">👥 Социум</button>
+          <button class="cbt-filter-btn" data-cbt-cat="identity_fear">🫁 Здоровье</button>
+        </div>
+
+        <div class="cbt-cards-grid" id="cbtCardsGrid">
+          <!-- Rendered by app.js -->
+        </div>
+      </div>
     </section>
 
   </div>
@@ -633,6 +694,6 @@
   <div class="toast" id="toast"></div>
 
   <script src="/chart.umd.js"></script>
-  <script src="/app.js?v=2.7.0"></script>
+  <script src="/app.js?v=2.8.0"></script>
 </body>
 </html>

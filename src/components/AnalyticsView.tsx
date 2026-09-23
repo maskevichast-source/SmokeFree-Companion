@@ -40,8 +40,9 @@ import {
   Coins,
   Gift,
   Crown,
+  Smile,
 } from 'lucide-react';
-import { UserProfile, FreedomStats, CravingRecord, TriggerItem, RelapseRecord, UnitTestItem } from '../types';
+import { UserProfile, FreedomStats, CravingRecord, TriggerItem, RelapseRecord, MoodRecord, UnitTestItem } from '../types';
 import { WHO_HEALTH_MILESTONES } from '../data/auditReport';
 import { playMilestoneChime } from '../utils/audioFeedback';
 
@@ -51,6 +52,8 @@ interface AnalyticsViewProps {
   cravings: CravingRecord[];
   triggers: TriggerItem[];
   relapses: RelapseRecord[];
+  moods?: MoodRecord[];
+  onLogMood?: (score: number, note?: string, tags?: string[]) => void;
   onSimulateDays?: (days: number) => void;
 }
 
@@ -60,9 +63,11 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
   cravings,
   triggers,
   relapses,
+  moods = [],
+  onLogMood,
   onSimulateDays,
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'overview' | 'cravings' | 'tests' | 'simulator'>('overview');
+  const [activeSubTab, setActiveSubTab] = useState<'overview' | 'mood' | 'cravings' | 'tests' | 'simulator'>('overview');
   const [runningTests, setRunningTests] = useState(false);
   const [testResults, setTestResults] = useState<UnitTestItem[]>([
     {
@@ -185,6 +190,83 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
   }, [cravings]);
+
+  // Mood and Clean-Track Correlation Data
+  const moodCorrelationData = useMemo(() => {
+    if (!moods || moods.length === 0) return [];
+
+    const sorted = [...moods].sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
+
+    return sorted.map((m) => {
+      const d = new Date(m.timestamp);
+      const dayCleanNum = Number(m.daysClean?.toFixed(1) || 0);
+      const dayLabel = `День ${dayCleanNum}`;
+      const dateLabel = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+
+      return {
+        id: m.id,
+        daysClean: dayCleanNum,
+        score: m.score,
+        emoji: m.emoji,
+        label: m.label,
+        note: m.note || '',
+        tags: m.tags || [],
+        cigarettesAvoided: m.cigarettesAvoided || Math.round(dayCleanNum * profile.unitsPerDay),
+        moneySaved: Math.round(
+          dayCleanNum * (profile.packPrice / (profile.packSize || 20)) * profile.unitsPerDay
+        ),
+        dayLabel,
+        dateLabel,
+      };
+    });
+  }, [moods, profile]);
+
+  const moodStats = useMemo(() => {
+    if (!moods || moods.length === 0) {
+      return {
+        avgScore: '0.0',
+        positivePercent: 0,
+        streakGrowth: '+0.0',
+        resilienceScore: 0,
+        tagCounts: [] as { tag: string; count: number }[],
+      };
+    }
+
+    const avg = moods.reduce((acc, m) => acc + m.score, 0) / moods.length;
+    const positiveCount = moods.filter((m) => m.score >= 4).length;
+    const positivePercent = Math.round((positiveCount / moods.length) * 100);
+
+    const sorted = [...moods].sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
+    const firstScore = sorted[0]?.score || 3;
+    const lastScore = sorted[sorted.length - 1]?.score || 3;
+    const growth = lastScore - firstScore;
+    const streakGrowth = growth >= 0 ? `+${growth.toFixed(1)}` : `${growth.toFixed(1)}`;
+
+    const resilientCount = moods.filter((m) => m.score >= 3).length;
+    const resilienceScore = Math.round((resilientCount / moods.length) * 100);
+
+    const tagMap: Record<string, number> = {};
+    moods.forEach((m) => {
+      m.tags?.forEach((t) => {
+        tagMap[t] = (tagMap[t] || 0) + 1;
+      });
+    });
+    const tagCounts = Object.entries(tagMap)
+      .map(([tag, count]) => ({ tag, count }))
+      .sort((a, b) => b.count - a.count);
+
+    return {
+      avgScore: avg.toFixed(1),
+      positivePercent,
+      streakGrowth,
+      resilienceScore,
+      tagCounts,
+    };
+  }, [moods]);
 
   // Goal Progress Ring
   const goalProgress = profile.financialGoal > 0 ? Math.min(100, Math.round((stats.moneySaved / profile.financialGoal) * 100)) : 0;
@@ -502,6 +584,20 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
             }`}
           >
             📊 Обзор и прогноз
+          </button>
+          <button
+            onClick={() => setActiveSubTab('mood')}
+            className={`px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 ${
+              activeSubTab === 'mood'
+                ? 'bg-rose-500 text-slate-950 font-bold shadow-md'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Smile className="w-3.5 h-3.5" />
+            <span>Настроение & Трек</span>
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-800 text-rose-300 font-mono">
+              {moods?.length || 0}
+            </span>
           </button>
           <button
             onClick={() => setActiveSubTab('cravings')}
@@ -1373,6 +1469,401 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MOOD & CLEAN-TRACK CORRELATION SUB-TAB */}
+      {activeSubTab === 'mood' && (
+        <div className="space-y-6">
+          {/* Mood KPIs Header Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Average Mood */}
+            <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-2">
+              <div className="flex items-center justify-between text-xs text-slate-400">
+                <span>Средний балл настроения</span>
+                <Smile className="w-4 h-4 text-rose-400" />
+              </div>
+              <div className="text-2xl font-black text-slate-100 font-mono flex items-center gap-2">
+                <span>{moodStats.avgScore}</span>
+                <span className="text-sm font-normal text-slate-500">/ 5.0</span>
+              </div>
+              <div className="text-[11px] text-rose-400 flex items-center gap-1">
+                <TrendingUp className="w-3 h-3" />
+                <span>Эмоциональный фон: {Number(moodStats.avgScore) >= 3.5 ? 'Стабильно позитивный' : 'Фаза нейроадаптации'}</span>
+              </div>
+            </div>
+
+            {/* Dopamine Resilience Score */}
+            <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-2">
+              <div className="flex items-center justify-between text-xs text-slate-400">
+                <span>Индекс устойчивости (≥3)</span>
+                <Zap className="w-4 h-4 text-amber-400" />
+              </div>
+              <div className="text-2xl font-black text-amber-400 font-mono">
+                {moodStats.resilienceScore}%
+              </div>
+              <div className="text-[11px] text-slate-400">
+                Доля дней без тяжелых эмоциональных провалов
+              </div>
+            </div>
+
+            {/* Streak Growth */}
+            <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-2">
+              <div className="flex items-center justify-between text-xs text-slate-400">
+                <span>Прирост настроения</span>
+                <TrendingUp className="w-4 h-4 text-emerald-400" />
+              </div>
+              <div className="text-2xl font-black text-emerald-400 font-mono">
+                {moodStats.streakGrowth} <span className="text-xs font-normal text-slate-400">баллов</span>
+              </div>
+              <div className="text-[11px] text-emerald-400/90">
+                Динамика радости жизни со дня отказа от никотина
+              </div>
+            </div>
+
+            {/* Positive Days Ratio */}
+            <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-2">
+              <div className="flex items-center justify-between text-xs text-slate-400">
+                <span>Отличные дни (4–5 баллов)</span>
+                <Sparkles className="w-4 h-4 text-purple-400" />
+              </div>
+              <div className="text-2xl font-black text-purple-400 font-mono">
+                {moodStats.positivePercent}%
+              </div>
+              <div className="text-[11px] text-slate-400">
+                {moods.filter((m) => m.score >= 4).length} из {moods.length} отметок
+              </div>
+            </div>
+          </div>
+
+          {/* Main Correlation Chart (Mood vs Clean Days / Cigarettes Avoided) */}
+          <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
+                  <Smile className="w-5 h-5 text-rose-400" />
+                  <span>Корреляция настроения и срока без никотина</span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Визуализация восстановления эмоционального фона (левая шкала 1–5) по мере накопления чистых дней и невыкуренных сигарет (правая шкала)
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 text-xs font-mono">
+                <span className="flex items-center gap-1 text-rose-400">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Настроение (1–5)
+                </span>
+                <span className="flex items-center gap-1 text-emerald-400">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Не выкурено (шт)
+                </span>
+              </div>
+            </div>
+
+            {/* Recharts Dual-Axis Chart */}
+            <div className="h-72 w-full pt-4">
+              {moodCorrelationData.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-slate-500 gap-2 border border-slate-800/80 rounded-2xl bg-slate-950/40">
+                  <Smile className="w-8 h-8 text-slate-600" />
+                  <p className="text-xs">Сделайте первую запись настроения в Компоньоне, чтобы построить график корреляции</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={moodCorrelationData} margin={{ top: 10, right: 30, left: -10, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                    <XAxis dataKey="dayLabel" stroke="#64748b" tick={{ fontSize: 11 }} />
+                    <YAxis
+                      yAxisId="left"
+                      domain={[1, 5]}
+                      ticks={[1, 2, 3, 4, 5]}
+                      stroke="#fb7185"
+                      tick={{ fontSize: 11 }}
+                      tickFormatter={(val) => `${val} ★`}
+                    />
+                    <YAxis
+                      yAxisId="right"
+                      orientation="right"
+                      stroke="#34d399"
+                      tick={{ fontSize: 11 }}
+                      tickFormatter={(val) => `${val} ед.`}
+                    />
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-slate-950 border border-slate-700 p-3 rounded-xl shadow-2xl text-xs space-y-1 max-w-xs">
+                              <div className="flex items-center justify-between font-bold text-slate-200 border-b border-slate-800 pb-1">
+                                <span>{data.dayLabel} ({data.dateLabel})</span>
+                                <span className="text-base">{data.emoji} {data.score}/5</span>
+                              </div>
+                              <div className="text-rose-400 font-semibold">
+                                Состояние: {data.label}
+                              </div>
+                              {data.note && (
+                                <p className="text-slate-300 italic text-[11px]">«{data.note}»</p>
+                              )}
+                              {data.tags && data.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-1 pt-1">
+                                  {data.tags.map((t: string, idx: number) => (
+                                    <span key={idx} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                                      {t}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                              <div className="text-[10px] text-emerald-400 pt-1 border-t border-slate-800/80 flex justify-between">
+                                <span>Не выкурено сигарет:</span>
+                                <span className="font-mono font-bold">+{data.cigarettesAvoided} шт.</span>
+                              </div>
+                              <div className="text-[10px] text-sky-400 flex justify-between">
+                                <span>Экономия бюджета:</span>
+                                <span className="font-mono font-bold">+{data.moneySaved} {profile.currencySymbol}</span>
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <ReferenceLine yAxisId="left" y={3} stroke="#475569" strokeDasharray="3 3" label={{ value: 'Норма', fill: '#94a3b8', fontSize: 10, position: 'insideTopLeft' }} />
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="score"
+                      stroke="#f43f5e"
+                      strokeWidth={3}
+                      dot={{ r: 5, fill: '#f43f5e', stroke: '#fff', strokeWidth: 2 }}
+                      activeDot={{ r: 8, fill: '#fb7185' }}
+                      name="Оценка настроения"
+                    />
+                    <Line
+                      yAxisId="right"
+                      type="monotone"
+                      dataKey="cigarettesAvoided"
+                      stroke="#10b981"
+                      strokeWidth={2}
+                      strokeDasharray="4 4"
+                      dot={{ r: 3, fill: '#10b981' }}
+                      name="Не выкурено (шт)"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </div>
+
+          {/* Neurobiology Stages & Emotional Tags Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Clinical Neurobiology Phases of Dopamine Recovery */}
+            <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
+                  <Brain className="w-5 h-5 text-purple-400" />
+                  <span>Нейробиология адаптации дофамина</span>
+                </h3>
+                <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                  WHO & Huberman Lab
+                </span>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                {/* Stage 1 */}
+                <div className={`p-3 rounded-2xl border transition-all ${
+                  stats.fractionalDays <= 3
+                    ? 'bg-rose-950/20 border-rose-500/40 text-slate-200'
+                    : 'bg-slate-950/50 border-slate-800/80 text-slate-400'
+                }`}>
+                  <div className="flex items-center justify-between font-bold mb-1">
+                    <span className="text-rose-400">Фаза 1 (Дни 1–3): «Дофаминовая яма»</span>
+                    <span className="font-mono text-[10px]">{stats.fractionalDays > 3 ? 'Пройдено ✓' : 'Текущая фаза'}</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed">
+                    Резкое падение стимуляции никотиновых ацетилхолиновых рецепторов (nAChR). Возможна раздражительность и спад настроения (1–2 балла). Организм начинает синтезировать собственный ацетилхолин.
+                  </p>
+                </div>
+
+                {/* Stage 2 */}
+                <div className={`p-3 rounded-2xl border transition-all ${
+                  stats.fractionalDays > 3 && stats.fractionalDays <= 14
+                    ? 'bg-amber-950/20 border-amber-500/40 text-slate-200'
+                    : stats.fractionalDays > 14
+                    ? 'bg-slate-950/50 border-slate-800/80 text-slate-400'
+                    : 'bg-slate-950/20 border-slate-800/40 text-slate-500'
+                }`}>
+                  <div className="flex items-center justify-between font-bold mb-1">
+                    <span className="text-amber-400">Фаза 2 (Дни 4–14): «Регенерация рецепторов»</span>
+                    <span className="font-mono text-[10px]">
+                      {stats.fractionalDays > 14 ? 'Пройдено ✓' : stats.fractionalDays >= 4 ? 'Текущая фаза' : 'Предстоит'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed">
+                    Снижение плотности сверхчувствительных никотиновых рецепторов до физиологической нормы. Настроение выравнивается до 3–4 баллов, улучшается сон и вкусовое восприятие.
+                  </p>
+                </div>
+
+                {/* Stage 3 */}
+                <div className={`p-3 rounded-2xl border transition-all ${
+                  stats.fractionalDays > 14 && stats.fractionalDays <= 30
+                    ? 'bg-emerald-950/20 border-emerald-500/40 text-slate-200'
+                    : stats.fractionalDays > 30
+                    ? 'bg-slate-950/50 border-slate-800/80 text-slate-400'
+                    : 'bg-slate-950/20 border-slate-800/40 text-slate-500'
+                }`}>
+                  <div className="flex items-center justify-between font-bold mb-1">
+                    <span className="text-emerald-400">Фаза 3 (Дни 15–30): «Эндогенный баланс ГАМК»</span>
+                    <span className="font-mono text-[10px]">
+                      {stats.fractionalDays > 30 ? 'Пройдено ✓' : stats.fractionalDays >= 15 ? 'Текущая фаза' : 'Предстоит'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed">
+                    Восстановление выработки ГАМК и серотонина. Стрессоустойчивость возрастает на 40%, тяга теряет физиологическую силу и переходит в разряд редких психологических воспоминаний.
+                  </p>
+                </div>
+
+                {/* Stage 4 */}
+                <div className={`p-3 rounded-2xl border transition-all ${
+                  stats.fractionalDays > 30
+                    ? 'bg-sky-950/20 border-sky-500/40 text-slate-200'
+                    : 'bg-slate-950/20 border-slate-800/40 text-slate-500'
+                }`}>
+                  <div className="flex items-center justify-between font-bold mb-1">
+                    <span className="text-sky-400">Фаза 4 (Дни 30+): «Полная психологическая автономия»</span>
+                    <span className="font-mono text-[10px]">
+                      {stats.fractionalDays >= 30 ? 'Активно 🌟' : 'Предстоит'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed">
+                    Полное ремоделирование нейронных путей вознаграждения. Автономное получение радости от спорта, хобби, общения и свободы от никотина.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Tag Breakdown and Emotional Distribution */}
+            <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-4">
+              <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
+                <Target className="w-5 h-5 text-emerald-400" />
+                <span>Эмоциональные триггеры и ресурсы</span>
+              </h3>
+              <p className="text-xs text-slate-400">
+                Частота появления психологических факторов в записях вашего эмоционального дневника
+              </p>
+
+              {moodStats.tagCounts.length === 0 ? (
+                <div className="p-8 text-center text-slate-500 text-xs">
+                  Теги еще не добавлены. Добавляйте теги при сохранении настроения.
+                </div>
+              ) : (
+                <div className="space-y-2.5 pt-1">
+                  {moodStats.tagCounts.map((item, idx) => {
+                    const maxCount = moodStats.tagCounts[0]?.count || 1;
+                    const pct = Math.round((item.count / maxCount) * 100);
+                    return (
+                      <div key={idx} className="space-y-1">
+                        <div className="flex justify-between text-xs font-semibold">
+                          <span className="text-slate-300">{item.tag}</span>
+                          <span className="text-slate-400 font-mono">{item.count} раз</span>
+                        </div>
+                        <div className="w-full h-2 rounded-full bg-slate-950 overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-rose-500 to-amber-500 rounded-full transition-all"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Quick Log Action Hint */}
+              <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+                <span>Хотите отметить текущее состояние?</span>
+                <button
+                  onClick={() => {
+                    if (onLogMood) {
+                      onLogMood(4, 'Отличный самочувствие на треке свободы', ['💪 Гордость', '🫁 Легкое дыхание']);
+                    }
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 transition-colors font-medium flex items-center gap-1.5"
+                >
+                  <Smile className="w-3.5 h-3.5" />
+                  <span>Быстрая отметка (4/5 🙂)</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* History of Mood Logs Table */}
+          <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-sky-400" />
+                <span>Журнал эмоциональных чекинов</span>
+              </h3>
+              <span className="text-xs text-slate-400 font-mono">
+                {moods.length} записей
+              </span>
+            </div>
+
+            <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+              {moods.length === 0 ? (
+                <p className="text-slate-500 text-center py-6 text-xs">История пока пуста</p>
+              ) : (
+                moods.map((m) => (
+                  <div
+                    key={m.id}
+                    className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="text-2xl p-1.5 rounded-xl bg-slate-900 border border-slate-800">
+                        {m.emoji}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-slate-200">
+                            {m.label} ({m.score}/5)
+                          </span>
+                          <span className="text-[10px] font-mono px-2 py-0.2 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            День {m.daysClean?.toFixed(1) || '1'}
+                          </span>
+                        </div>
+                        {m.note && (
+                          <p className="text-xs text-slate-300 italic mt-0.5">«{m.note}»</p>
+                        )}
+                        {m.tags && m.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {m.tags.map((t, idx) => (
+                              <span
+                                key={idx}
+                                className="text-[10px] px-1.5 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800"
+                              >
+                                {t}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <span className="text-[11px] text-slate-500 font-mono block">
+                        {new Date(m.timestamp).toLocaleDateString('ru-RU', {
+                          day: 'numeric',
+                          month: 'short',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                      <span className="text-[10px] text-emerald-400 font-mono">
+                        +{m.cigarettesAvoided || 0} сигарет избежано
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
