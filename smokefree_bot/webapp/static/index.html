@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="/styles.css?v=2.5.0" rel="stylesheet" />
+  <link href="/styles.css?v=2.6.0" rel="stylesheet" />
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
@@ -357,6 +357,37 @@
         <canvas id="cravingChart" height="240"></canvas>
       </div>
 
+      <!-- DAILY SAVINGS MILESTONES: WEEKLY CELEBRATION VISUAL CARD -->
+      <div class="weekly-milestone-card" id="weeklyMilestoneCard">
+        <div class="milestone-card-header">
+          <div>
+            <div class="milestone-pill-tag">
+              <span>🎉 Недельные рубежи</span>
+            </div>
+            <h3>Daily Savings Milestones</h3>
+            <p class="milestone-card-subtitle">Празднование закрытия каждой недели финансовой свободы</p>
+          </div>
+          <span class="milestone-count-badge" id="milestonesCompletedCount">0 / 6</span>
+        </div>
+
+        <!-- Dynamic Celebratory Alert Banner -->
+        <div class="milestone-celebrate-banner" id="milestoneCelebrateBanner" style="display: none;">
+          <div class="celebrate-banner-content">
+            <span class="celebrate-emoji-bounce">🎉</span>
+            <div>
+              <strong id="celebrateBannerTitle">ФИНАНСОВЫЙ ТРИУМФ НЕДЕЛИ!</strong>
+              <p id="celebrateBannerText">Сбережения зафиксированы — деньги в бюджете, а не в пепле!</p>
+            </div>
+          </div>
+          <button type="button" class="celebrate-banner-btn" id="btnTriggerConfetti">Салют 💥</button>
+        </div>
+
+        <!-- Weekly Milestones Grid -->
+        <div class="weekly-milestones-grid" id="weeklyMilestonesGrid">
+          <!-- Rendered dynamically by app.js -->
+        </div>
+      </div>
+
       <div class="clean-track-card" style="margin-top: 14px;">
         <div>
           <span>Чистота трека</span>
@@ -602,6 +633,6 @@
   <div class="toast" id="toast"></div>
 
   <script src="/chart.umd.js"></script>
-  <script src="/app.js?v=2.5.0"></script>
+  <script src="/app.js?v=2.6.0"></script>
 </body>
 </html>

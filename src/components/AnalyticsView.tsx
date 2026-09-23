@@ -35,6 +35,11 @@ import {
   Target,
   ArrowUpRight,
   Info,
+  Trophy,
+  PartyPopper,
+  Coins,
+  Gift,
+  Crown,
 } from 'lucide-react';
 import { UserProfile, FreedomStats, CravingRecord, TriggerItem, RelapseRecord, UnitTestItem } from '../types';
 import { WHO_HEALTH_MILESTONES } from '../data/auditReport';
@@ -191,6 +196,96 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
 
   // Chart timeframe state for savings vs goal
   const [chartHorizon, setChartHorizon] = useState<'30d' | '90d' | '180d' | '1y' | 'goal'>('goal');
+
+  // Selected milestone for extra celebration popup
+  const [celebratingMilestone, setCelebratingMilestone] = useState<number | null>(null);
+
+  // Weekly savings milestones (Week 1, Week 2, Week 3, Week 4, etc.)
+  const weeklyMilestones = useMemo(() => {
+    const daily = stats.dailyExpense > 0 ? stats.dailyExpense : 1000;
+    const currentDays = Math.max(0, stats.fractionalDays);
+    const saved = stats.moneySaved;
+
+    const milestones = [
+      {
+        week: 1,
+        daysRequired: 7,
+        title: 'Неделя 1: Первый финансовый щит',
+        subtitle: '7 дней чистой экономии',
+        targetAmount: Math.round(7 * daily),
+        icon: '🌱',
+        badge: 'Бронзовый щит',
+        reward: 'Сбережено на приятный ужин или подарок себе',
+      },
+      {
+        week: 2,
+        daysRequired: 14,
+        title: 'Неделя 2: Двойной рубеж',
+        subtitle: '14 дней без трат на табак',
+        targetAmount: Math.round(14 * daily),
+        icon: '⚡',
+        badge: 'Серебряный щит',
+        reward: 'Сбережено на абонемент в зал / массаж / СПА',
+      },
+      {
+        week: 3,
+        daysRequired: 21,
+        title: 'Неделя 3: Привычка свободы',
+        subtitle: '21 день чистых легких',
+        targetAmount: Math.round(21 * daily),
+        icon: '🔥',
+        badge: 'Золотой щит',
+        reward: 'Сформирован устойчивый паттерн экономии и чистоты',
+      },
+      {
+        week: 4,
+        daysRequired: 28,
+        title: 'Неделя 4: Месячный триумф',
+        subtitle: '4 недели непрерывных сбережений',
+        targetAmount: Math.round(28 * daily),
+        icon: '💎',
+        badge: 'Алмазный страж',
+        reward: 'Ощутимый месячный капитал сохранен в бюджете',
+      },
+      {
+        week: 8,
+        daysRequired: 56,
+        title: 'Неделя 8: Двухмесячный капитал',
+        subtitle: '8 недель свободы от никотина',
+        targetAmount: Math.round(56 * daily),
+        icon: '👑',
+        badge: 'Магистр свободы',
+        reward: 'Крупная сумма на долгожданное путешествие или гаджет',
+      },
+      {
+        week: 12,
+        daysRequired: 84,
+        title: 'Неделя 12: Квартальная автономия',
+        subtitle: '3 месяца абсолютной независимости',
+        targetAmount: Math.round(84 * daily),
+        icon: '🏆',
+        badge: 'Легендарный инвестор',
+        reward: 'Сэкономлен солидный квартальный бюджет на главную мечту',
+      },
+    ];
+
+    return milestones.map((m) => {
+      const isCompleted = currentDays >= m.daysRequired || saved >= m.targetAmount;
+      const progress = isCompleted
+        ? 100
+        : Math.min(99, Math.round((currentDays / m.daysRequired) * 100));
+      const daysLeft = Math.max(0, Math.ceil(m.daysRequired - currentDays));
+      const amountLeft = Math.max(0, Math.round(m.targetAmount - saved));
+
+      return {
+        ...m,
+        isCompleted,
+        progress,
+        daysLeft,
+        amountLeft,
+      };
+    });
+  }, [stats.dailyExpense, stats.fractionalDays, stats.moneySaved]);
 
   // Projected Goal Target Date
   const goalTargetDate = useMemo(() => {
@@ -932,6 +1027,206 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
               )}
             </div>
           </div>
+
+          {/* DAILY SAVINGS MILESTONES: WEEKLY CELEBRATION VISUAL CARD */}
+          <div className="p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800 shadow-2xl space-y-5 relative overflow-hidden">
+            {/* Background celebratory glow */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-amber-500/5 rounded-full blur-3xl pointer-events-none -ml-20 -mb-20" />
+
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5">
+                    <PartyPopper className="w-3.5 h-3.5 text-amber-400" />
+                    Недельные финансовые рубежи
+                  </span>
+                  <span className="text-xs text-slate-400">Празднование каждой недели свободы</span>
+                </div>
+                <h3 className="text-xl font-black text-slate-100 flex items-center gap-2 tracking-tight">
+                  <Trophy className="w-5 h-5 text-amber-400" />
+                  <span>Daily Savings Milestones (Недельный прогресс)</span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Каждые 7 дней чистой жизни закрывают финансовый рубеж и сохраняют реальный капитал.
+                </p>
+              </div>
+
+              {/* Stats Summary Counter */}
+              <div className="flex items-center gap-2 bg-slate-950/80 px-3.5 py-2 rounded-2xl border border-slate-800">
+                <Coins className="w-4 h-4 text-emerald-400" />
+                <div className="text-xs">
+                  <span className="text-slate-400">Закрыто рубежей: </span>
+                  <strong className="text-emerald-400 font-mono font-bold">
+                    {weeklyMilestones.filter((m) => m.isCompleted).length} из {weeklyMilestones.length}
+                  </strong>
+                </div>
+              </div>
+            </div>
+
+            {/* Congratulatory Active Banner if recent milestone reached */}
+            {weeklyMilestones.some((m) => m.isCompleted) && (
+              <div className="relative p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-emerald-500/15 to-teal-500/15 border border-amber-500/30 overflow-hidden z-10 shadow-lg">
+                <div className="flex items-start sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-xl shrink-0 animate-bounce">
+                      🎉
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>ФИНАНСОВЫЙ ТРИУМФ ДОСТИГНУТ!</span>
+                      </div>
+                      <p className="text-xs text-slate-200 mt-0.5">
+                        Вы успешно зафиксировали сбережения за{' '}
+                        <strong className="text-emerald-300">
+                          {weeklyMilestones.filter((m) => m.isCompleted).slice(-1)[0]?.title}
+                        </strong>
+                        ! Деньги остались в вашем бюджете, а не обратились в пепел.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const latest = weeklyMilestones.filter((m) => m.isCompleted).slice(-1)[0];
+                      if (latest) setCelebratingMilestone(latest.week);
+                    }}
+                    className="shrink-0 px-3.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold transition-all shadow-md flex items-center gap-1"
+                  >
+                    <PartyPopper className="w-3.5 h-3.5" />
+                    <span>Салют</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Weekly Milestones Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
+              {weeklyMilestones.map((m) => (
+                <div
+                  key={m.week}
+                  onClick={() => setCelebratingMilestone(m.week)}
+                  className={`p-4 rounded-2xl border transition-all duration-300 relative cursor-pointer group ${
+                    m.isCompleted
+                      ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950/40 border-emerald-500/40 hover:border-emerald-400 shadow-lg shadow-emerald-950/20 hover:scale-[1.02]'
+                      : 'bg-slate-950/70 border-slate-800/80 hover:border-slate-700'
+                  }`}
+                >
+                  {/* Top Badge Ribbon */}
+                  <div className="flex items-center justify-between gap-2 mb-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">{m.icon}</span>
+                      <div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                          Неделя {m.week}
+                        </span>
+                        <h4 className="text-xs font-bold text-slate-200 group-hover:text-emerald-300 transition-colors">
+                          {m.title}
+                        </h4>
+                      </div>
+                    </div>
+
+                    {m.isCompleted ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1 shadow-sm">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                        <span>Взято ✓</span>
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-800 text-slate-400">
+                        {m.progress}%
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Savings Target & Values */}
+                  <div className="space-y-2 pt-1 border-t border-slate-800/60">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-400 text-[11px]">Цель рубежа:</span>
+                      <span className="font-mono font-bold text-emerald-400">
+                        {m.targetAmount.toLocaleString()} {profile.currencySymbol}
+                      </span>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="w-full h-2 rounded-full bg-slate-900 overflow-hidden border border-slate-800">
+                      <div
+                        className={`h-full rounded-full transition-all duration-700 ${
+                          m.isCompleted
+                            ? 'bg-gradient-to-r from-emerald-500 to-teal-400'
+                            : 'bg-gradient-to-r from-amber-500 to-sky-400'
+                        }`}
+                        style={{ width: `${m.progress}%` }}
+                      />
+                    </div>
+
+                    {/* Footer note & Reward */}
+                    <div className="pt-1 flex items-center justify-between text-[11px]">
+                      {m.isCompleted ? (
+                        <span className="text-emerald-300 font-medium flex items-center gap-1">
+                          <Sparkles className="w-3 h-3 text-amber-400" />
+                          <span>{m.reward}</span>
+                        </span>
+                      ) : (
+                        <span className="text-slate-400">
+                          Осталось: <strong className="text-slate-200">{m.daysLeft} дн.</strong> ({m.amountLeft.toLocaleString()} {profile.currencySymbol})
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Celebratory Modal / Popup for milestone */}
+          {celebratingMilestone !== null && (
+            <div
+              className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4"
+              onClick={() => setCelebratingMilestone(null)}
+            >
+              <div
+                className="max-w-md w-full p-6 rounded-3xl bg-slate-900 border border-amber-500/40 shadow-2xl space-y-4 text-center relative overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Floating Confetti Elements */}
+                <div className="text-4xl animate-bounce mb-1">🎉 🏆 💰</div>
+                <div className="space-y-1">
+                  <span className="text-xs font-bold uppercase tracking-widest text-amber-400">
+                    Финансовая победа недели
+                  </span>
+                  <h3 className="text-xl font-black text-slate-100">
+                    {weeklyMilestones.find((m) => m.week === celebratingMilestone)?.title}
+                  </h3>
+                  <p className="text-xs text-slate-300 mt-1">
+                    {weeklyMilestones.find((m) => m.week === celebratingMilestone)?.reward}
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
+                  <div className="flex justify-between text-slate-400">
+                    <span>Сбережено за этот рубеж:</span>
+                    <strong className="text-emerald-400 font-mono text-sm">
+                      {weeklyMilestones.find((m) => m.week === celebratingMilestone)?.targetAmount.toLocaleString()} {profile.currencySymbol}
+                    </strong>
+                  </div>
+                  <div className="flex justify-between text-slate-400">
+                    <span>Статус рубежа:</span>
+                    <strong className="text-amber-400">
+                      {weeklyMilestones.find((m) => m.week === celebratingMilestone)?.isCompleted ? '✓ Успешно завершен' : 'В процессе достижения'}
+                    </strong>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setCelebratingMilestone(null)}
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-xs transition-all shadow-lg"
+                >
+                  Отлично, продолжать путь! ✨
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Dynamic Financial Forecast & Goal */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

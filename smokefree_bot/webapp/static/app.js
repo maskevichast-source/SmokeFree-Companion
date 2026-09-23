@@ -830,6 +830,186 @@
         },
       });
     }
+
+    renderWeeklyMilestones();
+  }
+
+  /* -------------------------------------------------------------
+     WEEKLY SAVINGS MILESTONES & CELEBRATION
+  ------------------------------------------------------------- */
+  function renderWeeklyMilestones() {
+    const grid = $("weeklyMilestonesGrid");
+    if (!grid || !stats) return;
+
+    const currencyConfig = CURRENCY_RATES[currentCurrency] || CURRENCY_RATES.KZT;
+    const packPrice = stats.user?.pack_price_kzt || 900;
+    const unitsPerDay = stats.user?.units_per_day || 20;
+    const dailyExpenseKzt = (packPrice / 20) * unitsPerDay;
+    const currentDays = Math.max(0, stats.fractional_days || stats.days || 0);
+    const savedKzt = stats.saved_kzt || 0;
+
+    const milestones = [
+      {
+        week: 1,
+        daysRequired: 7,
+        title: "Неделя 1: Первый щит",
+        targetKzt: 7 * dailyExpenseKzt,
+        icon: "🌱",
+        reward: "Сбережено на приятный ужин или подарок себе",
+      },
+      {
+        week: 2,
+        daysRequired: 14,
+        title: "Неделя 2: Двойной рубеж",
+        targetKzt: 14 * dailyExpenseKzt,
+        icon: "⚡",
+        reward: "Сбережено на абонемент в зал / СПА",
+      },
+      {
+        week: 3,
+        daysRequired: 21,
+        title: "Неделя 3: Привычка свободы",
+        targetKzt: 21 * dailyExpenseKzt,
+        icon: "🔥",
+        reward: "Сформирован устойчивый паттерн чистоты",
+      },
+      {
+        week: 4,
+        daysRequired: 28,
+        title: "Неделя 4: Месячный триумф",
+        targetKzt: 28 * dailyExpenseKzt,
+        icon: "💎",
+        reward: "Ощутимый месячный капитал сохранен в бюджете",
+      },
+      {
+        week: 8,
+        daysRequired: 56,
+        title: "Неделя 8: Двухмесячный капитал",
+        targetKzt: 56 * dailyExpenseKzt,
+        icon: "👑",
+        reward: "Крупная сумма на поездку или гаджет",
+      },
+      {
+        week: 12,
+        daysRequired: 84,
+        title: "Неделя 12: Квартальная победа",
+        targetKzt: 84 * dailyExpenseKzt,
+        icon: "🏆",
+        reward: "Квартальный бюджет направлен на главную мечту",
+      },
+    ];
+
+    let completedCount = 0;
+    const itemsHtml = milestones.map((m) => {
+      const isCompleted = currentDays >= m.daysRequired || savedKzt >= m.targetKzt;
+      if (isCompleted) completedCount++;
+
+      const progress = isCompleted ? 100 : Math.min(99, Math.round((currentDays / m.daysRequired) * 100));
+      const daysLeft = Math.max(0, Math.ceil(m.daysRequired - currentDays));
+      const amountLeftKzt = Math.max(0, m.targetKzt - savedKzt);
+
+      return `
+        <div class="weekly-milestone-item ${isCompleted ? 'completed' : ''}" data-week="${m.week}">
+          <div class="wm-top">
+            <div class="wm-title-wrap">
+              <span class="wm-icon">${m.icon}</span>
+              <div>
+                <span class="wm-week-lbl">НЕДЕЛЯ ${m.week}</span>
+                <strong class="wm-name">${m.title}</strong>
+              </div>
+            </div>
+            ${isCompleted
+              ? `<span class="wm-badge-completed">✓ Взято!</span>`
+              : `<span class="wm-badge-progress">${progress}%</span>`
+            }
+          </div>
+
+          <div class="wm-body">
+            <div class="wm-row">
+              <span class="wm-sub">Цель рубежа:</span>
+              <strong class="wm-target-val">${formatMoney(m.targetKzt)} ${currencyConfig.sign}</strong>
+            </div>
+
+            <div class="wm-bar-bg">
+              <div class="wm-bar-fill ${isCompleted ? 'wm-bar-done' : ''}" style="width: ${progress}%;"></div>
+            </div>
+
+            <div class="wm-footer">
+              ${isCompleted
+                ? `<span class="wm-reward-text">✨ ${m.reward}</span>`
+                : `<span class="wm-left-text">Осталось: <strong>${daysLeft} дн.</strong> (${formatMoney(amountLeftKzt)} ${currencyConfig.sign})</span>`
+              }
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    grid.innerHTML = itemsHtml;
+
+    if ($("milestonesCompletedCount")) {
+      $("milestonesCompletedCount").textContent = `${completedCount} / ${milestones.length}`;
+    }
+
+    const banner = $("milestoneCelebrateBanner");
+    if (banner) {
+      if (completedCount > 0) {
+        banner.style.display = "flex";
+        const latestCompleted = milestones.filter(m => currentDays >= m.daysRequired || savedKzt >= m.targetKzt).slice(-1)[0];
+        if (latestCompleted && $("celebrateBannerTitle")) {
+          $("celebrateBannerTitle").textContent = `🎉 РУБЕЖ ${latestCompleted.week}-Й НЕДЕЛИ ЗАКРЫТ!`;
+        }
+      } else {
+        banner.style.display = "none";
+      }
+    }
+
+    // Attach click triggers to celebrate with animation
+    grid.querySelectorAll(".weekly-milestone-item").forEach((item) => {
+      item.addEventListener("click", () => {
+        haptic("medium");
+        const week = parseInt(item.dataset.week, 10);
+        const m = milestones.find(x => x.week === week);
+        if (m) {
+          triggerCelebrationEffect(m.title, m.reward, formatMoney(m.targetKzt) + " " + currencyConfig.sign);
+        }
+      });
+    });
+
+    const btnConfetti = $("btnTriggerConfetti");
+    if (btnConfetti) {
+      btnConfetti.onclick = () => {
+        haptic("heavy");
+        triggerCelebrationEffect("🎉 ФИНАНСОВЫЙ ТРИУМФ!", "Деньги сохранены в вашем бюджете!", formatMoney(savedKzt) + " " + currencyConfig.sign);
+      };
+    }
+  }
+
+  /* -------------------------------------------------------------
+     CELEBRATION CONFETTI & POPUP EFFECT
+  ------------------------------------------------------------- */
+  function triggerCelebrationEffect(title, desc, amount) {
+    // 1. Trigger Screen Confetti Particles
+    const confettiContainer = document.createElement("div");
+    confettiContainer.className = "confetti-overlay-wrap";
+    document.body.appendChild(confettiContainer);
+
+    const colors = ["#f59e0b", "#10b981", "#38bdf8", "#ec4899", "#a855f7", "#eab308"];
+    for (let i = 0; i < 40; i++) {
+      const particle = document.createElement("div");
+      particle.className = "confetti-piece";
+      particle.style.left = `${Math.random() * 100}%`;
+      particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      particle.style.animationDelay = `${Math.random() * 0.4}s`;
+      particle.style.transform = `rotate(${Math.random() * 360}deg)`;
+      confettiContainer.appendChild(particle);
+    }
+
+    setTimeout(() => {
+      if (confettiContainer.parentNode) confettiContainer.parentNode.removeChild(confettiContainer);
+    }, 2500);
+
+    toast(`${title} — ${desc}`);
   }
 
   /* -------------------------------------------------------------
