@@ -156,13 +156,19 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    NO_CACHE_HEADERS = {
+        "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+        "Pragma": "no-cache",
+        "Expires": "0",
+    }
+
     @app.get("/health")
     async def health() -> dict:
         return {"status": "ok", "service": "smokefree"}
 
     @app.get("/")
     async def index(request: Request) -> FileResponse:
-        response = FileResponse(STATIC_DIR / "index.html")
+        response = FileResponse(STATIC_DIR / "index.html", headers=NO_CACHE_HEADERS)
         user_id = request.query_params.get("user_id")
         token = request.query_params.get("token")
         if user_id and token:
@@ -172,17 +178,16 @@ def create_app() -> FastAPI:
 
     @app.get("/app.js")
     async def app_js() -> FileResponse:
-        return FileResponse(STATIC_DIR / "app.js", media_type="application/javascript")
+        return FileResponse(STATIC_DIR / "app.js", media_type="application/javascript", headers=NO_CACHE_HEADERS)
 
     @app.get("/chart.umd.js")
     async def chart_lib() -> FileResponse:
-        # Self-hosted so the Mini App never depends on a third-party CDN
-        # being reachable/versioned-correctly from inside Telegram's WebView.
-        return FileResponse(STATIC_DIR / "chart.umd.js", media_type="application/javascript")
+        # Self-hosted chart engine
+        return FileResponse(STATIC_DIR / "chart.umd.js", media_type="application/javascript", headers=NO_CACHE_HEADERS)
 
     @app.get("/styles.css")
     async def styles() -> FileResponse:
-        return FileResponse(STATIC_DIR / "styles.css", media_type="text/css")
+        return FileResponse(STATIC_DIR / "styles.css", media_type="text/css", headers=NO_CACHE_HEADERS)
 
     @app.get("/manifest.json")
     async def manifest(request: Request) -> JSONResponse:
