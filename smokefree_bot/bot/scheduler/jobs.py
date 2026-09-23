@@ -48,6 +48,11 @@ async def send_daily_messages(bot: Bot, kind: str) -> None:
                 logger.exception("Daily message failed for user %s", user.id)
 
 async def radar_job(bot: Bot) -> None:
+    """
+    Проверяет триггеры с шагом в 10 минут.
+    Срабатывает, если триггер наступает в интервале от 5 до 20 минут от текущего момента.
+    Это экономит часы Neon PostgreSQL и предотвращает пропуски.
+    """
     utc_now = datetime.now(timezone.utc)
     async with SessionFactory() as session:
         targets = await radar_targets(session)
@@ -56,9 +61,12 @@ async def radar_job(bot: Bot) -> None:
                 user_tz = ZoneInfo(user.timezone or get_settings().timezone)
                 local_now = utc_now.astimezone(user_tz)
                 current_minutes = local_now.hour * 60 + local_now.minute
-                target_minutes = (current_minutes + 15) % (24 * 60)
 
-                if trigger.time_minutes != target_minutes:
+                # Вычисляем дельту минут до триггера с учетом перехода через полночь
+                diff = (trigger.time_minutes - current_minutes) % (24 * 60)
+
+                # Срабатываем, если триггер наступит через 5-20 минут (в среднем за ~15 минут)
+                if not (5 <= diff <= 20):
                     continue
 
                 today = local_now.date()
@@ -71,10 +79,10 @@ async def radar_job(bot: Bot) -> None:
 
                 await bot.send_message(
                     user.id,
-                    f"⚡️ <b>Триггер-радар (за 15 минут)</b>\n\n"
+                    f"⚡️ <b>Триггер-радар (через ~{diff} мин)</b>\n\n"
                     f"Приближается твой триггер: «<b>{trigger.label}</b>».\n"
                     f"Пик желания длится ровно 3 минуты. Сделай глоток холодной воды, "
-                    f"смени позу или запусти 3-минутный SOS в приложении.\n\n"
+                    f"смени обстановку или запусти 3-минутный SOS в приложении.\n\n"
                     f"Ты чист уже {days_free(user, today)} дн. Ты сильнее этой привычки!",
                     reply_markup=tracker_keyboard(user.id),
                     parse_mode="HTML"
@@ -85,7 +93,9 @@ async def radar_job(bot: Bot) -> None:
 def build_scheduler(bot: Bot) -> AsyncIOScheduler:
     settings = get_settings()
     scheduler = AsyncIOScheduler(timezone=ZoneInfo(settings.timezone))
-    scheduler.add_job(radar_job, "interval", minutes=1, args=[bot], id="trigger-radar", max_instances=1)
+    
+    # Запуск радара раз в 10 минут вместо 1 минуты — экономит Neon compute hours
+    scheduler.add_job(radar_job, "interval", minutes=10, args=[bot], id="trigger-radar", max_instances=1)
     scheduler.add_job(send_daily_messages, "cron", hour=9, minute=0, args=[bot, "morning"], id="morning-checkin", max_instances=1)
     scheduler.add_job(send_daily_messages, "cron", hour=21, minute=0, args=[bot, "evening"], id="evening-checkin", max_instances=1)
     return scheduler
