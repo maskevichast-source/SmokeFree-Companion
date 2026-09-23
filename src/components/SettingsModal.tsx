@@ -36,8 +36,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onImportData,
   onResetData,
 }) => {
+  const formatToLocalInput = (isoStr: string) => {
+    try {
+      const d = new Date(isoStr);
+      if (isNaN(d.getTime())) return '';
+      const pad = (n: number) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    } catch {
+      return '';
+    }
+  };
+
   const [name, setName] = useState(profile.name);
-  const [quitAt, setQuitAt] = useState(profile.quitAt.slice(0, 16));
+  const [quitAt, setQuitAt] = useState(() => formatToLocalInput(profile.quitAt));
   const [nicotineType, setNicotineType] = useState<NicotineType>(profile.nicotineType);
   const [currency, setCurrency] = useState<CurrencyType>(profile.currency);
   const [packPrice, setPackPrice] = useState(profile.packPrice);
@@ -216,7 +227,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   className={`py-1.5 px-2 rounded-lg text-[11px] font-medium border text-center truncate transition-colors ${
                     nicotineType === opt
                       ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                      : 'bg-slate-850 text-slate-400 border-slate-750 hover:text-slate-200'
+                      : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'
                   }`}
                 >
                   {opt}
@@ -331,14 +342,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <button
                   type="button"
                   onClick={onExportData}
-                  className="flex-1 py-1.5 px-2.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded-lg text-xs text-slate-300 font-medium flex items-center justify-center gap-1.5 transition-colors"
+                  className="flex-1 py-1.5 px-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs text-slate-300 font-medium flex items-center justify-center gap-1.5 transition-colors"
                 >
                   <Download className="w-3.5 h-3.5 text-sky-400" />
                   <span>Скачать JSON бэкап</span>
                 </button>
               )}
               {onImportData && (
-                <label className="flex-1 py-1.5 px-2.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded-lg text-xs text-slate-300 font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
+                <label className="flex-1 py-1.5 px-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs text-slate-300 font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
                   <Upload className="w-3.5 h-3.5 text-amber-400" />
                   <span>Загрузить бэкап</span>
                   <input

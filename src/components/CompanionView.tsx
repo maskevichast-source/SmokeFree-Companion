@@ -34,6 +34,8 @@ interface CompanionViewProps {
   triggers: TriggerItem[];
   cravings: CravingRecord[];
   relapses: RelapseRecord[];
+  chatMessages: ChatMessage[];
+  setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
   onOpenSos: () => void;
   onOpenRelapse: () => void;
   onOpenSettings: () => void;
@@ -50,6 +52,8 @@ export const CompanionView: React.FC<CompanionViewProps> = ({
   triggers,
   cravings,
   relapses,
+  chatMessages,
+  setChatMessages,
   onOpenSos,
   onOpenRelapse,
   onOpenSettings,
@@ -64,14 +68,6 @@ export const CompanionView: React.FC<CompanionViewProps> = ({
   const [newTriggerLabel, setNewTriggerLabel] = useState('');
 
   // AI Coach state
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    {
-      id: 'msg-welcome',
-      sender: 'coach',
-      text: `Привет, ${profile.name}! Ты держишь чистоту уже ${stats.days} дн. ${stats.hours} ч. Твой мозг прямо сейчас освобождается от никотиновой ловушки. Если возникнет тяга — жми кнопку SOS или напиши мне сюда в любой момент.`,
-      timestamp: 'Только что',
-    },
-  ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isCoachTyping, setIsCoachTyping] = useState(false);
 
@@ -87,7 +83,8 @@ export const CompanionView: React.FC<CompanionViewProps> = ({
       timestamp: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
     };
 
-    setChatMessages((prev) => [...prev, userMsg]);
+    const nextMessages = [...chatMessages, userMsg];
+    setChatMessages(nextMessages);
     if (!textToSend) setInputMessage('');
     setIsCoachTyping(true);
 
@@ -98,7 +95,15 @@ export const CompanionView: React.FC<CompanionViewProps> = ({
         body: JSON.stringify({
           message: text,
           daysFree: stats.days,
+          hoursFree: stats.hours,
+          moneySaved: Math.round(stats.moneySaved),
+          cigsAvoided: stats.cigarettesAvoided,
           trigger: profile.nicotineType,
+          nicotineType: profile.nicotineType,
+          history: nextMessages.slice(-6).map((m) => ({
+            role: m.sender === 'user' ? 'user' : 'model',
+            text: m.text,
+          })),
         }),
       });
       const data = await response.json();

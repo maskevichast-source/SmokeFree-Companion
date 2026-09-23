@@ -326,6 +326,8 @@ async def build_stats(session: AsyncSession, user_id: int) -> dict:
         "user": {
             "id": user.id,
             "first_name": user.first_name,
+            "name": user.first_name or "Друг",
+            "username": user.username,
             "city": user.city,
             "nicotine_type": user.nicotine_type,
             "quit_date": user.quit_date.isoformat() if user.quit_date else None,

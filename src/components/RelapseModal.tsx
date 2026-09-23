@@ -84,7 +84,7 @@ export const RelapseModal: React.FC<RelapseModalProps> = ({
                   className={`flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                     cigarettes === num
                       ? 'bg-amber-500 text-slate-950 border-amber-400'
-                      : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-750'
+                      : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-700'
                   }`}
                 >
                   {num} шт.

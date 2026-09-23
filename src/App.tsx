@@ -435,6 +435,8 @@ export default function App() {
             triggers={triggers}
             cravings={cravings}
             relapses={relapses}
+            chatMessages={chatMessages}
+            setChatMessages={setChatMessages}
             onOpenSos={() => setIsSosOpen(true)}
             onOpenRelapse={() => setIsRelapseOpen(true)}
             onOpenSettings={() => setIsSettingsOpen(true)}

@@ -146,13 +146,13 @@ export const SosModal: React.FC<SosModalProps> = ({
   const getScaleClass = () => {
     switch (breathPhase) {
       case 'Вдох':
-        return 'scale-115 border-emerald-400/80 bg-emerald-500/20 text-emerald-300 shadow-lg shadow-emerald-500/20';
+        return 'scale-[1.15] border-emerald-400/80 bg-emerald-500/20 text-emerald-300 shadow-lg shadow-emerald-500/20';
       case 'Задержка':
-        return 'scale-115 border-amber-400/80 bg-amber-500/20 text-amber-300 shadow-lg shadow-amber-500/20';
+        return 'scale-[1.15] border-amber-400/80 bg-amber-500/20 text-amber-300 shadow-lg shadow-amber-500/20';
       case 'Выдох':
-        return 'scale-90 border-teal-400/80 bg-teal-500/15 text-teal-300 shadow-md';
+        return 'scale-[0.9] border-teal-400/80 bg-teal-500/15 text-teal-300 shadow-md';
       case 'Пауза':
-        return 'scale-90 border-slate-600 bg-slate-800/50 text-slate-400';
+        return 'scale-[0.9] border-slate-600 bg-slate-800/50 text-slate-400';
     }
   };
 

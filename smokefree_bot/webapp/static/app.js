@@ -174,7 +174,7 @@
     const currencyConfig = CURRENCY_RATES[currentCurrency];
 
     if ($("greeting")) {
-      $("greeting").textContent = `${data.user.name || "Друг"}, твой стаж свободы:`;
+      $("greeting").textContent = `${data.user.name || data.user.first_name || "Друг"}, твой стаж свободы:`;
     }
 
     // Money
